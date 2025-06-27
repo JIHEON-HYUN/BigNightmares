@@ -13,5 +13,8 @@ UCLASS()
 class BIGNIGHTMARES_API ABNPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	int32 MoveSpeed;
 };
