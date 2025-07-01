@@ -3,15 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "Engine/GameInstance.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "BNGameInstance.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BIGNIGHTMARES_API ABNGameInstance : public AGameModeBase
+class BIGNIGHTMARES_API UBNGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-	
+
+	UBNGameInstance(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	virtual void Init() override;
 };
