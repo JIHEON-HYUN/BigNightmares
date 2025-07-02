@@ -21,6 +21,11 @@ void ABNBaseMonster::SetMonsterState(EMonsterState NewState)
 	if (CurrentState == NewState)
 		return;
 
+	UE_LOG(LogTemp, Log, TEXT("%s 상태 변경: %s -> %s"),
+		*GetName(),
+		*UEnum::GetValueAsString(CurrentState),
+		*UEnum::GetValueAsString(NewState));
+
 	CurrentState = NewState;
 }
 

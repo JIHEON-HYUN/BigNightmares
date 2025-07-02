@@ -2,4 +2,47 @@
 
 
 #include "Monster/BNHunterCharacter.h"
+#include "Components/CapsuleComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "AIController.h"
 
+ABNHunterCharacter::ABNHunterCharacter()
+{
+	PrimaryActorTick.bCanEverTick = true;
+
+	// Capsule Component 설정
+	GetCapsuleComponent()->InitCapsuleSize(34.f, 95.0f);
+	
+	// Mesh 설정
+	GetMesh()->SetupAttachment(GetCapsuleComponent());
+	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -95.f));
+	GetMesh()->SetRelativeRotation(FRotator(0.f, 0.f, 0.f));
+}
+
+void ABNHunterCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void ABNHunterCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void ABNHunterCharacter::OnTargetPerceived(AActor* Actor, FAIStimulus Stimulus)
+{
+}
+
+void ABNHunterCharacter::HandleIdle()
+{
+}
+
+void ABNHunterCharacter::HandleChase()
+{
+}
+
+void ABNHunterCharacter::HandleAttack()
+{
+}
