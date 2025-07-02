@@ -2,19 +2,50 @@
 
 
 #include "Character/BNBaseMonster.h"
+#include "Perception/AIPerceptionComponent.h"
 
 ABNBaseMonster::ABNBaseMonster()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	// 초기 상태는 Inactive
-	SetMonsterState(EMonsterState::Inactive);
+	// ==========================
+	// AI 감지 시스템 초기화
+	// ==========================
+	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
+
+	// ==========================
+	// 초기 상태 설정
+	// ==========================
+	CurrentState = EMonsterState::Inactive;
 }
 
 void ABNBaseMonster::BeginPlay()
 {
 	Super::BeginPlay();
 }
+
+// ==========================
+// 외부 인터페이스
+// ==========================
+
+EMonsterState ABNBaseMonster::GetMonsterState() const
+{
+	UE_LOG(LogTemp, Log, TEXT("GetMonsterState 호출됨. 현재 상태: %s"), *UEnum::GetValueAsString(CurrentState));
+	return CurrentState;
+}
+
+void ABNBaseMonster::ActivateMonster()
+{
+	if (bIsActive)
+		return;
+
+	bIsActive = true;
+	SetMonsterState(EMonsterState::Idle);
+}
+
+// ==========================
+// 상태 제어 내부 로직
+// ==========================
 
 void ABNBaseMonster::SetMonsterState(EMonsterState NewState)
 {
@@ -27,13 +58,4 @@ void ABNBaseMonster::SetMonsterState(EMonsterState NewState)
 		*UEnum::GetValueAsString(NewState));
 
 	CurrentState = NewState;
-}
-
-void ABNBaseMonster::ActivateMonster()
-{
-	if (bIsActive)
-		return;
-
-	bIsActive = true;
-	SetMonsterState(EMonsterState::Idle);
 }

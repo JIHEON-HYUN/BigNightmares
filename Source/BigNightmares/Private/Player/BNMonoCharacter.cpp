@@ -52,7 +52,7 @@ ABNMonoCharacter::ABNMonoCharacter()
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0,0.0, -27.0), FRotator(0.0,0.0,0.0));
 
 	//TODO(NOTE): Editor의 ABP_BNMonoAnim의 경로가 바뀐다면 해당 경로 반드시 수정 필요
-	static ConstructorHelpers::FClassFinder<UBNMonoAnimInstance> ABP_BNMonoAnimInstance(TEXT("/Game/Characters/Player/Animations/ABP_BNMonoAnimInstance.ABP_BNMonoAnimInstance"));
+	static ConstructorHelpers::FClassFinder<UBNMonoAnimInstance> ABP_BNMonoAnimInstance(TEXT("/Game/Characters/Player/Animations/ABP_BNMonoAnimInstance.ABP_BNMonoAnimInstance_C"));
 
 	if (ABP_BNMonoAnimInstance.Succeeded())
 	{

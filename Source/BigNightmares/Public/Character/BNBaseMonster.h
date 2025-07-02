@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/BNBaseCharacter.h"
+
 #include "BNBaseMonster.generated.h"
 
 UENUM(Blueprintable)
@@ -26,27 +27,43 @@ class BIGNIGHTMARES_API ABNBaseMonster : public ABNBaseCharacter
 public:
 	ABNBaseMonster();
 
+	// ====================
+	// 외부 인터페이스
+	// ====================
+	
+	// 현재 몬스터 상태 반환
+	UFUNCTION(BlueprintCallable, Category = "State")
+	EMonsterState GetMonsterState() const;
+
+	// 몬스터 활성화 (미션 클리어 개수에 따라 활성화)
+	UFUNCTION(BlueprintCallable, Category = "State")
+	void ActivateMonster();
+	
+
 protected:
 	virtual void BeginPlay() override;
 
+	// ====================
+	// 상태 변수 및 제어
+	// ====================
+	
 	// 현재 몬스터 상태
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Monster")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	EMonsterState CurrentState;
 
 	// 몬스터 활성화 여부
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Monster")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	bool bIsActive = false;
 
-protected:
 	// 몬스터 상태 변경
 	void SetMonsterState(EMonsterState NewState);
 
-public:
-	// 현재 상태 반환
-	UFUNCTION(BlueprintCallable, Category = "Monster")
-	EMonsterState GetMonsterState() const { return CurrentState; }
-
-	// 미션 성공시 몬스터 활성화
-	UFUNCTION(BlueprintCallable, Category = "Monster")
-	void ActivateMonster();
+	
+	// ====================
+	// AI 감지 시스템
+	// ====================
+	
+	// AI 감지 시스템
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception")
+	class UAIPerceptionComponent* PerceptionComponent;
 };
