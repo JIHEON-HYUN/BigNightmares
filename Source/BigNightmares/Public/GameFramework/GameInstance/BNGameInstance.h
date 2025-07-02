@@ -24,16 +24,22 @@ public:
 	// MainMenu 기능
 	UFUNCTION()
 	virtual void Host() override;
+	
 	UFUNCTION()
 	virtual void Join(const FString& Address) override;
+	
 	UFUNCTION(BlueprintCallable)
 	void LoadMainMenu();
 
 private:
 	TSubclassOf<class UUserWidget> MainMenuClass;
 	class UBNMainMenuWidget* MainMenuWidget;
-	
-	IOnlineSessionPtr SessionInterface;
 
+	// typedef TSharedPtr<class IOnlineSession, ESPMode::ThreadSafe> IOnlineSessionPtr (shared포인터)
+	IOnlineSessionPtr SessionInterface;
+	TSharedPtr<FOnlineSessionSearch> SessionSearch;
+
+	void CreateSession();
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
+	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 };

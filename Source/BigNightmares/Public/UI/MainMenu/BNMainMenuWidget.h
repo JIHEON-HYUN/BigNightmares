@@ -16,15 +16,18 @@ class BIGNIGHTMARES_API UBNMainMenuWidget : public UUserWidget
 	GENERATED_BODY()
 
 private:
+	// IBNMainMenuInterface를 상속받은 게임 인스턴스의 기능을 사용하기 위한 변수
 	IBNMainMenuInterface* MainMenuInterface;
 	
 public:
+	// MainMenuInterface에 의존성 주입
 	void SetIBNMainMenuInterface(IBNMainMenuInterface* NewMainMenuInterface);
 
 protected:
 	virtual bool Initialize() override;
 
 public:
+	// Widget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UButton* Btn_Host;
 
@@ -49,6 +52,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UEditableText* IPAddressBox;
 
+	// Callback Func
 	UFUNCTION()
 	void OnClickedHost();
 	UFUNCTION()
