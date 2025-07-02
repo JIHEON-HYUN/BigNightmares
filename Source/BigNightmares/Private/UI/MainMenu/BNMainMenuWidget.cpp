@@ -3,13 +3,44 @@
 
 #include "UI/MainMenu/BNMainMenuWidget.h"
 
+#include "UObject/ConstructorHelpers.h"
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "Components/TextBlock.h"
+
+#include "UI/MainMenu/BNSessionList.h"
+
+UBNMainMenuWidget::UBNMainMenuWidget(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	ConstructorHelpers::FClassFinder<UUserWidget> SessionListBPClass(TEXT("/Game/UI/MainMenu/WBP_SessionList"));
+	if (SessionListBPClass.Succeeded())
+	{
+		SessionListClass = SessionListBPClass.Class;
+	}
+}
 
 void UBNMainMenuWidget::SetIBNMainMenuInterface(IBNMainMenuInterface* NewMainMenuInterface)
 {
 	MainMenuInterface = NewMainMenuInterface;
+}
+
+void UBNMainMenuWidget::SetSessionList(TArray<FString> SessionNames)
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+
+	SessionList->ClearChildren();
+	
+	for (const FString& SessionName : SessionNames)
+	{
+		UBNSessionList* Session = CreateWidget<UBNSessionList>(World, SessionListClass);
+		if (Session == nullptr) return;
+
+		Session->SessionName->SetText(FText::FromString(SessionName));
+
+		SessionList->AddChild(Session);
+	}
 }
 
 bool UBNMainMenuWidget::Initialize()
@@ -48,11 +79,11 @@ void UBNMainMenuWidget::OnClickedJoin()
 	if (JoinMenu == nullptr) return;
 
 	MenuSwitcher->SetActiveWidget(JoinMenu);
+	MainMenuInterface->RefreshSessionList();
 }
 
 void UBNMainMenuWidget::OnClickedCancel()
 {
-	if (MainMenuInterface == nullptr) return;
 	if (MainMenu == nullptr) return;
 
 	MenuSwitcher->SetActiveWidget(MainMenu);
@@ -61,7 +92,8 @@ void UBNMainMenuWidget::OnClickedCancel()
 void UBNMainMenuWidget::OnClickedJoinTo()
 {
 	if (MainMenuInterface == nullptr) return;
-	
+
+	MainMenuInterface->Join();
 }
 
 void UBNMainMenuWidget::OnClickedQuit()

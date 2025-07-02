@@ -29,10 +29,13 @@ public:
 	virtual void Join() override;
 	
 	UFUNCTION(BlueprintCallable)
-	virtual void Quit();
+	virtual void Quit() override;
 	
 	UFUNCTION(BlueprintCallable)
-	void LoadMainMenu();
+	virtual void LoadMainMenu() override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void RefreshSessionList() override;
 
 private:
 	TSubclassOf<class UUserWidget> MainMenuClass;

@@ -18,10 +18,15 @@ class BIGNIGHTMARES_API UBNMainMenuWidget : public UUserWidget
 private:
 	// IBNMainMenuInterface를 상속받은 게임 인스턴스의 기능을 사용하기 위한 변수
 	IBNMainMenuInterface* MainMenuInterface;
+	TSubclassOf<class UUserWidget> SessionListClass;
 	
 public:
+	UBNMainMenuWidget(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	
 	// MainMenuInterface에 의존성 주입
 	void SetIBNMainMenuInterface(IBNMainMenuInterface* NewMainMenuInterface);
+
+	void SetSessionList(TArray<FString> SessionNames);
 
 protected:
 	virtual bool Initialize() override;
@@ -51,6 +56,9 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UWidget* JoinMenu;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	class UPanelWidget* SessionList;
 
 	// Callback Func
 	UFUNCTION()

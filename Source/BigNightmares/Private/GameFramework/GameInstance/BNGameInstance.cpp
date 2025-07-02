@@ -37,17 +37,6 @@ void UBNGameInstance::Init()
 			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UBNGameInstance::OnCreateSessionComplete);
 			// DestroySession이 완료되면 델리게이트 호출
 			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UBNGameInstance::OnDestroySessionComplete);
-
-			SessionSearch = MakeShareable(new FOnlineSessionSearch());
-			// SessionSearch가 유효하면(null이 아니면) SharedPtr를 SharedRef로 변환하여 FindSessions (SharedRef는 null이 아님이 보장되야 함)
-			if (SessionSearch.IsValid())
-			{
-				// bIsLanQuery : Lan 세션만 검색(true), 온라인 세션만 검색(false)
-				SessionSearch->bIsLanQuery = true;
-				SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
-				// FindSessions가 완료되면 델리게이트 호출
-				SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UBNGameInstance::OnFindSessionsComplete);
-			}
 		}
 	}
 }
@@ -74,7 +63,8 @@ void UBNGameInstance::Join()
 {
 	if (MainMenuWidget != nullptr)
 	{
-		MainMenuWidget->CloseMenu();
+		MainMenuWidget->SetSessionList({"fuck", "you"});
+		// MainMenuWidget->CloseMenu();
 	}
 
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
@@ -106,6 +96,20 @@ void UBNGameInstance::LoadMainMenu()
 
 	MainMenuWidget->Setup();
 	MainMenuWidget->SetIBNMainMenuInterface(this);
+}
+
+void UBNGameInstance::RefreshSessionList()
+{
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	// SessionSearch가 유효하면(null이 아니면) SharedPtr를 SharedRef로 변환하여 FindSessions (SharedRef는 null이 아님이 보장되야 함)
+	if (SessionSearch.IsValid())
+	{
+		// bIsLanQuery : Lan 세션만 검색(true), 온라인 세션만 검색(false)
+		// SessionSearch->bIsLanQuery = true;
+		SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+		// FindSessions가 완료되면 델리게이트 호출
+		SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UBNGameInstance::OnFindSessionsComplete);
+	}
 }
 
 void UBNGameInstance::CreateSession()
@@ -152,12 +156,15 @@ void UBNGameInstance::OnDestroySessionComplete(FName SessionName, bool bWasSucce
 
 void UBNGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 {
-	if (bWasSuccessful && SessionSearch.IsValid())
+	if (bWasSuccessful && SessionSearch.IsValid() && MainMenuWidget != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OnFindSessionsComplete"));
+		TArray<FString> SessionNames;
 		for (const auto& SearchResult : SessionSearch->SearchResults )
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Session ID : %s"), *SearchResult.GetSessionIdStr());
+			SessionNames.Add(SearchResult.GetSessionIdStr());
 		}
+
+		MainMenuWidget->SetSessionList(SessionNames);
 	}
 }
