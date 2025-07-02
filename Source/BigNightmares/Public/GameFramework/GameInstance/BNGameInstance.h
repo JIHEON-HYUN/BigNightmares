@@ -26,7 +26,10 @@ public:
 	virtual void Host() override;
 	
 	UFUNCTION()
-	virtual void Join(const FString& Address) override;
+	virtual void Join() override;
+	
+	UFUNCTION(BlueprintCallable)
+	virtual void Quit();
 	
 	UFUNCTION(BlueprintCallable)
 	void LoadMainMenu();
@@ -37,9 +40,10 @@ private:
 
 	// typedef TSharedPtr<class IOnlineSession, ESPMode::ThreadSafe> IOnlineSessionPtr (shared포인터)
 	IOnlineSessionPtr SessionInterface;
-	TSharedPtr<FOnlineSessionSearch> SessionSearch;
+	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
 
 	void CreateSession();
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+	void OnFindSessionsComplete(bool bWasSuccessful);
 };

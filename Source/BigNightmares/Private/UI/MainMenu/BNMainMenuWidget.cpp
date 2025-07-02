@@ -5,7 +5,6 @@
 
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
-#include "Components/EditableText.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 void UBNMainMenuWidget::SetIBNMainMenuInterface(IBNMainMenuInterface* NewMainMenuInterface)
@@ -18,6 +17,7 @@ bool UBNMainMenuWidget::Initialize()
 	bool SuperSuccess = Super::Initialize();
 	if (!SuperSuccess) return false;
 
+	// 버튼 클릭 델리게이트 바인딩
 	if (Btn_Host == nullptr) return false;
 	Btn_Host->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedHost);
 
@@ -29,6 +29,9 @@ bool UBNMainMenuWidget::Initialize()
 
 	if (Btn_Join_To == nullptr) return false;
 	Btn_Join_To->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedJoinTo);
+
+	if (Btn_Quit == nullptr) return false;
+	Btn_Quit->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedQuit);
 	
 	return true;
 }
@@ -58,9 +61,14 @@ void UBNMainMenuWidget::OnClickedCancel()
 void UBNMainMenuWidget::OnClickedJoinTo()
 {
 	if (MainMenuInterface == nullptr) return;
-	if (IPAddressBox == nullptr) return;
+	
+}
 
-	MainMenuInterface->Join(IPAddressBox->GetText().ToString());
+void UBNMainMenuWidget::OnClickedQuit()
+{
+	if (MainMenuInterface == nullptr) return;
+
+	MainMenuInterface->Quit();	
 }
 
 void UBNMainMenuWidget::Setup()
@@ -94,12 +102,3 @@ void UBNMainMenuWidget::CloseMenu()
 	PlayerController->bShowMouseCursor = false;
 }
 
-void UBNMainMenuWidget::QuitGame()
-{
-	UWorld* World = GetWorld();
-	if (World == nullptr) return;
-	
-	APlayerController* PlayerController = World->GetFirstPlayerController();
-	
-	UKismetSystemLibrary::QuitGame(World, PlayerController, EQuitPreference::Quit, false);
-}

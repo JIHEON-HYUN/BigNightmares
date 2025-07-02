@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 #include "UI/MainMenu/BNMainMenuWidget.h"
 
@@ -38,7 +39,15 @@ void UBNGameInstance::Init()
 			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UBNGameInstance::OnDestroySessionComplete);
 
 			SessionSearch = MakeShareable(new FOnlineSessionSearch());
-			SessionInterface->FindSessions(0, SessionSearch);
+			// SessionSearch가 유효하면(null이 아니면) SharedPtr를 SharedRef로 변환하여 FindSessions (SharedRef는 null이 아님이 보장되야 함)
+			if (SessionSearch.IsValid())
+			{
+				// bIsLanQuery : Lan 세션만 검색(true), 온라인 세션만 검색(false)
+				SessionSearch->bIsLanQuery = true;
+				SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+				// FindSessions가 완료되면 델리게이트 호출
+				SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UBNGameInstance::OnFindSessionsComplete);
+			}
 		}
 	}
 }
@@ -61,7 +70,7 @@ void UBNGameInstance::Host()
 	}
 }
 
-void UBNGameInstance::Join(const FString& Address)
+void UBNGameInstance::Join()
 {
 	if (MainMenuWidget != nullptr)
 	{
@@ -75,7 +84,17 @@ void UBNGameInstance::Join(const FString& Address)
 		// TRAVEL_Absolute - 전체 경로를 지정하여 해당 맵으로 이동 (가장 일반적임)
 		// TRAVEL_Partial - 플레이어 상태를 유지한 채로 레벨만 전환 (Seamless Travel)
 		// TRAVEL_Relative - 상대 경로 기반 이동 (거의 사용 안됨)
-	PlayerController->ClientTravel(Address, TRAVEL_Absolute);
+	// PlayerController->ClientTravel(Address, TRAVEL_Absolute);
+}
+
+void UBNGameInstance::Quit()
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+	
+	APlayerController* PlayerController = World->GetFirstPlayerController();
+	
+	UKismetSystemLibrary::QuitGame(World, PlayerController, EQuitPreference::Quit, false);
 }
 
 void UBNGameInstance::LoadMainMenu()
@@ -94,6 +113,9 @@ void UBNGameInstance::CreateSession()
 	if (SessionInterface.IsValid())
 	{
 		FOnlineSessionSettings SessionSettings;
+		SessionSettings.bIsLANMatch = true;
+		SessionSettings.NumPublicConnections = 12;
+		SessionSettings.bShouldAdvertise = true;
 		// CreateSession
 		SessionInterface->CreateSession(0, SESSION_NAME, SessionSettings);
 	}
@@ -125,5 +147,17 @@ void UBNGameInstance::OnDestroySessionComplete(FName SessionName, bool bWasSucce
 	if (bWasSuccessful)
 	{
 		CreateSession();
+	}
+}
+
+void UBNGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
+{
+	if (bWasSuccessful && SessionSearch.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnFindSessionsComplete"));
+		for (const auto& SearchResult : SessionSearch->SearchResults )
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Session ID : %s"), *SearchResult.GetSessionIdStr());
+		}
 	}
 }

@@ -41,6 +41,9 @@ public:
 	class UButton* Btn_Join_To;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	class UButton* Btn_Quit;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UWidgetSwitcher* MenuSwitcher;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
@@ -48,9 +51,6 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UWidget* JoinMenu;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class UEditableText* IPAddressBox;
 
 	// Callback Func
 	UFUNCTION()
@@ -61,8 +61,9 @@ public:
 	void OnClickedCancel();
 	UFUNCTION()
 	void OnClickedJoinTo();
+	UFUNCTION()
+	void OnClickedQuit();
 
 	void Setup();
 	void CloseMenu();
-	void QuitGame();
 };
