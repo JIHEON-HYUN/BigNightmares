@@ -19,21 +19,28 @@ ABNBaseAIController::ABNBaseAIController()
 	BlackboardComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackboardComponent"));
 }
 
-void ABNBaseAIController::OnPossess(APawn* InPawn)
+void ABNBaseAIController::BeginPlay()
 {
-	Super::OnPossess(InPawn);
+	Super::BeginPlay();
 
 	// ===============================
 	// AI 초기화: 블랙보드 + 비헤이비어 트리 실행
 	// ===============================
-	if (BlackboardData && UseBlackboard(BlackboardData, BlackboardComponent))
+	if (UseBlackboard(BlackboardData, BlackboardComponent))
 	{
-		if (BehaviorTree)
-		{
-			RunBehaviorTree(BehaviorTree);
-		}
+		RunBehaviorTree(BehaviorTree);
+		UE_LOG(LogTemp, Warning, TEXT("BehaviorTree 실행 성공"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("BehaviorTree 실행 실패"));
 	}
 
+}
+
+void ABNBaseAIController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
 	
 	// ===============================
 	// AI 감지 시스템 연결

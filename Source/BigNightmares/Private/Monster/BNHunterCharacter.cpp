@@ -27,7 +27,6 @@ ABNHunterCharacter::ABNHunterCharacter()
 	// ===============================
 	// AI 컨트롤러 설정
 	// ===============================
-	AIControllerClass = ABNHunterAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 

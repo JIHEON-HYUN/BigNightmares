@@ -24,6 +24,8 @@ public:
 	ABNBaseAIController();
 
 protected:
+	virtual void BeginPlay() override;
+	
 	// ===============================
 	// AI 데이터
 	// ===============================
