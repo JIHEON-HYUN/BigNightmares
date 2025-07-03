@@ -132,6 +132,7 @@ void UBNGameInstance::CreateSession()
 		SessionSettings.bShouldAdvertise = true;
 		// Presence 세션으로 등록되서, Presence 기반 search에 노출됨
 		SessionSettings.bUsesPresence = true;
+		SessionSettings.bUseLobbiesIfAvailable = true;
 		
 		// CreateSession
 		SessionInterface->CreateSession(0, SESSION_NAME, SessionSettings);
