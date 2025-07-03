@@ -42,6 +42,12 @@ void ABNBaseAIController::OnPossess(APawn* InPawn)
 	{
 		PC->OnTargetPerceptionUpdated.AddDynamic(this, &ABNBaseAIController::OnTargetPerceptionUpdated);
 	}
+
+	// 로그는 추후 삭제 예정
+	if (InPawn)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[AIController] %s 가 %s 를 Possess함"), *GetName(), *InPawn->GetName());
+	}
 }
 
 void ABNBaseAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)

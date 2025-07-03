@@ -3,6 +3,7 @@
 
 #include "Monster/BNHunterCharacter.h"
 #include "Components/CapsuleComponent.h"
+#include "Monster/BNHunterAIController.h"
 
 
 ABNHunterCharacter::ABNHunterCharacter()
@@ -21,11 +22,30 @@ ABNHunterCharacter::ABNHunterCharacter()
 	GetMesh()->SetupAttachment(GetCapsuleComponent());
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -95.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.f, 0.f, 0.f));
+
+	
+	// ===============================
+	// AI 컨트롤러 설정
+	// ===============================
+	AIControllerClass = ABNHunterAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 void ABNHunterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 로그는 추후에 삭제 예정
+	UE_LOG(LogTemp, Warning, TEXT("[AI] %s 생성 완료"), *GetName());
+	
+	if (AController* MyController = GetController())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[AI] %s -> 컨트롤러 %s 할당됨"), *GetName(), *MyController->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[AI] %s -> 컨트롤러 없음"), *GetName());
+	}
 }
 
 void ABNHunterCharacter::Tick(float DeltaTime)
