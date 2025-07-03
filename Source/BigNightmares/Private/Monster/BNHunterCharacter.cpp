@@ -3,8 +3,7 @@
 
 #include "Monster/BNHunterCharacter.h"
 #include "Components/CapsuleComponent.h"
-#include "Perception/AISenseConfig_Sight.h"
-#include "Perception/AIPerceptionComponent.h"
+
 
 ABNHunterCharacter::ABNHunterCharacter()
 {

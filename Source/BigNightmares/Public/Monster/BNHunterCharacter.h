@@ -6,8 +6,6 @@
 #include "Character/BNBaseMonster.h"
 #include "BNHunterCharacter.generated.h"
 
-struct FAIStimulus;
-
 /**
  * 
  */
