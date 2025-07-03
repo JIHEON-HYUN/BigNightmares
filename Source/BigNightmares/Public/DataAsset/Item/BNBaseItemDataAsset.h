@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayEffect.h"
 #include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
 #include "BNBaseItemDataAsset.generated.h"
@@ -33,6 +34,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag ItemEffectTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UGameplayEffect> ItemGameplayEffect;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	EBNItemUseType UseType;

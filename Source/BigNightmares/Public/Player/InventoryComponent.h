@@ -21,7 +21,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
 	TObjectPtr<UBNBaseItemDataAsset> ItemDataAsset;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
+	//TODO : VisibleAnywhere로 수정해함 Debug를 위해서 EditDefaultsOnly로 바꿔둠
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
 	TMap<FName, int32> OwnedItemID;
 
 	UFUNCTION(BlueprintCallable)
@@ -29,5 +30,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void RemoveItem(FName ItemID);
-	
+
+	UFUNCTION(BlueprintCallable)
+	void UsingItem(FName ItemID);
+
+	const FBNItemInfo* GetItemInfo(FName ItemID) const;
 };

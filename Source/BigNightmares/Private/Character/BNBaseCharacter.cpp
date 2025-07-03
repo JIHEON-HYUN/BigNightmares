@@ -3,6 +3,9 @@
 
 #include "Character/BNBaseCharacter.h"
 
+#include "Abilities/BNBaseAbilitySystemComponent.h"
+#include "GameFramework/PlayerState/BNPlayerState.h"
+
 // Sets default values
 ABNBaseCharacter::ABNBaseCharacter()
 {
@@ -11,6 +14,8 @@ ABNBaseCharacter::ABNBaseCharacter()
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	GetMesh()->bReceivesDecals = false;
+
+	//BNBaseAbilitySystemComponent->
 }
 
 // Called when the game starts or when spawned
@@ -25,5 +30,42 @@ void ABNBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+UAbilitySystemComponent* ABNBaseCharacter::GetAbilitySystemComponent() const
+{
+	return GetBNBaseAbilitySystemComponent();
+}
+
+void ABNBaseCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (ABNPlayerState* PS = GetPlayerState<ABNPlayerState>())
+	{
+		UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
+		if (ASC)
+		{
+			ASC->InitAbilityActorInfo(PS,this);
+		}
+	}
+}
+
+UBNBaseAbilitySystemComponent* ABNBaseCharacter::GetBNBaseAbilitySystemComponent() const
+{
+	if (const ABNPlayerState* PS = GetPlayerState<ABNPlayerState>())
+	{
+		return PS->GetBNBaseAbilitySystemComponent();
+	}
+	return nullptr;
+}
+
+UBNTarotCardAttributeSet* ABNBaseCharacter::GetBNBaseAttributeSet() const
+{
+	if (const ABNPlayerState* PS = GetPlayerState<ABNPlayerState>())
+	{
+		return PS->GetBNBaseAttributeSet();
+	}
+	return nullptr;
 }
 

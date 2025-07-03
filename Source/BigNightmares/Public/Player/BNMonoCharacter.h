@@ -6,6 +6,8 @@
 #include "Character/BNBaseCharacter.h"
 #include "BNMonoCharacter.generated.h"
 
+class UBNBaseItemDataAsset;
+class UInventoryComponent;
 class UDataAsset_InputConfig_Player;
 class USpringArmComponent;
 class UCameraComponent;
@@ -21,6 +23,9 @@ class BIGNIGHTMARES_API ABNMonoCharacter : public ABNBaseCharacter
 
 	ABNMonoCharacter();
 
+protected:
+	virtual void BeginPlay() override;
+	
 #pragma region Camera
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Camera", meta = (AllowPrivateAccess = "true"))
@@ -40,5 +45,17 @@ protected:
 
 	void Input_Move(const FInputActionValue& InputActionValue);
 	void Input_Look(const FInputActionValue& InputActionValue);	
+	void Input_UseItem(const FInputActionValue& InputActionValue);	
 #pragma endregion
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
+	TObjectPtr<UInventoryComponent> InventoryComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UBNBaseAbilitySystemComponent> AbilitySystemComponent;
+
+protected:
+	virtual void PossessedBy(AController* NewController) override;
+	
 };
