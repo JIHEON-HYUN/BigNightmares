@@ -23,7 +23,7 @@ public:
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AttributeAbilitySystemComponent = nullptr;
 
-	void Init(UAbilitySystemComponent* InASC);
+	void Init(UBNBaseAbilitySystemComponent* InASC);
 
 #pragma region MoveSpeedCard
 	UPROPERTY(BlueprintReadOnly, Category="Status")

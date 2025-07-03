@@ -11,35 +11,33 @@ UBNTarotCardAttributeSet::UBNTarotCardAttributeSet()
 {
 	InitSpeedBuffDuration(5.f);
 	InitMoveSpeed(200.f);
-	InitMoveSpeedMultiplier(1.3f);
+	InitMoveSpeedMultiplier(10.f); // 1.3f 를 기본으로
 }
 
-void UBNTarotCardAttributeSet::Init(UAbilitySystemComponent* InASC)
+void UBNTarotCardAttributeSet::Init(UBNBaseAbilitySystemComponent* InASC)
 {
 	AttributeAbilitySystemComponent = InASC;
+	UE_LOG(LogTemp, Warning, TEXT("Init called, ASC ptr: %p"), AttributeAbilitySystemComponent.Get());
 }
-
 
 void UBNTarotCardAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
 
+	//TODO(NOTE): 나중에 일정시간 적용후 해제가 아닌경우 여기 사용
 	FGameplayTagContainer GrantedTags;
 	Data.EffectSpec.GetAllGrantedTags(GrantedTags);
-
-	// if (Data.EvaluatedData.Attribute == GetMoveSpeedAttribute())
-	// {
-	// 	ChangeMoveSpeed();
-	// }
 }
 
 void UBNTarotCardAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
-	
+
 	if (Attribute == GetMoveSpeedAttribute())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AttributeSetCheck1"));
+		UE_LOG(LogTemp, Warning, TEXT("ASC Ptr  :  %p"), AttributeAbilitySystemComponent.Get())
+		
 		if (AttributeAbilitySystemComponent)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("AttributeSetCheck2"));
@@ -58,11 +56,16 @@ void UBNTarotCardAttributeSet::PreAttributeChange(const FGameplayAttribute& Attr
 void UBNTarotCardAttributeSet::ChangeMoveSpeed(float NewSpeed)
 {
 	//float NewSpeed = GetMoveSpeed();
-	if (AActor* Owner = GetOwningActor())
+	UE_LOG(LogTemp, Warning, TEXT("ChangeMoveSpeed NewSpeed: %f"), NewSpeed);
+	if (AActor* Owner = AttributeAbilitySystemComponent->GetAvatarActor())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ChangeMoveSpeed Owner: %s"), *GetNameSafe(Owner));
+		UE_LOG(LogTemp, Warning, TEXT("Owner class: %s"), Owner ? *Owner->GetClass()->GetName() : TEXT("nullptr"));
 		if (ACharacter* Character = Cast<ABNMonoCharacter>(Owner))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Old MaxWalkSpeed: %f"), Character->GetCharacterMovement()->MaxWalkSpeed);
 			Character->GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
+			UE_LOG(LogTemp, Warning, TEXT("New MaxWalkSpeed: %f"), Character->GetCharacterMovement()->MaxWalkSpeed);
 		}
 	}
 }

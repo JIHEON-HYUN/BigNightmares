@@ -55,6 +55,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UBNBaseAbilitySystemComponent> AbilitySystemComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UBNTarotCardAttributeSet> TarotCardAttributeSet;
+
 protected:
 	virtual void PossessedBy(AController* NewController) override;
 	

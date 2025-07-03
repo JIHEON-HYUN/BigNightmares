@@ -23,7 +23,7 @@ public:
 	ABNPlayerState();
 	virtual UBNBaseAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	FORCEINLINE UBNBaseAbilitySystemComponent* GetBNBaseAbilitySystemComponent() const { return BNBaseAbilitySystemComponent; }
+	FORCEINLINE UBNBaseAbilitySystemComponent* GetBNBaseAbilitySystemComponent() const { return BNBaseAbilitySystemComponent.Get(); }
 	FORCEINLINE UBNTarotCardAttributeSet* GetBNBaseAttributeSet() const {return BNBaseAttributeSet;}
 
 protected:
@@ -32,6 +32,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AbilitySystem")
 	TObjectPtr<UBNTarotCardAttributeSet> BNBaseAttributeSet;
+
+	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
 
 	
 };

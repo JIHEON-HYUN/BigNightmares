@@ -79,9 +79,19 @@ void ABNMonoCharacter::BeginPlay()
 	if (ABNPlayerState* PS = GetPlayerState<ABNPlayerState>())
 	{
 		AbilitySystemComponent = PS->GetAbilitySystemComponent();
-		UBNTarotCardAttributeSet* TarotCardAttributeSet = PS->GetBNBaseAttributeSet();
-		AbilitySystemComponent->AddAttributeSetSubobject(TarotCardAttributeSet);
-		TarotCardAttributeSet->Init(AbilitySystemComponent);
+		TarotCardAttributeSet = PS->GetBNBaseAttributeSet();
+
+		if (AbilitySystemComponent && TarotCardAttributeSet)
+		{
+			UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent or TarotCardAttributeSet is in BeginPlay"));
+			AbilitySystemComponent->InitAbilityActorInfo(PS, this);
+			AbilitySystemComponent->AddAttributeSetSubobject(TarotCardAttributeSet.Get());
+			TarotCardAttributeSet->Init(AbilitySystemComponent);			
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent or TarotCardAttributeSet is null in BeginPlay"));
+		}
 	}
 }
 
@@ -152,14 +162,18 @@ void ABNMonoCharacter::Input_UseItem(const FInputActionValue& InputActionValue)
 	// GE 적용 준비
 	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 	FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(ItemInfo->ItemGameplayEffect, 1.0f, EffectContext);
+	SpecHandle.Data->DynamicGrantedTags.AddTag(ItemInfo->ItemEffectTag);
 
-	if (SpecHandle.IsValid())
+	if (SpecHandle.IsValid())		
 	{
-		SpecHandle.Data->DynamicGrantedTags.AddTag(ItemInfo->ItemEffectTag);
+		UE_LOG(LogTemp, Warning, TEXT("ASC AvatarActor: %s"), *GetNameSafe(AbilitySystemComponent->GetAvatarActor()));
+		UE_LOG(LogTemp, Warning, TEXT("ASC OwnerActor: %s"), *GetNameSafe(AbilitySystemComponent->GetOwnerActor()));
+		
 		UE_LOG(LogTemp, Warning, TEXT("TAG NAME : %s"), *ItemInfo->ItemEffectTag.ToString());
-		AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+
 		if (ItemInfo->UseType == EBNItemUseType::UseImmediately)
 		{
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 			UE_LOG(LogTemp, Warning, TEXT("즉발성 아이템"));			
 		}
 		else if (ItemInfo->UseType == EBNItemUseType::StoreAndUseLater)
