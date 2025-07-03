@@ -12,7 +12,7 @@ public class BigNightmares : ModuleRules
 		{
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput"
 			,"GameplayAbilities", "GameplayTags", "GameplayTasks", "AnimGraphRuntime",
-			"OnlineSubsystem"
+			"OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemSteam"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

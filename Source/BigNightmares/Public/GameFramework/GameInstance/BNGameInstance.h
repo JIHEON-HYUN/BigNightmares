@@ -26,7 +26,7 @@ public:
 	virtual void Host() override;
 	
 	UFUNCTION()
-	virtual void Join() override;
+	virtual void Join(uint32 Index) override;
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void Quit() override;
@@ -46,7 +46,11 @@ private:
 	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
 
 	void CreateSession();
+
+	// Callback Func
+		// Dynamic이 아닌 일반 델리게이트이므로, UFUNCTION() 등록 안해도 됨
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 };

@@ -18,6 +18,7 @@ class BIGNIGHTMARES_API UBNMainMenuWidget : public UUserWidget
 private:
 	// IBNMainMenuInterface를 상속받은 게임 인스턴스의 기능을 사용하기 위한 변수
 	IBNMainMenuInterface* MainMenuInterface;
+	// WBP_SessionList를 저장하기 위한 변수
 	TSubclassOf<class UUserWidget> SessionListClass;
 	
 public:
@@ -27,6 +28,8 @@ public:
 	void SetIBNMainMenuInterface(IBNMainMenuInterface* NewMainMenuInterface);
 
 	void SetSessionList(TArray<FString> SessionNames);
+
+	void SelectIndex(uint32 Index);
 
 protected:
 	virtual bool Initialize() override;
@@ -60,6 +63,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UPanelWidget* SessionList;
 
+	TOptional<uint32> SelectedIndex;
+
+	void Setup();
+	void CloseMenu();
+	
 	// Callback Func
 	UFUNCTION()
 	void OnClickedHost();
@@ -71,7 +79,4 @@ public:
 	void OnClickedJoinTo();
 	UFUNCTION()
 	void OnClickedQuit();
-
-	void Setup();
-	void CloseMenu();
 };

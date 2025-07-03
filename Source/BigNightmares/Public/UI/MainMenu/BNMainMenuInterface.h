@@ -22,7 +22,7 @@ class BIGNIGHTMARES_API IBNMainMenuInterface
 
 public:
 	virtual void Host() = 0;
-	virtual void Join() = 0;
+	virtual void Join(uint32 Index) = 0;
 	virtual void Quit() = 0;
 	virtual void LoadMainMenu() = 0;
 	virtual void RefreshSessionList() = 0;
