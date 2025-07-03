@@ -2,17 +2,11 @@
 
 
 #include "Character/BNBaseMonster.h"
-#include "Perception/AIPerceptionComponent.h"
 
 ABNBaseMonster::ABNBaseMonster()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
-	// ==========================
-	// AI 감지 시스템 초기화
-	// ==========================
-	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
-
+	
 	// ==========================
 	// 초기 상태 설정
 	// ==========================

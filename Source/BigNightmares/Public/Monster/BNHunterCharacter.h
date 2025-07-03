@@ -7,7 +7,6 @@
 #include "BNHunterCharacter.generated.h"
 
 struct FAIStimulus;
-class UAISenseConfig_Sight;
 
 /**
  * 
@@ -23,33 +22,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-
-	// ================================
-	// 감지 시스템 구성
-	// ================================
-
-	// 시야 감지 설정
-	UPROPERTY(Visibleanywhere, BlueprintReadOnly, Category = "Perception")
-	UAISenseConfig_Sight* SightConfig;
-
-	// 감지 이벤트 (OnPerceptionUpdated)
-	UFUNCTION()
-	void OnTargetPerceived(AActor* Actor, FAIStimulus Stimulus);
 	
-	
-	// ================================
-	// 추적 대상 및 상태
-	// ================================
-	
-	// 현재 추적 대상
-	UPROPERTY(BlueprintReadOnly, Category = "Targeting")
-	AActor* Target;
-
-	// 대상 추적 중 여부
-	UPROPERTY(BlueprintReadOnly, Category = "Targeting")
-	bool bIsTracking = false;
-	
-
 	// ================================
 	// 이동 및 전투 설정
 	// ================================

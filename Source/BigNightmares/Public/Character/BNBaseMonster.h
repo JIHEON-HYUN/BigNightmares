@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Character/BNBaseCharacter.h"
-
 #include "BNBaseMonster.generated.h"
 
 UENUM(Blueprintable)
@@ -58,12 +57,4 @@ protected:
 	// 몬스터 상태 변경
 	void SetMonsterState(EMonsterState NewState);
 
-	
-	// ====================
-	// AI 감지 시스템
-	// ====================
-	
-	// AI 감지 시스템
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception")
-	class UAIPerceptionComponent* PerceptionComponent;
 };
