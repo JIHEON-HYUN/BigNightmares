@@ -13,9 +13,15 @@ public class BigNightmares : ModuleRules
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput"
 			,"GameplayAbilities", "GameplayTags", "GameplayTasks", "AnimGraphRuntime",
 			"OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemSteam"
+			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", 
+			"GameplayTags", "GameplayTasks", "AnimGraphRuntime", "OnlineSubsystem", "OnlineSubsystemUtils", 
+			"OnlineSubsystemSteam", "AIModule"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"BigNightmares"
+		});
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
