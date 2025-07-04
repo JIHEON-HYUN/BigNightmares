@@ -20,7 +20,16 @@ public:
 	class UTextBlock* SessionName;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	class UTextBlock* HostUserName;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	class UTextBlock* PlayerCount;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UButton* Btn_Session;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool Selected = false;
 
 	void Setup(class UBNMainMenuWidget* NewParent, uint32 NewIndex);
 

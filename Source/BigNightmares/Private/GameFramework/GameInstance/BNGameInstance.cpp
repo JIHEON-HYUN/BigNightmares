@@ -13,6 +13,7 @@
 #include "UI/MainMenu/BNMainMenuWidget.h"
 
 const static FName SESSION_NAME = TEXT("My Session Game");
+const static FName SESSION_NAME_SETTINGS_KEY = TEXT("SessionName");
 
 UBNGameInstance::UBNGameInstance(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -47,8 +48,10 @@ void UBNGameInstance::Init()
 	}
 }
 
-void UBNGameInstance::Host()
+void UBNGameInstance::Host(FString SessionName)
 {
+	DesiredSessionName = SessionName;
+	
 	if (SessionInterface.IsValid())
 	{
 		auto ExistingSession = SessionInterface->GetNamedSession(SESSION_NAME);
@@ -126,13 +129,23 @@ void UBNGameInstance::CreateSession()
 	if (SessionInterface.IsValid())
 	{
 		FOnlineSessionSettings SessionSettings;
-		SessionSettings.bIsLANMatch = false;
+		
+		if (IOnlineSubsystem::Get()->GetSubsystemName() == "NULL")
+		{
+			SessionSettings.bIsLANMatch = true;
+		}
+		else
+		{
+			SessionSettings.bIsLANMatch = false;
+		}
+		
 		SessionSettings.NumPublicConnections = 12;
 		// 온라인 세션 검색에 노출할지 결정, false면 세션 검색에서 제외됨
 		SessionSettings.bShouldAdvertise = true;
 		// Presence 세션으로 등록되서, Presence 기반 search에 노출됨
 		SessionSettings.bUsesPresence = true;
 		SessionSettings.bUseLobbiesIfAvailable = true;
+		SessionSettings.Set(SESSION_NAME_SETTINGS_KEY, DesiredSessionName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 		
 		// CreateSession
 		SessionInterface->CreateSession(0, SESSION_NAME, SessionSettings);
@@ -172,14 +185,29 @@ void UBNGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 {
 	if (bWasSuccessful && SessionSearch.IsValid() && MainMenuWidget != nullptr)
 	{
-		TArray<FString> SessionNames;
+		TArray<FSessionData> SessionDatas;
 		for (const auto& SearchResult : SessionSearch->SearchResults )
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Session ID : %s"), *SearchResult.GetSessionIdStr());
-			SessionNames.Add(SearchResult.GetSessionIdStr());
+			FSessionData SessionData;
+			SessionData.SessionName = SearchResult.GetSessionIdStr();
+			SessionData.MaxPlayer = SearchResult.Session.SessionSettings.NumPublicConnections;
+			SessionData.CurrentPlayer = SessionData.MaxPlayer - SearchResult.Session.NumOpenPublicConnections;
+			SessionData.HostUserName = SearchResult.Session.OwningUserName;
+
+			FString SessionName;
+			if (SearchResult.Session.SessionSettings.Get(SESSION_NAME_SETTINGS_KEY, SessionName))
+			{
+				SessionData.SessionName = SessionName;
+			}
+			else
+			{
+				SessionData.SessionName = "Could not find name";
+			}
+			
+			SessionDatas.Add(SessionData);
 		}
 
-		MainMenuWidget->SetSessionList(SessionNames);
+		MainMenuWidget->SetSessionList(SessionDatas);
 	}
 }
 

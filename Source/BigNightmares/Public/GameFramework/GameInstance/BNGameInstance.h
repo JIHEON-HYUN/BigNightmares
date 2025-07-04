@@ -23,7 +23,7 @@ public:
 
 	// MainMenu 기능
 	UFUNCTION()
-	virtual void Host() override;
+	virtual void Host(FString SessionName) override;
 	
 	UFUNCTION()
 	virtual void Join(uint32 Index) override;
@@ -40,6 +40,8 @@ public:
 private:
 	TSubclassOf<class UUserWidget> MainMenuClass;
 	class UBNMainMenuWidget* MainMenuWidget;
+
+	FString DesiredSessionName;
 
 	// typedef TSharedPtr<class IOnlineSession, ESPMode::ThreadSafe> IOnlineSessionPtr (shared포인터)
 	IOnlineSessionPtr SessionInterface;

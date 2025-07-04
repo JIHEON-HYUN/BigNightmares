@@ -13,5 +13,11 @@ UCLASS()
 class BIGNIGHTMARES_API ABNLobbyGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void Logout(AController* Exiting) override;
+
+private:
+	uint32 NumberOfPlayers = 0;
 };

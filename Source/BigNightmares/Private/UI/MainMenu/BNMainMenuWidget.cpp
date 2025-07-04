@@ -7,6 +7,7 @@
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/TextBlock.h"
+#include "Components/EditableText.h"
 
 #include "UI/MainMenu/BNSessionList.h"
 
@@ -21,12 +22,42 @@ UBNMainMenuWidget::UBNMainMenuWidget(const FObjectInitializer& ObjectInitializer
 	}
 }
 
+bool UBNMainMenuWidget::Initialize()
+{
+	bool SuperSuccess = Super::Initialize();
+	if (!SuperSuccess) return false;
+
+	// 버튼 클릭 델리게이트 바인딩
+	if (Btn_Host == nullptr) return false;
+	Btn_Host->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedHost);
+
+	if (Btn_Host_As == nullptr) return false;
+	Btn_Host_As->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedHostAs);
+
+	if (Btn_Join == nullptr) return false;
+	Btn_Join->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedJoin);
+
+	if (Btn_Join_To == nullptr) return false;
+	Btn_Join_To->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedJoinTo);
+	
+	if (Btn_Back == nullptr) return false;
+	Btn_Back->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedBack);
+
+	if (Btn_Cancel == nullptr) return false;
+	Btn_Cancel->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedCancel);
+	
+	if (Btn_Quit == nullptr) return false;
+	Btn_Quit->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedQuit);
+	
+	return true;
+}
+
 void UBNMainMenuWidget::SetIBNMainMenuInterface(IBNMainMenuInterface* NewMainMenuInterface)
 {
 	MainMenuInterface = NewMainMenuInterface;
 }
 
-void UBNMainMenuWidget::SetSessionList(TArray<FString> SessionNames)
+void UBNMainMenuWidget::SetSessionList(TArray<FSessionData> SessionDatas)
 {
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
@@ -35,12 +66,15 @@ void UBNMainMenuWidget::SetSessionList(TArray<FString> SessionNames)
 	SessionList->ClearChildren();
 
 	uint32 Index = 0;
-	for (const FString& SessionName : SessionNames)
+	for (const FSessionData& SessionData : SessionDatas)
 	{
 		UBNSessionList* Session = CreateWidget<UBNSessionList>(World, SessionListClass);
 		if (Session == nullptr) return;
 
-		Session->SessionName->SetText(FText::FromString(SessionName));
+		Session->SessionName->SetText(FText::FromString(SessionData.SessionName));
+		Session->HostUserName->SetText(FText::FromString(SessionData.HostUserName));
+		Session->PlayerCount->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), SessionData.CurrentPlayer, SessionData.MaxPlayer)));
+		
 		Session->Setup(this, Index);
 		SessionList->AddChild(Session);
 		
@@ -51,30 +85,18 @@ void UBNMainMenuWidget::SetSessionList(TArray<FString> SessionNames)
 void UBNMainMenuWidget::SelectIndex(uint32 Index)
 {
 	SelectedIndex = Index;
+	UpdateChildren();
 }
 
-bool UBNMainMenuWidget::Initialize()
+void UBNMainMenuWidget::UpdateChildren()
 {
-	bool SuperSuccess = Super::Initialize();
-	if (!SuperSuccess) return false;
+	for (int32 i = 0; i < SessionList->GetChildrenCount(); ++i)
+	{
+		auto Session = Cast<UBNSessionList>(SessionList->GetChildAt(i));
+		if (Session == nullptr) return;
 
-	// 버튼 클릭 델리게이트 바인딩
-	if (Btn_Host == nullptr) return false;
-	Btn_Host->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedHost);
-
-	if (Btn_Join == nullptr) return false;
-	Btn_Join->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedJoin);
-
-	if (Btn_Cancel == nullptr) return false;
-	Btn_Cancel->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedCancel);
-
-	if (Btn_Join_To == nullptr) return false;
-	Btn_Join_To->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedJoinTo);
-
-	if (Btn_Quit == nullptr) return false;
-	Btn_Quit->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedQuit);
-	
-	return true;
+		Session->Selected = (SelectedIndex.IsSet() && SelectedIndex.GetValue() == i);
+	}
 }
 
 void UBNMainMenuWidget::Setup()
@@ -112,43 +134,60 @@ void UBNMainMenuWidget::CloseMenu()
 	PlayerController->bShowMouseCursor = false;
 }
 
+
 void UBNMainMenuWidget::OnClickedHost()
 {
+	if (MenuSwitcher == nullptr) return;
+	if (HostMenu == nullptr) return;
+
+	MenuSwitcher->SetActiveWidget(HostMenu);
+}
+
+void UBNMainMenuWidget::OnClickedHostAs()
+{
 	if (MainMenuInterface == nullptr) return;
-	MainMenuInterface->Host();
+
+	FString SessionName = SessionHostName->Text.ToString();
+	MainMenuInterface->Host(SessionName);
 }
 
 void UBNMainMenuWidget::OnClickedJoin()
 {
-	if (SelectedIndex.IsSet())
-	{
-		UE_LOG(LogTemp, Display, TEXT("Selected Index : %d"), SelectedIndex.GetValue());
-	}
 	if (MainMenuInterface == nullptr) return;
+	if (MenuSwitcher == nullptr) return;
 	if (JoinMenu == nullptr) return;
 
 	MenuSwitcher->SetActiveWidget(JoinMenu);
 	MainMenuInterface->RefreshSessionList();
 }
 
-void UBNMainMenuWidget::OnClickedCancel()
+void UBNMainMenuWidget::OnClickedJoinTo()
 {
+	if (SelectedIndex.IsSet() && MainMenuInterface != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Selected Index: %d"), SelectedIndex.GetValue());
+		MainMenuInterface->Join(SelectedIndex.GetValue());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Not Selected Index"));
+	}
+}
+
+void UBNMainMenuWidget::OnClickedBack()
+{
+	if (MenuSwitcher == nullptr) return;
 	if (MainMenu == nullptr) return;
 
 	MenuSwitcher->SetActiveWidget(MainMenu);
 }
 
-void UBNMainMenuWidget::OnClickedJoinTo()
+void UBNMainMenuWidget::OnClickedCancel()
 {
-	if (SelectedIndex.IsSet() && MainMenuInterface != nullptr)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Selected Index: %d"), SelectedIndex.GetValue());
-		MainMenuInterface->Join(SelectedIndex.GetValue());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Display, TEXT("Not Selected Index"));
-	}
+	if (MenuSwitcher == nullptr) return;
+	if (MainMenu == nullptr) return;
+
+	MenuSwitcher->SetActiveWidget(MainMenu);
 }
 
 void UBNMainMenuWidget::OnClickedQuit()
