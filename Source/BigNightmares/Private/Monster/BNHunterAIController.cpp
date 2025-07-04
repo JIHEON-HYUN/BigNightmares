@@ -19,6 +19,10 @@ void ABNHunterAIController::SetupPerception()
 		UE_LOG(LogTemp, Error, TEXT("[HunterAI] SetupPerception 실패 - 컴포넌트 누락"));
 		return;
 	}
+	else
+	{
+	    UE_LOG(LogTemp, Error, TEXT("[HunterAI] SetupPerception 성공"));
+	}
 
 	// 시야 설정
 	SightConfig->SightRadius = 1500.f;
