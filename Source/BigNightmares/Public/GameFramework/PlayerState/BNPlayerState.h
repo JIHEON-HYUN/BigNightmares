@@ -22,7 +22,7 @@ class BIGNIGHTMARES_API ABNPlayerState : public APlayerState, public IAbilitySys
 public:
 	ABNPlayerState();
 	virtual UBNBaseAbilitySystemComponent* GetAbilitySystemComponent() const override;
-
+	
 	FORCEINLINE UBNBaseAbilitySystemComponent* GetBNBaseAbilitySystemComponent() const { return BNBaseAbilitySystemComponent.Get(); }
 	FORCEINLINE UBNTarotCardAttributeSet* GetBNBaseAttributeSet() const {return BNBaseAttributeSet;}
 

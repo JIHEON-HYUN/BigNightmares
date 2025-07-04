@@ -42,18 +42,32 @@ void UBNTarotCardAttributeSet::PreAttributeChange(const FGameplayAttribute& Attr
 		if (AttributeAbilitySystemComponent)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("AttributeSetCheck2"));
+			
 			FGameplayTagContainer ActiveTags;
 			AttributeAbilitySystemComponent->GetOwnedGameplayTags(ActiveTags);
+
+			int32& Count = AttributeChangeCount.FindOrAdd(Attribute);
+			
 			if (ActiveTags.HasTag(BaseGamePlayTags::Effect_Item_TarotCard_MoveSpeed))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("AttributeSetCheck3"));
-				ChangeMoveSpeed(NewValue);
+				if (Count == 0)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("AttributeSetCheck3"));
+					ChangeMoveSpeed(NewValue);
+					Count++;
+				}
+				else if (Count == 1)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("AttributeSetCheck4"));
+					ChangeMoveSpeed(NewValue);
+					Count = 0;
+				}
 			}
 		}
 	}
 }
 
-void UBNTarotCardAttributeSet::ChangeMoveSpeed(float NewSpeed)
+void UBNTarotCardAttributeSet::ChangeMoveSpeed(float NewSpeed, int32 Count)
 {
 	//float NewSpeed = GetMoveSpeed();
 	UE_LOG(LogTemp, Warning, TEXT("ChangeMoveSpeed NewSpeed: %f"), NewSpeed);
@@ -61,7 +75,7 @@ void UBNTarotCardAttributeSet::ChangeMoveSpeed(float NewSpeed)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ChangeMoveSpeed Owner: %s"), *GetNameSafe(Owner));
 		UE_LOG(LogTemp, Warning, TEXT("Owner class: %s"), Owner ? *Owner->GetClass()->GetName() : TEXT("nullptr"));
-		if (ACharacter* Character = Cast<ABNMonoCharacter>(Owner))
+		if (ABNMonoCharacter* Character = Cast<ABNMonoCharacter>(Owner))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Old MaxWalkSpeed: %f"), Character->GetCharacterMovement()->MaxWalkSpeed);
 			Character->GetCharacterMovement()->MaxWalkSpeed = NewSpeed;

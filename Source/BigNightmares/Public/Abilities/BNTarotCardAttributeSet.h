@@ -50,10 +50,14 @@ public:
 	ATTRIBUTE_ACCESSORS(UBNTarotCardAttributeSet, MoveSpeedDownMultiplier)
 #pragma endregion
 
+private:
+	UPROPERTY()
+	TMap<FGameplayAttribute, int32> AttributeChangeCount;
+
 public:
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 
-	void ChangeMoveSpeed(float NewSpeed);
+	void ChangeMoveSpeed(float NewSpeed,int32 Count = 0);
 
 };

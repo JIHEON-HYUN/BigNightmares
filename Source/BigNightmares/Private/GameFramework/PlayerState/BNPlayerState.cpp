@@ -4,16 +4,18 @@
 #include "GameFramework/PlayerState/BNPlayerState.h"
 
 #include "Abilities/BNBaseAbilitySystemComponent.h"
-#include "Abilities/BNBaseAttributeSet.h"
 #include "Abilities/BNTarotCardAttributeSet.h"
 
 ABNPlayerState::ABNPlayerState()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ABNPlayerState Constructor Called"));
-
+	NetUpdateFrequency = 100.f;     //초당 최대 네트워크 상태 업데이트 횟수
+	MinNetUpdateFrequency = 60.f;	//상황에 따라 줄어들더라도 유지할 최소 업데이트 횟수 (최소 보장)
+	
 	BNBaseAbilitySystemComponent = Cast<UBNBaseAbilitySystemComponent>(
 		CreateDefaultSubobject<UBNBaseAbilitySystemComponent>(TEXT("BNBaseAbilitySystemComponent"))
 	);
+	BNBaseAbilitySystemComponent->SetIsReplicated(true);	//네트워크에서 복제 되도록 설정
+	BNBaseAbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed); //
 
 	BNBaseAttributeSet = NewObject<UBNTarotCardAttributeSet>(BNBaseAbilitySystemComponent, UBNTarotCardAttributeSet::StaticClass());
 	

@@ -49,16 +49,25 @@ protected:
 #pragma endregion
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
-	TObjectPtr<UInventoryComponent> InventoryComponent;
-
+#pragma region ASC
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UBNBaseAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UBNTarotCardAttributeSet> TarotCardAttributeSet;
+	TObjectPtr<class UBNTarotCardAttributeSet> MonoCharacterAttributeSet;
+
+	UFUNCTION()
+	UBNBaseAbilitySystemComponent* GetAbilitySystemComponent();
+
+	void InitAbilityActorInfo();
+#pragma endregion
+	
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
+	TObjectPtr<UInventoryComponent> InventoryComponent;
 
 protected:
 	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
 	
 };

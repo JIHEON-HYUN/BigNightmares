@@ -79,14 +79,14 @@ void ABNMonoCharacter::BeginPlay()
 	if (ABNPlayerState* PS = GetPlayerState<ABNPlayerState>())
 	{
 		AbilitySystemComponent = PS->GetAbilitySystemComponent();
-		TarotCardAttributeSet = PS->GetBNBaseAttributeSet();
+		MonoCharacterAttributeSet = PS->GetBNBaseAttributeSet();
 
-		if (AbilitySystemComponent && TarotCardAttributeSet)
+		if (AbilitySystemComponent && MonoCharacterAttributeSet)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("AbilitySystemComponent or TarotCardAttributeSet is in BeginPlay"));
 			AbilitySystemComponent->InitAbilityActorInfo(PS, this);
-			AbilitySystemComponent->AddAttributeSetSubobject(TarotCardAttributeSet.Get());
-			TarotCardAttributeSet->Init(AbilitySystemComponent);			
+			AbilitySystemComponent->AddAttributeSetSubobject(MonoCharacterAttributeSet.Get());
+			MonoCharacterAttributeSet->Init(AbilitySystemComponent);			
 		}
 		else
 		{
@@ -116,7 +116,7 @@ void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void ABNMonoCharacter::Input_Move(const FInputActionValue& InputActionValue)
 {
 	const FVector2D MovementVector = InputActionValue.Get<FVector2D>();
-	const FRotator MovementRotation(0.f,-180.f, 0.f); 
+	const FRotator MovementRotation(0.f,-180.f, 0.f);
 
 	if (MovementVector.Y != 0.f)
 	{
@@ -141,7 +141,6 @@ void ABNMonoCharacter::Input_UseItem(const FInputActionValue& InputActionValue)
 {
 	
 	FName ItemID;
-
 	UE_LOG(LogTemp,Warning, TEXT("Check1"));
 	if (!InventoryComponent || !AbilitySystemComponent) return;
 
@@ -202,7 +201,8 @@ void ABNMonoCharacter::Input_UseItem(const FInputActionValue& InputActionValue)
 			UE_LOG(LogTemp, Warning, TEXT("ItemGameplayAbility == True"));
 
 			FGameplayAbilitySpec AbilitySpec(ItemInfo->ItemGameplayAbility, 1, -1);
-			//AbilitySpec.DynamicGrantedTags.AddTag(ItemInfo->ItemEffectTag);
+			AbilitySystemComponent->AddLooseGameplayTag( ItemInfo->ItemEffectTag);
+			//AbilitySystemComponent->AddReplicatedLooseGameplayTag( ItemInfo->ItemEffectTag);
 			FGameplayAbilitySpecHandle AbilitySpecHandle = AbilitySystemComponent->GiveAbility(AbilitySpec);
 
 			if (AbilitySpecHandle.IsValid())
@@ -246,10 +246,35 @@ void ABNMonoCharacter::Input_UseItem(const FInputActionValue& InputActionValue)
 
 }
 
+UBNBaseAbilitySystemComponent* ABNMonoCharacter::GetAbilitySystemComponent()
+{
+	return AbilitySystemComponent;
+}
+
+void ABNMonoCharacter::InitAbilityActorInfo()
+{
+	if (ABNPlayerState* BNPlayerState = GetPlayerState<ABNPlayerState>())
+	{
+		AbilitySystemComponent = BNPlayerState->GetBNBaseAbilitySystemComponent();
+		MonoCharacterAttributeSet = BNPlayerState->GetBNBaseAttributeSet();
+
+		if (IsValid(AbilitySystemComponent))
+		{
+			AbilitySystemComponent->InitAbilityActorInfo(BNPlayerState, this);
+		}
+	}
+}
+
 void ABNMonoCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
+	if (HasAuthority())
+	{
+		InitAbilityActorInfo();
+	}
+
+	//아래는 내 코드
 	if (GetBNBaseAbilitySystemComponent() && GetBNBaseAttributeSet())
 	{
 		const FString AppendString = FString::Printf(TEXT("Owner Actor: %s, AvatarActor: %s"),
@@ -258,4 +283,11 @@ void ABNMonoCharacter::PossessedBy(AController* NewController)
 
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *AppendString);
 	}
+}
+
+void ABNMonoCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	
+	InitAbilityActorInfo();
 }
