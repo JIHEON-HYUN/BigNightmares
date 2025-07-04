@@ -145,6 +145,7 @@ void UBNGameInstance::CreateSession()
 		// Presence 세션으로 등록되서, Presence 기반 search에 노출됨
 		SessionSettings.bUsesPresence = true;
 		SessionSettings.bUseLobbiesIfAvailable = true;
+		SessionSettings.bAllowJoinInProgress = true;
 		SessionSettings.Set(SESSION_NAME_SETTINGS_KEY, DesiredSessionName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 		
 		// CreateSession
