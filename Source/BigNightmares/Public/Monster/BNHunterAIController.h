@@ -7,6 +7,7 @@
 #include "BNHunterAIController.generated.h"
 
 class UAISenseConfig_Sight;
+
 /**
  * 
  */
@@ -19,11 +20,11 @@ public:
 	ABNHunterAIController();
 
 protected:
-	virtual void BeginPlay() override;
+	virtual void SetupPerception() override;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	TObjectPtr<UAISenseConfig_Sight> SightConfig;
 
-	// ===============================
-	// 감지 구성
-	// ===============================
-	UPROPERTY()
-	UAISenseConfig_Sight* SightConfig;
+	UFUNCTION()
+	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 };

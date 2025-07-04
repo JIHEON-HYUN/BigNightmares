@@ -6,36 +6,47 @@
 
 ABNHunterAIController::ABNHunterAIController()
 {
-	// ===============================
-	// AI 감지 시스템 구성
-	// ===============================
-
-	// PerceptionComponent 생성 및 AIController에 연결
-	UAIPerceptionComponent* Perception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
-	SetPerceptionComponent(*Perception);
-
-	// 시야 감지 구성 생성 및 설정
+	// Perception Component 생성
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-	SightConfig->SightRadius = 1200.f;
-	SightConfig->LoseSightRadius = 1500.f;
+}
+
+void ABNHunterAIController::SetupPerception()
+{
+	Super::SetupPerception();
+
+	if (!SightConfig || !AIPerceptionComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[HunterAI] SetupPerception 실패 - 컴포넌트 누락"));
+		return;
+	}
+
+	// 시야 설정
+	SightConfig->SightRadius = 1500.f;
+	SightConfig->LoseSightRadius = 1800.f;
 	SightConfig->PeripheralVisionAngleDegrees = 90.f;
 	SightConfig->SetMaxAge(5.f);
-
-	// 감지 대상 설정: 적만 감지
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = false;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = false;
 
-	// 시야 감지를 PerceptionComponent에 적용
-	Perception->ConfigureSense(*SightConfig);
-	Perception->SetDominantSense(SightConfig->GetSenseImplementation());
+	// Perception 구성
+	AIPerceptionComponent->ConfigureSense(*SightConfig);
+	AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
+
+	// 감지 이벤트 바인딩
+	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABNHunterAIController::OnTargetPerceptionUpdated);
+
+	UE_LOG(LogTemp, Log, TEXT("[HunterAI] SetupPerception 완료"));
 }
 
-void ABNHunterAIController::BeginPlay()
+void ABNHunterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	Super::BeginPlay();
-
-	// ===============================
-	// BeginPlay 로직 (필요 시 추가)
-	// ===============================
+	if (Stimulus.WasSuccessfullySensed())
+	{
+		UE_LOG(LogTemp, Log, TEXT("[HunterAI] Actor %s 감지됨!"), *Actor->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("[HunterAI] Actor %s 시야에서 사라짐"), *Actor->GetName());
+	}
 }
