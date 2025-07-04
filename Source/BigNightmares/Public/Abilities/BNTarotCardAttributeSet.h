@@ -9,6 +9,8 @@
 /**
  * 
  */
+
+//TODO(NOTE) : UBNTarotCardAttributeSet이름 > UBNMonoCharacterAttributeSet 이었어야함.
 UCLASS()
 class BIGNIGHTMARES_API UBNTarotCardAttributeSet : public UBNBaseAttributeSet
 {
@@ -25,14 +27,14 @@ public:
 
 	void Init(UBNBaseAbilitySystemComponent* InASC);
 
-#pragma region MoveSpeedCard
+#pragma region MoveSpeedUpCard
 	UPROPERTY(BlueprintReadOnly, Category="Status")
 	FGameplayAttributeData MoveSpeed;
 	ATTRIBUTE_ACCESSORS(UBNTarotCardAttributeSet, MoveSpeed)
 
 	UPROPERTY(BlueprintReadOnly, Category="Status")
-	FGameplayAttributeData MoveSpeedMultiplier;
-	ATTRIBUTE_ACCESSORS(UBNTarotCardAttributeSet, MoveSpeedMultiplier)
+	FGameplayAttributeData MoveSpeedUpMultiplier;
+	ATTRIBUTE_ACCESSORS(UBNTarotCardAttributeSet, MoveSpeedUpMultiplier)
 
 	UPROPERTY(BlueprintReadOnly, Category="Status")
 	FGameplayAttributeData SpeedBuffDuration;
@@ -40,6 +42,12 @@ public:
 
 	UPROPERTY()
 	bool bShouldApplyMoveSpeed;
+#pragma endregion
+
+#pragma region MoveSpeedDownCard
+	UPROPERTY(BlueprintReadOnly, Category="Status")
+	FGameplayAttributeData MoveSpeedDownMultiplier;
+	ATTRIBUTE_ACCESSORS(UBNTarotCardAttributeSet, MoveSpeedDownMultiplier)
 #pragma endregion
 
 public:

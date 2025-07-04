@@ -11,7 +11,8 @@ UBNTarotCardAttributeSet::UBNTarotCardAttributeSet()
 {
 	InitSpeedBuffDuration(5.f);
 	InitMoveSpeed(200.f);
-	InitMoveSpeedMultiplier(10.f); // 1.3f 를 기본으로
+	InitMoveSpeedUpMultiplier(10.f); // 1.3f 를 기본으로
+	InitMoveSpeedDownMultiplier(0.5f);
 }
 
 void UBNTarotCardAttributeSet::Init(UBNBaseAbilitySystemComponent* InASC)
@@ -43,7 +44,6 @@ void UBNTarotCardAttributeSet::PreAttributeChange(const FGameplayAttribute& Attr
 			UE_LOG(LogTemp, Warning, TEXT("AttributeSetCheck2"));
 			FGameplayTagContainer ActiveTags;
 			AttributeAbilitySystemComponent->GetOwnedGameplayTags(ActiveTags);
-
 			if (ActiveTags.HasTag(BaseGamePlayTags::Effect_Item_TarotCard_MoveSpeed))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("AttributeSetCheck3"));

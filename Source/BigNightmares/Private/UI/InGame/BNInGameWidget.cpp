@@ -12,7 +12,7 @@ void UBNInGameWidget::InitWithItemData(const UBNBaseItemDataAsset* InItemData)
 
 	if (InItemData->ItemInfoList[0].ItemID == FName("0"))
 	{
-		Image_TarotCard->SetBrushFromTexture(InItemData->ItemInfoList[0].ItemIcon);
+		Image_TarotCard->SetBrushFromTexture(InItemData->ItemInfoList[1].ItemIcon);
 	}
 	else
 	{

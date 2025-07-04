@@ -23,7 +23,7 @@
 
 ABNMonoCharacter::ABNMonoCharacter()
 {
-	GetCapsuleComponent()->InitCapsuleSize(25.0f, 10.f);
+	GetCapsuleComponent()->InitCapsuleSize(10.f, 25.f);
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
@@ -83,7 +83,7 @@ void ABNMonoCharacter::BeginPlay()
 
 		if (AbilitySystemComponent && TarotCardAttributeSet)
 		{
-			UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent or TarotCardAttributeSet is in BeginPlay"));
+			UE_LOG(LogTemp, Warning, TEXT("AbilitySystemComponent or TarotCardAttributeSet is in BeginPlay"));
 			AbilitySystemComponent->InitAbilityActorInfo(PS, this);
 			AbilitySystemComponent->AddAttributeSetSubobject(TarotCardAttributeSet.Get());
 			TarotCardAttributeSet->Init(AbilitySystemComponent);			
@@ -159,6 +159,8 @@ void ABNMonoCharacter::Input_UseItem(const FInputActionValue& InputActionValue)
 	UE_LOG(LogTemp,Warning, TEXT("Check3"));
 	if (!ItemInfo->ItemGameplayEffect) return;
 	UE_LOG(LogTemp,Warning, TEXT("Check4"));
+
+/*
 	// GE 적용 준비
 	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 	FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(ItemInfo->ItemGameplayEffect, 1.0f, EffectContext);
@@ -171,21 +173,77 @@ void ABNMonoCharacter::Input_UseItem(const FInputActionValue& InputActionValue)
 		
 		UE_LOG(LogTemp, Warning, TEXT("TAG NAME : %s"), *ItemInfo->ItemEffectTag.ToString());
 
-		if (ItemInfo->UseType == EBNItemUseType::UseImmediately)
+		// GA를 통한 어빌과 GE만을 사용하는 어빌
+		if (ItemInfo->GAUseType == EGAUsage::UseGA)
+		{
+			if (ItemInfo->ItemGameplayAbility)
+			{
+				
+			}
+			UE_LOG(LogTemp, Warning, TEXT("EGAUsage UseGA"));			
+		}
+		else if (ItemInfo->GAUseType == EGAUsage::SkipGA)
 		{
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
-			UE_LOG(LogTemp, Warning, TEXT("즉발성 아이템"));			
+			UE_LOG(LogTemp, Warning, TEXT("EGAUsage SkipGA"));			
 		}
-		else if (ItemInfo->UseType == EBNItemUseType::StoreAndUseLater)
+	}
+*/
+
+	UE_LOG(LogTemp, Warning, TEXT("ASC AvatarActor: %s"), *GetNameSafe(AbilitySystemComponent->GetAvatarActor()));
+	UE_LOG(LogTemp, Warning, TEXT("ASC OwnerActor: %s"), *GetNameSafe(AbilitySystemComponent->GetOwnerActor()));
+	UE_LOG(LogTemp, Warning, TEXT("TAG NAME : %s"), *ItemInfo->ItemEffectTag.ToString());
+	
+	// GA를 통한 어빌과 GE만을 사용하는 어빌
+	if (ItemInfo->GAUseType == EGAUsage::UseGA)
+	{
+		if (ItemInfo->ItemGameplayAbility)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("인벤토리 보관가능 아이템"));
+			UE_LOG(LogTemp, Warning, TEXT("ItemGameplayAbility == True"));
+
+			FGameplayAbilitySpec AbilitySpec(ItemInfo->ItemGameplayAbility, 1, -1);
+			//AbilitySpec.DynamicGrantedTags.AddTag(ItemInfo->ItemEffectTag);
+			FGameplayAbilitySpecHandle AbilitySpecHandle = AbilitySystemComponent->GiveAbility(AbilitySpec);
+
+			if (AbilitySpecHandle.IsValid())
+			{
+				AbilitySystemComponent->TryActivateAbility(AbilitySpecHandle);
+			}
+
+			InventoryComponent->RemoveItem(ItemID);
 		}
-		// (선택) 아이템 소모 처리 등
-		InventoryComponent->RemoveItem(ItemID);
+		UE_LOG(LogTemp, Warning, TEXT("EGAUsage UseGA"));			
+	}
+	else if (ItemInfo->GAUseType == EGAUsage::SkipGA)
+	{
+		// GE 적용 준비
+		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+		FGameplayEffectSpecHandle EffectSpecHandle = AbilitySystemComponent->MakeOutgoingSpec(ItemInfo->ItemGameplayEffect, 1.0f, EffectContext);
+		EffectSpecHandle.Data->DynamicGrantedTags.AddTag(ItemInfo->ItemEffectTag);
+		if (EffectSpecHandle.IsValid())
+		{
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+			UE_LOG(LogTemp, Warning, TEXT("EGAUsage SkipGA"));
+
+			InventoryComponent->RemoveItem(ItemID);
+		}
 	}
 
+
+		
+	//아이템을 습득할 때 나눌 예정.
+	// if (ItemInfo->UseType == EBNCardEffectTrigger::UseImmediately)
+	// {
+	// 	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+	// 	UE_LOG(LogTemp, Warning, TEXT("즉발성 아이템"));			
+	// }
+	// else if (ItemInfo->UseType == EBNCardEffectTrigger::StoreAndUseLater)
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("인벤토리 보관가능 아이템"));
+	// }
 	float Temp = GetCharacterMovement()->GetMaxSpeed();
 	UE_LOG(LogTemp,Warning, TEXT("MAX SPEED %.f"), Temp);
+
 }
 
 void ABNMonoCharacter::PossessedBy(AController* NewController)
