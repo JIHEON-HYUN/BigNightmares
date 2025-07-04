@@ -37,6 +37,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void RefreshSessionList() override;
 
+	void StartSession();
+
 private:
 	TSubclassOf<class UUserWidget> MainMenuClass;
 	class UBNMainMenuWidget* MainMenuWidget;
@@ -53,6 +55,7 @@ private:
 		// Dynamic이 아닌 일반 델리게이트이므로, UFUNCTION() 등록 안해도 됨
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+	void OnNetworkFailure(UWorld * World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString = TEXT(""));
 	void OnFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 };

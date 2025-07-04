@@ -120,7 +120,7 @@ void UBNMainMenuWidget::Setup()
 void UBNMainMenuWidget::CloseMenu()
 {
 	// 메인 메뉴 화면에서 지우기
-	this->RemoveFromViewport();
+	this->RemoveFromParent();
 	
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
@@ -146,8 +146,9 @@ void UBNMainMenuWidget::OnClickedHost()
 void UBNMainMenuWidget::OnClickedHostAs()
 {
 	if (MainMenuInterface == nullptr) return;
+	if (SessionHostName == nullptr) return;
 
-	FString SessionName = SessionHostName->Text.ToString();
+	FString SessionName = SessionHostName->GetText().ToString();
 	MainMenuInterface->Host(SessionName);
 }
 

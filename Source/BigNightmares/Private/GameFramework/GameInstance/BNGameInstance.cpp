@@ -46,6 +46,11 @@ void UBNGameInstance::Init()
 			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UBNGameInstance::OnJoinSessionComplete);
 		}
 	}
+
+	if (GEngine != nullptr)
+	{
+		GEngine->OnNetworkFailure().AddUObject(this, &UBNGameInstance::OnNetworkFailure);
+	}
 }
 
 void UBNGameInstance::Host(FString SessionName)
@@ -153,6 +158,14 @@ void UBNGameInstance::CreateSession()
 	}
 }
 
+void UBNGameInstance::StartSession()
+{
+	if (SessionInterface.IsValid())
+	{
+		SessionInterface->StartSession(SESSION_NAME);
+	}
+}
+
 void UBNGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
 	if (!bWasSuccessful)
@@ -180,6 +193,12 @@ void UBNGameInstance::OnDestroySessionComplete(FName SessionName, bool bWasSucce
 	{
 		CreateSession();
 	}
+}
+
+void UBNGameInstance::OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType,
+	const FString& ErrorString)
+{
+	LoadMainMenu();
 }
 
 void UBNGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
@@ -233,3 +252,4 @@ void UBNGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCom
 		// TRAVEL_Relative - 상대 경로 기반 이동 (거의 사용 안됨)
 	PlayerController->ClientTravel(Address, TRAVEL_Absolute);
 }
+
