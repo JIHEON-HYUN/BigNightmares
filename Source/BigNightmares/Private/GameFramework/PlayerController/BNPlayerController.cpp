@@ -3,3 +3,9 @@
 
 #include "GameFramework/PlayerController/BNPlayerController.h"
 
+#include "Blueprint/UserWidget.h"
+
+void ABNPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+}
