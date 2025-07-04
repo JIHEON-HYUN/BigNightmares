@@ -13,7 +13,8 @@ void ABNLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	{
 		UWorld* World = GetWorld();
 		if (World == nullptr) return;
-		
+
+		bUseSeamlessTravel = true;
 		World->ServerTravel("/Game/Levels/L_InGame?listen");
 	}
 }

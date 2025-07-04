@@ -12,7 +12,7 @@
 
 #include "UI/MainMenu/BNMainMenuWidget.h"
 
-const static FName SESSION_NAME = TEXT("My Session Game");
+const static FName SESSION_NAME = TEXT("GameSession");
 const static FName SESSION_NAME_SETTINGS_KEY = TEXT("SessionName");
 
 UBNGameInstance::UBNGameInstance(const FObjectInitializer& ObjectInitializer)
