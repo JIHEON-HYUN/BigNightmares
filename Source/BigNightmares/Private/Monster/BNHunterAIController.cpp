@@ -21,9 +21,9 @@ void ABNHunterAIController::SetupPerception()
 	}
 	else
 	{
-	    UE_LOG(LogTemp, Error, TEXT("[HunterAI] SetupPerception 성공"));
+		UE_LOG(LogTemp, Error, TEXT("[HunterAI] SetupPerception 성공"));
 	}
-
+	
 	// 시야 설정
 	SightConfig->SightRadius = 1500.f;
 	SightConfig->LoseSightRadius = 1800.f;
@@ -41,6 +41,7 @@ void ABNHunterAIController::SetupPerception()
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABNHunterAIController::OnTargetPerceptionUpdated);
 
 	UE_LOG(LogTemp, Log, TEXT("[HunterAI] SetupPerception 완료"));
+	
 }
 
 void ABNHunterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
