@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "BNInGameWidget.generated.h"
 
+class UBNBaseItemDataAsset;
+class UImage;
 /**
  * 
  */
@@ -13,5 +15,11 @@ UCLASS()
 class BIGNIGHTMARES_API UBNInGameWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
+public:
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> Image_TarotCard;
+
+	UFUNCTION(BlueprintCallable)
+	void InitWithItemData(const UBNBaseItemDataAsset* InItemData);
 };

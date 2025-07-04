@@ -3,21 +3,27 @@
 
 #include "Player/BNMonoCharacter.h"
 
+#include "Abilities/BNBaseAbilitySystemComponent.h"
+#include "Abilities/BNBaseAttributeSet.h"
+#include "Abilities/BNTarotCardAttributeSet.h"
+#include "Animation/AnimInstance/BNMonoAnimInstance.h"
 #include "BaseGamePlayTags.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "Animation/AnimInstance/BNCharacterAnimInstance.h"
-#include "Animation/AnimInstance/BNMonoAnimInstance.h"
 #include "DataAsset/Input/DataAsset_InputConfig_Player.h"
+#include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameplayEffectTypes.h"
+#include "GameplayTagContainer.h"
+#include "GameFramework/PlayerState/BNPlayerState.h"
 #include "Input/BNBaseEnhancedInputComponent.h"
+#include "Player/InventoryComponent.h"
 
 
 ABNMonoCharacter::ABNMonoCharacter()
 {
-	GetCapsuleComponent()->InitCapsuleSize(25.0f, 10.f);
+	GetCapsuleComponent()->InitCapsuleSize(10.f, 25.f);
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
@@ -25,6 +31,7 @@ ABNMonoCharacter::ABNMonoCharacter()
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->bDoCollisionTest = false;
 	CameraBoom->TargetArmLength = 300.f;
 	CameraBoom->bUsePawnControlRotation = false;
 	CameraBoom->SetUsingAbsoluteRotation(true);
@@ -33,7 +40,7 @@ ABNMonoCharacter::ABNMonoCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
-
+	
 	GetCharacterMovement()->bOrientRotationToMovement = true; //캐릭터가 이동하는 방향으로 자동으로 회전
 	GetCharacterMovement()->RotationRate = FRotator(0.f,360.f,0.f); //캐릭터의 회전 속도, 360 => 1초에 한 바퀴
 	//TODO(NOTE): 이동속도 변경을 원하면 해당 수치 조절
@@ -58,6 +65,34 @@ ABNMonoCharacter::ABNMonoCharacter()
 	{
 		GetMesh()->SetAnimInstanceClass(ABP_BNMonoAnimInstance.Class);
 	}
+
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+}
+
+void ABNMonoCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	/**
+	 *   PlayerState에서 관리해야 서버통신에 사용할 수 있어서 ASC와 Attirubute생성을 PlayerState에서 하고 플레이어에 가져와 사용
+	 **/
+	if (ABNPlayerState* PS = GetPlayerState<ABNPlayerState>())
+	{
+		AbilitySystemComponent = PS->GetAbilitySystemComponent();
+		TarotCardAttributeSet = PS->GetBNBaseAttributeSet();
+
+		if (AbilitySystemComponent && TarotCardAttributeSet)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AbilitySystemComponent or TarotCardAttributeSet is in BeginPlay"));
+			AbilitySystemComponent->InitAbilityActorInfo(PS, this);
+			AbilitySystemComponent->AddAttributeSetSubobject(TarotCardAttributeSet.Get());
+			TarotCardAttributeSet->Init(AbilitySystemComponent);			
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent or TarotCardAttributeSet is null in BeginPlay"));
+		}
+	}
 }
 
 void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -73,6 +108,7 @@ void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	UBNBaseEnhancedInputComponent* BaseEnhancedInputComponent = CastChecked<UBNBaseEnhancedInputComponent>(PlayerInputComponent);
 	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Move,ETriggerEvent::Triggered, this,&ABNMonoCharacter::Input_Move);
+	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_UseItem, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_UseItem);
 	//TODO(NOTE): Look의 동작이 정해진다면 활성화
 	//BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Look, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Look);
 }
@@ -99,4 +135,127 @@ void ABNMonoCharacter::Input_Move(const FInputActionValue& InputActionValue)
 void ABNMonoCharacter::Input_Look(const FInputActionValue& InputActionValue)
 {
 	
+}
+
+void ABNMonoCharacter::Input_UseItem(const FInputActionValue& InputActionValue)
+{
+	
+	FName ItemID;
+
+	UE_LOG(LogTemp,Warning, TEXT("Check1"));
+	if (!InventoryComponent || !AbilitySystemComponent) return;
+
+	if (InventoryComponent->OwnedItemID.Num() == 0) return;
+
+	for (const TPair<FName, int>& ItemInfo : InventoryComponent->OwnedItemID)
+	{
+		ItemID = ItemInfo.Key;
+		break;
+	}
+	
+	UE_LOG(LogTemp,Warning, TEXT("Check2"));
+	const FBNItemInfo* ItemInfo = InventoryComponent->GetItemInfo(ItemID);
+	if (!ItemInfo) return;
+	UE_LOG(LogTemp,Warning, TEXT("Check3"));
+	if (!ItemInfo->ItemGameplayEffect) return;
+	UE_LOG(LogTemp,Warning, TEXT("Check4"));
+
+/*
+	// GE 적용 준비
+	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+	FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(ItemInfo->ItemGameplayEffect, 1.0f, EffectContext);
+	SpecHandle.Data->DynamicGrantedTags.AddTag(ItemInfo->ItemEffectTag);
+
+	if (SpecHandle.IsValid())		
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ASC AvatarActor: %s"), *GetNameSafe(AbilitySystemComponent->GetAvatarActor()));
+		UE_LOG(LogTemp, Warning, TEXT("ASC OwnerActor: %s"), *GetNameSafe(AbilitySystemComponent->GetOwnerActor()));
+		
+		UE_LOG(LogTemp, Warning, TEXT("TAG NAME : %s"), *ItemInfo->ItemEffectTag.ToString());
+
+		// GA를 통한 어빌과 GE만을 사용하는 어빌
+		if (ItemInfo->GAUseType == EGAUsage::UseGA)
+		{
+			if (ItemInfo->ItemGameplayAbility)
+			{
+				
+			}
+			UE_LOG(LogTemp, Warning, TEXT("EGAUsage UseGA"));			
+		}
+		else if (ItemInfo->GAUseType == EGAUsage::SkipGA)
+		{
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+			UE_LOG(LogTemp, Warning, TEXT("EGAUsage SkipGA"));			
+		}
+	}
+*/
+
+	UE_LOG(LogTemp, Warning, TEXT("ASC AvatarActor: %s"), *GetNameSafe(AbilitySystemComponent->GetAvatarActor()));
+	UE_LOG(LogTemp, Warning, TEXT("ASC OwnerActor: %s"), *GetNameSafe(AbilitySystemComponent->GetOwnerActor()));
+	UE_LOG(LogTemp, Warning, TEXT("TAG NAME : %s"), *ItemInfo->ItemEffectTag.ToString());
+	
+	// GA를 통한 어빌과 GE만을 사용하는 어빌
+	if (ItemInfo->GAUseType == EGAUsage::UseGA)
+	{
+		if (ItemInfo->ItemGameplayAbility)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ItemGameplayAbility == True"));
+
+			FGameplayAbilitySpec AbilitySpec(ItemInfo->ItemGameplayAbility, 1, -1);
+			//AbilitySpec.DynamicGrantedTags.AddTag(ItemInfo->ItemEffectTag);
+			FGameplayAbilitySpecHandle AbilitySpecHandle = AbilitySystemComponent->GiveAbility(AbilitySpec);
+
+			if (AbilitySpecHandle.IsValid())
+			{
+				AbilitySystemComponent->TryActivateAbility(AbilitySpecHandle);
+			}
+
+			InventoryComponent->RemoveItem(ItemID);
+		}
+		UE_LOG(LogTemp, Warning, TEXT("EGAUsage UseGA"));			
+	}
+	else if (ItemInfo->GAUseType == EGAUsage::SkipGA)
+	{
+		// GE 적용 준비
+		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+		FGameplayEffectSpecHandle EffectSpecHandle = AbilitySystemComponent->MakeOutgoingSpec(ItemInfo->ItemGameplayEffect, 1.0f, EffectContext);
+		EffectSpecHandle.Data->DynamicGrantedTags.AddTag(ItemInfo->ItemEffectTag);
+		if (EffectSpecHandle.IsValid())
+		{
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+			UE_LOG(LogTemp, Warning, TEXT("EGAUsage SkipGA"));
+
+			InventoryComponent->RemoveItem(ItemID);
+		}
+	}
+
+
+		
+	//아이템을 습득할 때 나눌 예정.
+	// if (ItemInfo->UseType == EBNCardEffectTrigger::UseImmediately)
+	// {
+	// 	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+	// 	UE_LOG(LogTemp, Warning, TEXT("즉발성 아이템"));			
+	// }
+	// else if (ItemInfo->UseType == EBNCardEffectTrigger::StoreAndUseLater)
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("인벤토리 보관가능 아이템"));
+	// }
+	float Temp = GetCharacterMovement()->GetMaxSpeed();
+	UE_LOG(LogTemp,Warning, TEXT("MAX SPEED %.f"), Temp);
+
+}
+
+void ABNMonoCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (GetBNBaseAbilitySystemComponent() && GetBNBaseAttributeSet())
+	{
+		const FString AppendString = FString::Printf(TEXT("Owner Actor: %s, AvatarActor: %s"),
+			*GetBNBaseAbilitySystemComponent()->GetName(),
+			*GetBNBaseAttributeSet()->GetName());
+
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *AppendString);
+	}
 }
