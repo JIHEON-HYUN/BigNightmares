@@ -10,9 +10,9 @@ public class BigNightmares : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
-			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput"
-			,"GameplayAbilities", "GameplayTags", "GameplayTasks", "AnimGraphRuntime",
-			"OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemSteam"
+			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
+			"GameplayAbilities", "GameplayTags", "GameplayTasks", "AnimGraphRuntime",
+			"OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemSteam",
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", 
 			"GameplayTags", "GameplayTasks", "AnimGraphRuntime", "OnlineSubsystem", "OnlineSubsystemUtils", 
 			"OnlineSubsystemSteam", "AIModule"
