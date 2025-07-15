@@ -13,7 +13,6 @@
 void ABNGameState::AddLobbyPlayer(const FLobbyPlayerData& NewPlayer)
 {
 	LobbyPlayerDataList.Add(NewPlayer);
-	OnLobbyListUpdated.Broadcast(LobbyPlayerDataList);
 }
 
 void ABNGameState::RemoveLobbyPlayer(ABNPlayerState* ExitPlayerState)
@@ -22,7 +21,6 @@ void ABNGameState::RemoveLobbyPlayer(ABNPlayerState* ExitPlayerState)
 		{
 			return RemovePlayerData.PlayerName == ExitPlayerState->GetPlayerName();
 		});
-	OnLobbyListUpdated.Broadcast(LobbyPlayerDataList);
 }
 
 const TArray<FLobbyPlayerData>& ABNGameState::GetLobbyPlayers() const
@@ -32,22 +30,6 @@ const TArray<FLobbyPlayerData>& ABNGameState::GetLobbyPlayers() const
 
 void ABNGameState::OnRep_LobbyPlayerDataList()
 {
-	// // 클라이언트로 동기화되었을 때 UI 갱신
-	//
-	// UWorld* World = GetWorld();
-	// if (World == nullptr) return;
-	//
-	// APlayerController* LocalPC = World->GetFirstPlayerController();
-	// if (LocalPC == nullptr || !LocalPC->IsLocalController()) return;
-	//
-	// // 위젯 참조 시도
-	// auto BNController = Cast<ABNPlayerController>(LocalPC);
-	// if (BNController && BNController->LobbyWidget)
-	// {
-	// 	// GameState에서 현재 동기화된 리스트 전달
-	// 	BNController->LobbyWidget->SetPlayerList(LobbyPlayerDataList);
-	// }
-
 	OnLobbyListUpdated.Broadcast(LobbyPlayerDataList);
 }
 

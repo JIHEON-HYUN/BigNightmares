@@ -10,8 +10,11 @@ USTRUCT(BlueprintType)
 struct FLobbyPlayerData
 {
 	GENERATED_BODY()
-	
+
+	UPROPERTY(BlueprintReadWrite)
 	FString PlayerName;
+	
+	UPROPERTY(BlueprintReadWrite)
 	bool ReadyState;
 };
 
