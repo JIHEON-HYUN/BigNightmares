@@ -22,6 +22,7 @@ void ABNGameState::RemoveLobbyPlayer(ABNPlayerState* ExitPlayerState)
 		{
 			return RemovePlayerData.PlayerName == ExitPlayerState->GetPlayerName();
 		});
+	OnLobbyListUpdated.Broadcast(LobbyPlayerDataList);
 }
 
 const TArray<FLobbyPlayerData>& ABNGameState::GetLobbyPlayers() const
@@ -46,6 +47,8 @@ void ABNGameState::OnRep_LobbyPlayerDataList()
 	// 	// GameState에서 현재 동기화된 리스트 전달
 	// 	BNController->LobbyWidget->SetPlayerList(LobbyPlayerDataList);
 	// }
+
+	OnLobbyListUpdated.Broadcast(LobbyPlayerDataList);
 }
 
 void ABNGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

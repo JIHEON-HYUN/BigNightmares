@@ -32,6 +32,6 @@ protected:
 
 	UFUNCTION()
 	void OnRep_LobbyPlayerDataList();
-
+	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
