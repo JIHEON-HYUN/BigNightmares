@@ -144,7 +144,7 @@ void UBNGameInstance::CreateSession()
 			SessionSettings.bIsLANMatch = false;
 		}
 		
-		SessionSettings.NumPublicConnections = 12;
+		SessionSettings.NumPublicConnections = 6;
 		// 온라인 세션 검색에 노출할지 결정, false면 세션 검색에서 제외됨
 		SessionSettings.bShouldAdvertise = true;
 		// Presence 세션으로 등록되서, Presence 기반 search에 노출됨
