@@ -19,7 +19,6 @@ class BIGNIGHTMARES_API ABNGameState : public AGameStateBase
 public:
 	void AddLobbyPlayer(const FLobbyPlayerData& NewPlayer);
 	void RemoveLobbyPlayer(class ABNPlayerState* ExitPlayerState);
-	
 	const TArray<FLobbyPlayerData>& GetLobbyPlayers() const;
 	
 private:

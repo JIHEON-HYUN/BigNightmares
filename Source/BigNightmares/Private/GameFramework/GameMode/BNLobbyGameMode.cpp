@@ -32,11 +32,6 @@ void ABNLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Name = %s"), *NewLobbyPlayer.PlayerName);
-	
-	// if (ReadyCount == 12)
-	// {
-	// 	GetWorldTimerManager().SetTimer(GameStartTimer, this, &ABNLobbyGameMode::StartGame, 30);
-	// }
 }
 
 void ABNLobbyGameMode::Logout(AController* Exiting)
@@ -53,14 +48,31 @@ void ABNLobbyGameMode::Logout(AController* Exiting)
 	}
 }
 
+void ABNLobbyGameMode::SetMaxReadyCount(uint8 NewMaxReadyCount)
+{
+	MaxReadyCount = NewMaxReadyCount;
+}
+
 void ABNLobbyGameMode::Ready()
 {
 	++ReadyCount;
+
+	if (ReadyCount == MaxReadyCount)
+	{
+		// ReadyCount가 정원이 되면, 3초 후에 게임 시작
+		GetWorldTimerManager().SetTimer(GameStartTimer, this, &ABNLobbyGameMode::StartGame, 3);
+	}
 }
 
 void ABNLobbyGameMode::UnReady()
 {
 	--ReadyCount;
+
+	if (ReadyCount < MaxReadyCount && GetWorldTimerManager().IsTimerActive(GameStartTimer))
+	{
+		// 게임 시작 카운트가 시작됐지만 ReadyCount가 줄었으면, Timer 초기화
+		GetWorldTimerManager().ClearTimer(GameStartTimer);
+	}
 }
 
 void ABNLobbyGameMode::StartGame()

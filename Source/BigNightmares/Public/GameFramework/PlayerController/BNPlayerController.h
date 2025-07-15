@@ -32,6 +32,8 @@ public:
 	virtual void CloseLobbyMenu() override;
 	UFUNCTION(BlueprintCallable)
 	virtual void ReturnToMainMenu() override;
+	UFUNCTION(BlueprintCallable)
+	virtual void ChangePlayerReadyState() override;
 	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 

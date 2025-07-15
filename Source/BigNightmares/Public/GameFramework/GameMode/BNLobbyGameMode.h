@@ -28,12 +28,14 @@ public:
 	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
-	
+
+	void SetMaxReadyCount(uint8 NewMaxReadyCount);
 	void Ready();
 	void UnReady();
 
 private:
-	uint32 ReadyCount = 0;
+	uint8 ReadyCount = 0;
+	uint8 MaxReadyCount = 2;
 	FTimerHandle GameStartTimer;
 	
 	void StartGame();

@@ -107,4 +107,6 @@ void UBNLobbyWidget::OnClickedReady()
 	{
 		Cast<UBNPlayerList>(PlayerListBox->GetChildAt(i))->ChangeReadyState();
 	}
+
+	LobbyInterface->ChangePlayerReadyState();
 }

@@ -25,4 +25,5 @@ public:
 	virtual void OpenLobbyMenu() = 0;
 	virtual void CloseLobbyMenu() = 0;
 	virtual void ReturnToMainMenu() = 0;
+	virtual void ChangePlayerReadyState() = 0;
 };

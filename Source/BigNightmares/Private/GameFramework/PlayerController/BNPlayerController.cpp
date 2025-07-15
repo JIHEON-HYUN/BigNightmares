@@ -51,6 +51,11 @@ void ABNPlayerController::ReturnToMainMenu()
 	ClientTravel("/Game/Levels/L_MainMenu", TRAVEL_Absolute);
 }
 
+void ABNPlayerController::ChangePlayerReadyState()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Player Ready"));
+}
+
 void ABNPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
