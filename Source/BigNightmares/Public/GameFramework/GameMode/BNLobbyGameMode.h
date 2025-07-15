@@ -6,7 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "BNLobbyGameMode.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FLobbyPlayerData
 {
 	GENERATED_BODY()

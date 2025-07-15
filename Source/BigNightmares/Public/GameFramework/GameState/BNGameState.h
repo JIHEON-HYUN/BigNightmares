@@ -21,6 +21,12 @@ public:
 	void RemoveLobbyPlayer(class ABNPlayerState* ExitPlayerState);
 	const TArray<FLobbyPlayerData>& GetLobbyPlayers() const;
 	
-private:
+protected:
+	UPROPERTY(ReplicatedUsing = OnRep_LobbyPlayerDataList)
 	TArray<FLobbyPlayerData> LobbyPlayerDataList;
+
+	UFUNCTION()
+	void OnRep_LobbyPlayerDataList();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

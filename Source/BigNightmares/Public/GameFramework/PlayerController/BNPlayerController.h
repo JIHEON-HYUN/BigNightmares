@@ -21,6 +21,9 @@ class BIGNIGHTMARES_API ABNPlayerController : public APlayerController, public I
 	GENERATED_BODY()
 
 public:
+	TSubclassOf<class UUserWidget> LobbyClass;
+	class UBNLobbyWidget* LobbyWidget;
+	
 	ABNPlayerController();
 
 	// LobbyWidget 기능
@@ -45,9 +48,6 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
-	TSubclassOf<class UUserWidget> LobbyClass;
-	class UBNLobbyWidget* LobbyWidget;
-	
 	UPROPERTY()
 	TObjectPtr<UBNInventoryWidgetController> InventoryWidgetController;
 
