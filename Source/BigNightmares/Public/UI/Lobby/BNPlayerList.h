@@ -26,7 +26,7 @@ public:
 	void ChangeReadyState();
 
 private:
-	// 부모 메인 메뉴 위젯
+	// 부모 로비 메뉴 위젯
 	UPROPERTY()
 	class UBNLobbyWidget* Parent;
 };

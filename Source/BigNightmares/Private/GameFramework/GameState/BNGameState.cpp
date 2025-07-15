@@ -6,9 +6,7 @@
 #include "Net/UnrealNetwork.h"
 
 #include "GameFramework/GameMode/BNLobbyGameMode.h"
-#include "GameFramework/PlayerController/BNPlayerController.h"
 #include "GameFramework/PlayerState/BNPlayerState.h"
-#include "UI/Lobby/BNLobbyWidget.h"
 
 void ABNGameState::AddLobbyPlayer(const FLobbyPlayerData& NewPlayer)
 {
@@ -30,7 +28,7 @@ const TArray<FLobbyPlayerData>& ABNGameState::GetLobbyPlayers() const
 
 void ABNGameState::OnRep_LobbyPlayerDataList()
 {
-	OnLobbyListUpdated.Broadcast(LobbyPlayerDataList);
+	OnLobbyPlayerUpdated.Broadcast(LobbyPlayerDataList);
 }
 
 void ABNGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

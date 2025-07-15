@@ -23,6 +23,8 @@ class BIGNIGHTMARES_API ABNPlayerController : public APlayerController, public I
 
 public:
 	TSubclassOf<class UUserWidget> LobbyClass;
+	
+	UPROPERTY()
 	class UBNLobbyWidget* LobbyWidget;
 	
 	ABNPlayerController();
@@ -37,8 +39,14 @@ public:
 	virtual void CloseLobbyMenu() override;
 	UFUNCTION(BlueprintCallable)
 	virtual void ReturnToMainMenu() override;
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	virtual void ChangePlayerReadyState() override;
+
+	// LobbyPlayerDataList가 업데이트되면 콜백
+	UFUNCTION()
+	void OnLobbyPlayerUpdated_Handler(const TArray<FLobbyPlayerData>& UpdatedList);
+
+	
 	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
@@ -46,10 +54,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CreateInventoryWidget();
-
-	UFUNCTION()
-	void OnLobbyListUpdated_Handler(const TArray<FLobbyPlayerData>& UpdatedList);
-
+	
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:

@@ -28,9 +28,9 @@ void ABNPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (ABNGameState* CurrentGameState = GetWorld()->GetGameState<ABNGameState>())
+	if (ABNGameState* GS = GetWorld()->GetGameState<ABNGameState>())
 	{
-		CurrentGameState->OnLobbyListUpdated.AddDynamic(this, &ABNPlayerController::OnLobbyListUpdated_Handler);
+		GS->OnLobbyPlayerUpdated.AddDynamic(this, &ABNPlayerController::OnLobbyPlayerUpdated_Handler);
 	}
 }
 
@@ -46,8 +46,8 @@ void ABNPlayerController::LoadLobbyMenu()
 
 void ABNPlayerController::OpenLobbyMenu()
 {
-	auto CurrentGameState = Cast<ABNGameState>(GetWorld()->GetGameState());
-	LobbyWidget->SetPlayerList(CurrentGameState->GetLobbyPlayers());
+	auto GS = Cast<ABNGameState>(GetWorld()->GetGameState());
+	LobbyWidget->SetPlayerList(GS->GetLobbyPlayers());
 	LobbyWidget->OpenMenu();
 }
 
@@ -64,6 +64,14 @@ void ABNPlayerController::ReturnToMainMenu()
 void ABNPlayerController::ChangePlayerReadyState()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player Ready"));
+}
+
+void ABNPlayerController::OnLobbyPlayerUpdated_Handler(const TArray<FLobbyPlayerData>& UpdatedList)
+{
+	if (LobbyWidget)
+	{
+		LobbyWidget->SetPlayerList(UpdatedList);
+	}
 }
 
 void ABNPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -137,13 +145,5 @@ void ABNPlayerController::CreateInventoryWidget()
 		InventoryWidget->SetWidgetController(GetBNInventoryWidgetController());
 		InventoryWidgetController->BroadcastInitialValues();
 		InventoryWidget->AddToViewport();
-	}
-}
-
-void ABNPlayerController::OnLobbyListUpdated_Handler(const TArray<FLobbyPlayerData>& UpdatedList)
-{
-	if (LobbyWidget)
-	{
-		LobbyWidget->SetPlayerList(UpdatedList);
 	}
 }

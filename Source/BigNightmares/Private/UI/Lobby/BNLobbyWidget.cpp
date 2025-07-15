@@ -6,6 +6,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "GameFramework/PlayerState.h"
 #include "UI/Lobby/BNPlayerList.h"
 
 #include "GameFramework/GameMode/BNLobbyGameMode.h"
@@ -103,9 +104,18 @@ void UBNLobbyWidget::OnClickedExit()
 
 void UBNLobbyWidget::OnClickedReady()
 {
-	for (int i = 0; i < PlayerListBox->GetChildrenCount(); i++)
+	FString SteamID = GetOwningPlayerState()->GetPlayerName();
+	
+	for (uint8 i = 0; i < PlayerListBox->GetChildrenCount(); i++)
 	{
-		Cast<UBNPlayerList>(PlayerListBox->GetChildAt(i))->ChangeReadyState();
+		auto Player = Cast<UBNPlayerList>(PlayerListBox->GetChildAt(i));
+		if (Player == nullptr) return;
+
+		if (Player->SteamID->GetText().ToString() == SteamID)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("TLqkf"));
+			Player->ChangeReadyState();
+		}
 	}
 
 	LobbyInterface->ChangePlayerReadyState();
