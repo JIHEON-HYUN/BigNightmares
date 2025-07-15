@@ -18,6 +18,12 @@ void ABNBaseAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
+	// [로그 추가] 어떤 컨트롤러가 어떤 폰에 빙의되었는지 확인합니다.
+	if (InPawn)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AI Controller '%s' has possessed '%s'"), *GetName(), *InPawn->GetName());
+	}
+	
 	if (ABNBaseMonster* Monster = Cast<ABNBaseMonster>(InPawn))
 	{
 		if (Monster->BehaviorTree && Monster->BehaviorTree->BlackboardAsset)

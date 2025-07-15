@@ -10,6 +10,8 @@ class UAISenseConfig_Sight;
 class AActor;
 class UBehaviorTree;
 
+class UAISenseConfig_Sight;
+
 /**
  * 
  */
@@ -21,17 +23,8 @@ class BIGNIGHTMARES_API ABNHunterAIController : public ABNBaseAIController
 public:
 	ABNHunterAIController();
 
-	// [신규] 블랙보드에서 사용할 키의 이름을 반환하는 함수
-	static const FName TargetPlayerKey;
-
 protected:
-	virtual void BeginPlay() override;
-	
-	virtual void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus) override;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI Sight")
+	// 헌터의 시각 감지 설정을 위한 변수입니다.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI Perception")
 	TObjectPtr<UAISenseConfig_Sight> SightConfig;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Behavior")
-	TObjectPtr<UBehaviorTree> BehaviorTreeAsset;
 };
