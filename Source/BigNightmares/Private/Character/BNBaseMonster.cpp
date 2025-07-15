@@ -7,7 +7,6 @@
 #include "AIController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Perception/AIPerceptionComponent.h"
 
 ABNBaseMonster::ABNBaseMonster()
 {
@@ -17,9 +16,6 @@ ABNBaseMonster::ABNBaseMonster()
     AbilitySystemComponent = CreateDefaultSubobject<UBNBaseAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
     AbilitySystemComponent->SetIsReplicated(true);
     AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
-
-    // AI 감지 컴포넌트 생성
-    PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
 }
 
 UAbilitySystemComponent* ABNBaseMonster::GetAbilitySystemComponent() const
@@ -29,19 +25,11 @@ UAbilitySystemComponent* ABNBaseMonster::GetAbilitySystemComponent() const
 
 void ABNBaseMonster::PossessedBy(AController* NewController)
 {
-    Super::PossessedBy(NewController);
-
-    // GAS 및 Perception 초기화
+    // Super::PossessedBy를 호출하지 않는 것은 그대로 유지합니다.
     if (AbilitySystemComponent)
     {
         AbilitySystemComponent->InitAbilityActorInfo(this, this);
     }
-    if (PerceptionComponent)
-    {
-        PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABNBaseMonster::OnTargetPerceptionUpdated);
-    }
-    
-    // TODO: 이 곳에서 몬스터의 기본 어빌리티(공격, 스킬 등)를 부여하는 로직을 추가할 수 있습니다.
 }
 
 void ABNBaseMonster::BeginPlay()
@@ -87,51 +75,22 @@ void ABNBaseMonster::ActivateMonster()
     AbilitySystemComponent->AddReplicatedLooseGameplayTag(GameplayTags.Character_Monster_Active);
 
     // AI 로직을 시작하고, 초기 행동 상태를 'Idle'(대기)로 설정합니다.
-    StartAILogic();
     EnterIdleState();
 }
 
-void ABNBaseMonster::EnterIdleState()
+oid ABNBaseMonster::EnterIdleState()
 {
-    // [수정됨] FBNMonsterGameplayTags 싱글톤에서 'Idle' 태그를 가져와 상태를 전환합니다.
     TransitionToState(FBNMonsterGameplayTags::Get().Character_Monster_Active_Idle);
 }
 
 void ABNBaseMonster::EnterChasingState()
 {
-    // [수정됨] FBNMonsterGameplayTags 싱글톤에서 'Chasing' 태그를 가져와 상태를 전환합니다.
     TransitionToState(FBNMonsterGameplayTags::Get().Character_Monster_Active_Chasing);
 }
 
 void ABNBaseMonster::EnterAttackingState()
 {
-    // [수정됨] FBNMonsterGameplayTags 싱글톤에서 'Attacking' 태그를 가져와 상태를 전환합니다.
     TransitionToState(FBNMonsterGameplayTags::Get().Character_Monster_Active_Attacking);
-}
-
-void ABNBaseMonster::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
-{
-    AAIController* AIController = Cast<AAIController>(GetController());
-    if (!AIController || !Actor) return;
-
-    UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
-    if (!BlackboardComp) return;
-
-    // 감지에 성공했는지 여부를 확인합니다.
-    if (Stimulus.WasSuccessfullySensed())
-    {
-        // 감지한 액터를 블랙보드의 'TargetActor' 키에 저장합니다.
-        BlackboardComp->SetValueAsObject(TEXT("TargetActor"), Actor);
-        // TODO: 이 곳에서 바로 추격 상태로 전환할 수도 있습니다.
-        // EnterChasingState(); 
-    }
-    else
-    {
-        // 감지했던 액터를 놓쳤다면, 블랙보드의 'TargetActor'를 비웁니다.
-        BlackboardComp->ClearValue(TEXT("TargetActor"));
-        // TODO: 이 곳에서 다시 대기 상태로 전환할 수 있습니다.
-        // EnterIdleState();
-    }
 }
 
 void ABNBaseMonster::TransitionToState(const FGameplayTag& NewStateTag)
@@ -145,7 +104,7 @@ void ABNBaseMonster::TransitionToState(const FGameplayTag& NewStateTag)
     TagsToRemove.AddTag(MonsterTags.Character_Monster_Active_Chasing);
     TagsToRemove.AddTag(MonsterTags.Character_Monster_Active_Attacking);
     AbilitySystemComponent->RemoveReplicatedLooseGameplayTags(TagsToRemove);
-
+    
     // 새로운 행동 상태 태그를 추가합니다.
     AbilitySystemComponent->AddReplicatedLooseGameplayTag(NewStateTag);
 
@@ -156,7 +115,6 @@ void ABNBaseMonster::TransitionToState(const FGameplayTag& NewStateTag)
         UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
         if (BlackboardComp)
         {
-            // 블랙보드의 'State' 키(Name 타입)에 현재 상태 태그의 이름을 저장합니다.
             BlackboardComp->SetValueAsName(TEXT("State"), NewStateTag.GetTagName());
         }
     }
@@ -164,23 +122,6 @@ void ABNBaseMonster::TransitionToState(const FGameplayTag& NewStateTag)
 
 bool ABNBaseMonster::HasStateTag(FGameplayTag StateTag) const
 {
-    if (!AbilitySystemComponent || !StateTag.IsValid()) return false;
+    if (!AbilitySystemComponent) return false;
     return AbilitySystemComponent->HasMatchingGameplayTag(StateTag);
-}
-
-void ABNBaseMonster::StartAILogic()
-{
-    // [수정됨] FBNMonsterGameplayTags 싱글톤을 이용해 태그를 직접 비교합니다.
-    if (HasStateTag(FBNMonsterGameplayTags::Get().Character_Monster_Dormant))
-    {
-        return;
-    }
-    
-    AAIController* AIController = Cast<AAIController>(GetController());
-    
-    // 컨트롤러와 행동 트리 에셋이 모두 유효할 때, 행동 트리를 실행시킵니다.
-    if (AIController && BehaviorTree)
-    {
-        AIController->RunBehaviorTree(BehaviorTree);
-    }
 }
