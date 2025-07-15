@@ -20,6 +20,7 @@
 #include "GameFramework/PlayerState/BNPlayerState.h"
 #include "Input/BNBaseEnhancedInputComponent.h"
 #include "Library/BNAbilitySystemLibrary.h"
+#include "Net/UnrealNetwork.h"
 #include "Player/InventoryComponent.h"
 
 
@@ -68,9 +69,6 @@ ABNMonoCharacter::ABNMonoCharacter()
 	{
 		GetMesh()->SetAnimInstanceClass(ABP_BNMonoAnimInstance.Class);
 	}
-
-	//InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
-
 }
 
 void ABNMonoCharacter::BeginPlay()
@@ -163,7 +161,7 @@ void ABNMonoCharacter::InitAbilityActorInfo()
 		AbilitySystemComponent = BNPlayerState->GetBNBaseAbilitySystemComponent();
 		MonoCharacterAttributeSet = BNPlayerState->GetBNBaseAttributeSet();
 
-		//Debugging : IsValid(MonoCharacterAttributeSet)
+#pragma region Debugging : IsValid(MonoCharacterAttributeSet)
 		/*if (IsValid(MonoCharacterAttributeSet))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("MonoCharacterAttributeSet IsValid"));
@@ -174,6 +172,7 @@ void ABNMonoCharacter::InitAbilityActorInfo()
 			UE_LOG(LogTemp, Error, TEXT("%s"), *MonoCharacterAttributeSet.GetName());			
 		}
 		*/
+#pragma endregion
 
 		if (!IsValid(MonoCharacterAttributeSet)) return;
 		
@@ -248,6 +247,8 @@ void ABNMonoCharacter::OnMoveSpeedChanged(const FOnAttributeChangeData Data)
 void ABNMonoCharacter::Server_SetMaxWalkSpeed_Implementation(float NewSpeed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
+	Client_ApplyMoveSpeed(NewSpeed);
+	//CurrentMoveSpeed = NewSpeed;
 }
 
 void ABNMonoCharacter::PossessedBy(AController* NewController)
@@ -260,7 +261,7 @@ void ABNMonoCharacter::PossessedBy(AController* NewController)
 		InitAbilityActorInfo();
 	}
 
-	//Debugging Code: GetBNBaseAbilitySystemComponent() && GetAttributeSet<UBNTarotCardAttributeSet>()
+#pragma region Debugging Code: GetBNBaseAbilitySystemComponent() && GetAttributeSet<UBNTarotCardAttributeSet>()
 	/*if (GetBNBaseAbilitySystemComponent() && GetAttributeSet<UBNTarotCardAttributeSet>())
 	{
 		const FString AppendString = FString::Printf(TEXT("Owner Actor: %s, AvatarActor: %s"),
@@ -269,6 +270,7 @@ void ABNMonoCharacter::PossessedBy(AController* NewController)
 		
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *AppendString);
 	}*/
+#pragma endregion
 }
 
 void ABNMonoCharacter::OnRep_PlayerState()
