@@ -9,6 +9,7 @@
 #include "UI/Lobby/BNLobbyInterface.h"
 #include "BNPlayerController.generated.h"
 
+struct FLobbyPlayerData;
 class UBNSystemWidget;
 class UInventoryComponent;
 /**
@@ -25,6 +26,7 @@ public:
 	class UBNLobbyWidget* LobbyWidget;
 	
 	ABNPlayerController();
+	virtual void BeginPlay() override;
 
 	// LobbyWidget 기능
 	UFUNCTION(BlueprintCallable)
@@ -44,6 +46,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CreateInventoryWidget();
+
+	UFUNCTION()
+	void OnLobbyListUpdated_Handler(const TArray<FLobbyPlayerData>& UpdatedList);
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 

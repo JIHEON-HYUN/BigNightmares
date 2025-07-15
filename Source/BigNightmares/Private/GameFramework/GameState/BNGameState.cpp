@@ -13,6 +13,7 @@
 void ABNGameState::AddLobbyPlayer(const FLobbyPlayerData& NewPlayer)
 {
 	LobbyPlayerDataList.Add(NewPlayer);
+	OnLobbyListUpdated.Broadcast(LobbyPlayerDataList);
 }
 
 void ABNGameState::RemoveLobbyPlayer(ABNPlayerState* ExitPlayerState)
@@ -30,23 +31,21 @@ const TArray<FLobbyPlayerData>& ABNGameState::GetLobbyPlayers() const
 
 void ABNGameState::OnRep_LobbyPlayerDataList()
 {
-	// 클라이언트로 동기화되었을 때 UI 갱신
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("로비플레이어 데이터 변경"));
-	
-	UWorld* World = GetWorld();
-	if (World == nullptr) return;
-
-	APlayerController* LocalPC = World->GetFirstPlayerController();
-	if (LocalPC == nullptr || !LocalPC->IsLocalController()) return;
-
-	// 위젯 참조 시도
-	auto BNController = Cast<ABNPlayerController>(LocalPC);
-	if (BNController && BNController->LobbyWidget)
-	{
-		// GameState에서 현재 동기화된 리스트 전달
-		BNController->LobbyWidget->SetPlayerList(LobbyPlayerDataList);
-	}
+	// // 클라이언트로 동기화되었을 때 UI 갱신
+	//
+	// UWorld* World = GetWorld();
+	// if (World == nullptr) return;
+	//
+	// APlayerController* LocalPC = World->GetFirstPlayerController();
+	// if (LocalPC == nullptr || !LocalPC->IsLocalController()) return;
+	//
+	// // 위젯 참조 시도
+	// auto BNController = Cast<ABNPlayerController>(LocalPC);
+	// if (BNController && BNController->LobbyWidget)
+	// {
+	// 	// GameState에서 현재 동기화된 리스트 전달
+	// 	BNController->LobbyWidget->SetPlayerList(LobbyPlayerDataList);
+	// }
 }
 
 void ABNGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

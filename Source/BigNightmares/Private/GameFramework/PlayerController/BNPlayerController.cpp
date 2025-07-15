@@ -24,6 +24,16 @@ ABNPlayerController::ABNPlayerController()
 	}
 }
 
+void ABNPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	if (ABNGameState* CurrentGameState = GetWorld()->GetGameState<ABNGameState>())
+	{
+		CurrentGameState->OnLobbyListUpdated.AddDynamic(this, &ABNPlayerController::OnLobbyListUpdated_Handler);
+	}
+}
+
 void ABNPlayerController::LoadLobbyMenu()
 {
 	if (LobbyClass == nullptr) return;
@@ -127,5 +137,13 @@ void ABNPlayerController::CreateInventoryWidget()
 		InventoryWidget->SetWidgetController(GetBNInventoryWidgetController());
 		InventoryWidgetController->BroadcastInitialValues();
 		InventoryWidget->AddToViewport();
+	}
+}
+
+void ABNPlayerController::OnLobbyListUpdated_Handler(const TArray<FLobbyPlayerData>& UpdatedList)
+{
+	if (LobbyWidget)
+	{
+		LobbyWidget->SetPlayerList(UpdatedList);
 	}
 }

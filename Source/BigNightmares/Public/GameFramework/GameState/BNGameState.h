@@ -8,6 +8,8 @@
 
 struct FLobbyPlayerData;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLobbyListUpdated, const TArray<FLobbyPlayerData>&, NewList);
+
 /**
  * 
  */
@@ -20,6 +22,9 @@ public:
 	void AddLobbyPlayer(const FLobbyPlayerData& NewPlayer);
 	void RemoveLobbyPlayer(class ABNPlayerState* ExitPlayerState);
 	const TArray<FLobbyPlayerData>& GetLobbyPlayers() const;
+
+	UPROPERTY(BlueprintAssignable)
+	FLobbyListUpdated OnLobbyListUpdated;
 	
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_LobbyPlayerDataList)
