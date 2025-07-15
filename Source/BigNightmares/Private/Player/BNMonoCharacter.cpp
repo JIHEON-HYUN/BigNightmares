@@ -3,26 +3,24 @@
 
 #include "Player/BNMonoCharacter.h"
 
-#include "Abilities/BNBaseAbilitySystemComponent.h"
-#include "Abilities/BNBaseAttributeSet.h"
-#include "Abilities/BNTarotCardAttributeSet.h"
-#include "Animation/AnimInstance/BNMonoAnimInstance.h"
-#include "BaseGamePlayTags.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "DataAsset/Input/DataAsset_InputConfig_Player.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameplayEffectTypes.h"
 #include "GameplayTagContainer.h"
+
+#include "Abilities/BNBaseAbilitySystemComponent.h"
+#include "Abilities/BNBaseAttributeSet.h"
+#include "Abilities/BNTarotCardAttributeSet.h"
+#include "Animation/AnimInstance/BNMonoAnimInstance.h"
+#include "BaseGamePlayTags.h"
+#include "DataAsset/Input/DataAsset_InputConfig_Player.h"
 #include "DataAsset/BNMonoCharacterDataAsset.h"
 #include "GameFramework/PlayerState/BNPlayerState.h"
 #include "Input/BNBaseEnhancedInputComponent.h"
 #include "Library/BNAbilitySystemLibrary.h"
-#include "Net/UnrealNetwork.h"
-#include "Player/InventoryComponent.h"
-
 
 ABNMonoCharacter::ABNMonoCharacter()
 {
@@ -168,7 +166,7 @@ void ABNMonoCharacter::InitAbilityActorInfo()
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("MonoCharacterAttributeSet Not IsValid"));			
+			UE_LOG(LogTemp, Error, TEXT("MonoCharacterAttributeSet Not IsValid"));
 			UE_LOG(LogTemp, Error, TEXT("%s"), *MonoCharacterAttributeSet.GetName());			
 		}
 		*/

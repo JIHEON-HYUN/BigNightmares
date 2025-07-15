@@ -3,8 +3,9 @@
 
 #include "Library/BNAbilitySystemLibrary.h"
 
-#include "GameFramework/GameMode/BNInGameGameMode.h"
 #include "Kismet/GameplayStatics.h"
+
+#include "GameFramework/GameMode/BNInGameGameMode.h"
 
 UBNMonoCharacterDataAsset* UBNAbilitySystemLibrary::GetMonoCharacterDataAsset(const UObject* WorldContextObject)
 {

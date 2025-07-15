@@ -25,7 +25,7 @@ class BIGNIGHTMARES_API ABNMonoCharacter : public ABNBaseCharacter
 
 	ABNMonoCharacter();
 
-protected:
+protected: 
 	virtual void BeginPlay() override;
 	
 #pragma region Camera

@@ -2,6 +2,7 @@
 
 
 #include "Abilities//BNMonsterAttributeSet.h"
+
 #include "Net/UnrealNetwork.h"
 
 UBNMonsterAttributeSet::UBNMonsterAttributeSet()

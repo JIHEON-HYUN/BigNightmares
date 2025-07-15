@@ -5,11 +5,9 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "GameFramework/GameSession.h"
-#include "GameFramework/PlayerController/BNPlayerController.h"
-#include "GameFramework/PlayerState/BNPlayerState.h"
-#include "Library/BNAbilitySystemLibrary.h"
 #include "Net/UnrealNetwork.h"
+
+#include "Library/BNAbilitySystemLibrary.h"
 
 bool FPackagedInventory::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess)
 {

@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+
 #include "Abilities/BNBaseAbilitySystemComponent.h"
 
 UBNBaseAbilitySystemComponent* UBNBaseGameplayAbility::GetBNBaseAbilitySystemComponentFromActorInfo() const

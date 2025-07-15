@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "GameFramework/PlayerState.h"
+
 #include "Abilities/BNBaseAbilitySystemComponent.h"
 #include "Abilities/BNTarotCardAttributeSet.h"
-#include "GameFramework/PlayerState.h"
 #include "UI/InGame/InventoryInterface.h"
+
 #include "BNPlayerState.generated.h"
 
 class UInventoryComponent;
