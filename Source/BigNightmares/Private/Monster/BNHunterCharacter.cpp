@@ -5,8 +5,6 @@
 #include "Monster/Weapons/BNMonsterWeapon.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Perception/AIPerceptionComponent.h"
-#include "Perception/AISenseConfig_Sight.h"
 
 ABNHunterCharacter::ABNHunterCharacter()
 {
@@ -26,27 +24,6 @@ ABNHunterCharacter::ABNHunterCharacter()
 
 	// 캐릭터 무브먼트 컴포넌트의 기본 최대 속도를 WalkSpeed로 설정합니다.
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-	
-	// --- 4. 시각 감지(Sight) 설정 ---
-	// 부모의 PerceptionComponent를 가져와 헌터에 맞게 설정합니다.
-	if (PerceptionComponent)
-	{
-		SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-		if (SightConfig)
-		{
-			SightConfig->SightRadius = 1500.f;
-			SightConfig->LoseSightRadius = 2000.f;
-			SightConfig->PeripheralVisionAngleDegrees = 90.0f;
-			SightConfig->SetMaxAge(5.0f);
-
-			SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-			SightConfig->DetectionByAffiliation.bDetectNeutrals = false;
-			SightConfig->DetectionByAffiliation.bDetectFriendlies = false;
-
-			PerceptionComponent->ConfigureSense(*SightConfig);
-			PerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
-		}
-	}
 }
 
 void ABNHunterCharacter::ActivateMonster()

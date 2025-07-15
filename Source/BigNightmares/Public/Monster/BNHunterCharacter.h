@@ -6,7 +6,6 @@
 #include "Character/BNBaseMonster.h"
 #include "BNHunterCharacter.generated.h"
 
-class UAISenseConfig_Sight;
 class ABNMonsterWeapon;
 class AActor;
 
@@ -64,9 +63,6 @@ protected:
 	virtual void EnterAttackingState() override;
 	
 private:
-	// 시각 감지 설정을 위한 변수
-	UPROPERTY()
-	TObjectPtr<UAISenseConfig_Sight> SightConfig;
 
 	// [추가됨] 몬스터 자동 활성화를 위한 타이머 핸들입니다.
 	FTimerHandle ActivateTimerHandle;

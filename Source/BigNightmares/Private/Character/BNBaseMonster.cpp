@@ -78,7 +78,7 @@ void ABNBaseMonster::ActivateMonster()
     EnterIdleState();
 }
 
-oid ABNBaseMonster::EnterIdleState()
+void ABNBaseMonster::EnterIdleState()
 {
     TransitionToState(FBNMonsterGameplayTags::Get().Character_Monster_Active_Idle);
 }
