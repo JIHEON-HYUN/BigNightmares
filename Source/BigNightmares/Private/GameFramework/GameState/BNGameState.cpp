@@ -32,6 +32,8 @@ void ABNGameState::OnRep_LobbyPlayerDataList()
 {
 	// 클라이언트로 동기화되었을 때 UI 갱신
 
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("로비플레이어 데이터 변경"));
+	
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
 
