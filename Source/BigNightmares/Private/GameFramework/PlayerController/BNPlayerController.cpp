@@ -63,9 +63,17 @@ void ABNPlayerController::ReturnToMainMenu()
 	ClientTravel("/Game/Levels/L_MainMenu", TRAVEL_Absolute);
 }
 
-void ABNPlayerController::ChangePlayerReadyState()
+void ABNPlayerController::ChangePlayerReadyState_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Player Ready"));
+	auto GS = GetWorld()->GetGameState<ABNGameState>();
+	if (GS == nullptr) return;
+	
+	auto PS = GetPlayerState<ABNPlayerState>();
+	if (PS == nullptr) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *PS->GetPlayerName());
+
+	GS->SetPlayerReadyState(PS->GetPlayerName());
 }
 
 void ABNPlayerController::OnLobbyPlayerUpdated_Handler(const TArray<FLobbyPlayerData>& UpdatedList)

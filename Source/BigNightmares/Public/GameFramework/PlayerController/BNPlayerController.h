@@ -40,7 +40,7 @@ public:
 	virtual void CloseLobbyMenu() override;
 	UFUNCTION(BlueprintCallable)
 	virtual void ReturnToMainMenu() override;
-	UFUNCTION()
+	UFUNCTION(Server, Reliable)
 	virtual void ChangePlayerReadyState() override;
 
 	// LobbyPlayerDataList가 업데이트되면 콜백

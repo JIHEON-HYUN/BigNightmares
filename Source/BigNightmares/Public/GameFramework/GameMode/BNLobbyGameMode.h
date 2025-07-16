@@ -15,7 +15,7 @@ struct FLobbyPlayerData
 	FString PlayerName;
 	
 	UPROPERTY(BlueprintReadWrite)
-	bool ReadyState;
+	bool ReadyState = false;
 };
 
 /**
@@ -38,7 +38,7 @@ public:
 
 private:
 	uint8 ReadyCount = 0;
-	uint8 MaxReadyCount = 2;
+	uint8 MaxReadyCount = 3;
 	FTimerHandle GameStartTimer;
 	
 	void StartGame();

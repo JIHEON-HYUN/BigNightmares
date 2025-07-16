@@ -21,24 +21,26 @@ void ABNGameState::RemoveLobbyPlayer(ABNPlayerState* ExitPlayerState)
 		});
 }
 
-void ABNGameState::SetPlayerReadyState(const FString& PlayerName, bool NewReadyState)
+const TArray<FLobbyPlayerData>& ABNGameState::GetLobbyPlayers() const
+{
+	return LobbyPlayerDataList;
+}
+
+void ABNGameState::SetPlayerReadyState(const FString& PlayerName)
 {
 	for (auto& PlayerData : LobbyPlayerDataList)
 	{
 		if (PlayerData.PlayerName == PlayerName)
 		{
-			// 레디 상태가 동일하면 처리 X
-			if (PlayerData.ReadyState == NewReadyState) return;
-
 			// 레디 상태를 바꾸고, LobbyPlayerDataList 변경 알림
-			PlayerData.ReadyState = NewReadyState;
+			PlayerData.ReadyState = !PlayerData.ReadyState;
 			OnLobbyPlayerUpdated.Broadcast(LobbyPlayerDataList);
 
 			ABNLobbyGameMode* GM = GetWorld()->GetAuthGameMode<ABNLobbyGameMode>();
 			if (GM == nullptr) return;
 			
 			// LobbyGameMode의 레디 상태에 반영
-			if (NewReadyState)
+			if (PlayerData.ReadyState)
 			{
 				GM->Ready();
 			}
@@ -50,11 +52,6 @@ void ABNGameState::SetPlayerReadyState(const FString& PlayerName, bool NewReadyS
 			break;
 		}
 	}
-}
-
-const TArray<FLobbyPlayerData>& ABNGameState::GetLobbyPlayers() const
-{
-	return LobbyPlayerDataList;
 }
 
 void ABNGameState::OnRep_LobbyPlayerDataList()

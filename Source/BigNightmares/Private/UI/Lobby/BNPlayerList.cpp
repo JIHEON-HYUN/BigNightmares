@@ -37,9 +37,9 @@ void UBNPlayerList::ChangeReadyState()
 	}
 }
 
-const FString& UBNPlayerList::GetSteamID()
+const FString UBNPlayerList::GetSteamID()
 {
-	if (SteamID == nullptr) return "SteamID is nullptr";
+	if (SteamID == nullptr) return TEXT("SteamID is nullptr");
 	
 	return SteamID->GetText().ToString();
 }

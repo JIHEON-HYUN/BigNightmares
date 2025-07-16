@@ -21,8 +21,8 @@ class BIGNIGHTMARES_API ABNGameState : public AGameStateBase
 public:
 	void AddLobbyPlayer(const FLobbyPlayerData& NewPlayer);
 	void RemoveLobbyPlayer(class ABNPlayerState* ExitPlayerState);
-	void SetPlayerReadyState(const FString& PlayerName, bool NewReadyState);
 	const TArray<FLobbyPlayerData>& GetLobbyPlayers() const;
+	void SetPlayerReadyState(const FString& PlayerName);
 
 	UPROPERTY(BlueprintAssignable)
 	FLobbyPlayerUpdated OnLobbyPlayerUpdated;

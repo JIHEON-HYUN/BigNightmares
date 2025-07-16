@@ -25,5 +25,5 @@ protected:
 public:
 	void Setup(FString NewSteamID, bool ReadyState);
 	void ChangeReadyState();
-	const FString& GetSteamID();
+	const FString GetSteamID();
 };
