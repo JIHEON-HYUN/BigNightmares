@@ -72,6 +72,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UButton* Btn_Quit;
 
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	class UButton* Btn_Refresh;
+
 	// Widget - MenuBox
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UWidgetSwitcher* MenuSwitcher;
@@ -109,4 +112,6 @@ public:
 	void OnClickedCancel();
 	UFUNCTION()
 	void OnClickedQuit();
+	UFUNCTION()
+	void OnClickedRefresh();
 };

@@ -48,6 +48,9 @@ bool UBNMainMenuWidget::Initialize()
 	
 	if (Btn_Quit == nullptr) return false;
 	Btn_Quit->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedQuit);
+
+	if (Btn_Refresh == nullptr) return false;
+	Btn_Refresh->OnClicked.AddDynamic(this, &UBNMainMenuWidget::OnClickedRefresh);
 	
 	return true;
 }
@@ -196,4 +199,11 @@ void UBNMainMenuWidget::OnClickedQuit()
 	if (MainMenuInterface == nullptr) return;
 
 	MainMenuInterface->Quit();	
+}
+
+void UBNMainMenuWidget::OnClickedRefresh()
+{
+	if (MainMenuInterface == nullptr) return;
+
+	MainMenuInterface->RefreshSessionList();	
 }
