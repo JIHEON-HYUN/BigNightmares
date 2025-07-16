@@ -7,7 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Character/BNBaseMonster.h"
-#include "Monster/BNMonsterGameplayTags.h"
+#include "DataAsset/DataAsset_State_Monster.h"
 
 ABNBaseAIController::ABNBaseAIController()
 {
@@ -21,34 +21,31 @@ void ABNBaseAIController::OnPossess(APawn* InPawn)
 	
 	if (ABNBaseMonster* Monster = Cast<ABNBaseMonster>(InPawn))
 	{
-		if (Monster->BehaviorTree && Monster->BehaviorTree->BlackboardAsset)
+		// [수정] OnPossess는 이제 비헤이비어 트리를 실행하는 책임만 가집니다.
+		// 초기 상태 설정은 몬스터가 BeginPlay에서 직접 처리합니다.
+		if (Monster->BehaviorTree)
 		{
-			// 1. 블랙보드를 설정합니다.
-			UBlackboardComponent* TempBlackboardComp = nullptr;
-			if (UseBlackboard(Monster->BehaviorTree->BlackboardAsset, TempBlackboardComp))
-			{
-				// 2. [핵심 수정] 몬스터의 현재 상태(GameplayTag)를 읽어서 블랙보드의 초기값을 설정합니다.
-				// OnPossess는 BeginPlay 이후에 호출되므로, 몬스터는 이미 Dormant 태그를 가지고 있습니다.
-				const FBNMonsterGameplayTags& GameplayTags = FBNMonsterGameplayTags::Get();
-				FName InitialStateName = NAME_None;
-
-				if (Monster->HasStateTag(GameplayTags.Character_Monster_Dormant))
-				{
-					InitialStateName = GameplayTags.Character_Monster_Dormant.GetTagName();
-					UE_LOG(LogTemp, Log, TEXT("AIController possessed a Dormant monster. Setting Blackboard State to: %s"), *InitialStateName.ToString());
-				}
-				
-				Blackboard->SetValueAsName(TEXT("State"), InitialStateName);
-
-				// 3. 이제 블랙보드가 올바른 초기 상태를 알게 되었으므로, 비헤이비어 트리를 시작합니다.
-				BehaviorTreeComponent->StartTree(*(Monster->BehaviorTree));
-			}
+			RunBehaviorTree(Monster->BehaviorTree);
 		}
 		
 		if (AIPerceptionComponent)
 		{
 			AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABNBaseAIController::OnTargetPerceptionUpdated);
 		}
+	}
+}
+
+void ABNBaseAIController::SetInitialStateOnBlackboard(FName InitialState)
+{
+	if (UBlackboardComponent* MyBlackboard = GetBlackboardComponent())
+	{
+		MyBlackboard->SetValueAsName(TEXT("State"), InitialState);
+		UE_LOG(LogTemp, Log, TEXT("AIController's Blackboard State was set to: %s (Called by Monster)"), *InitialState.ToString());
+	}
+	else
+	{
+		// 이 로그는 보통 OnPossess가 아직 호출되지 않았을 때 나타날 수 있습니다.
+		UE_LOG(LogTemp, Warning, TEXT("SetInitialStateOnBlackboard was called, but BlackboardComponent is not yet valid."));
 	}
 }
 

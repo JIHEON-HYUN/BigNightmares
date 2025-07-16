@@ -3,7 +3,7 @@
 
 #include "Character/BNBaseMonster.h"
 #include "Abilities/BNBaseAbilitySystemComponent.h"
-#include "Monster/BNMonsterGameplayTags.h"
+#include "DataAsset/DataAsset_State_Monster.h"
 #include "AIController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -37,77 +37,77 @@ void ABNBaseMonster::BeginPlay()
 {
     Super::BeginPlay();
 
-    // 게임이 시작되면, 몬스터의 초기 상태를 'Dormant'(비활성)으로 설정합니다.
-    if (AbilitySystemComponent)
+    // 데이터 에셋의 DormantStateTag를 초기 상태로 부여합니다.
+    if (AbilitySystemComponent && StateDataAsset)
     {
-        AbilitySystemComponent->AddReplicatedLooseGameplayTag(FBNMonsterGameplayTags::Get().Character_Monster_Dormant);
+        AbilitySystemComponent->AddReplicatedLooseGameplayTag(StateDataAsset->DormantStateTag);
+        UE_LOG(LogTemp, Warning, TEXT("[%s] has entered %s State."), *GetName(), *StateDataAsset->DormantStateTag.ToString());
     }
-
-    // [로그 추가] 현재 상태를 출력합니다.
-    UE_LOG(LogTemp, Warning, TEXT("[%s] has entered Dormant State."), *GetName());
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("[%s] does not have a valid StateDataAsset!"), *GetName());
+    }
 }
 
 // ... (ActivateMonster, EnterIdleState 등 나머지 함수는 기존과 동일) ...
 void ABNBaseMonster::ActivateMonster()
 {
-    // [수정됨] 필수 컴포넌트 유무만 확인합니다. 태그 유효성 검사는 더 이상 필요 없습니다.
-    if (!AbilitySystemComponent)
+    if (!AbilitySystemComponent || !StateDataAsset)
     {
-        UE_LOG(LogTemp, Error, TEXT("BNBaseMonster::ActivateMonster - AbilitySystemComponent is NULL!")); // [로그 추가]
+        UE_LOG(LogTemp, Error, TEXT("BNBaseMonster::ActivateMonster - AbilitySystemComponent or StateDataAsset is NULL!"));
+        return;
+    }
+    
+    // 이미 활성 상태(Idle, Chase, Attack 등)인지 확인합니다.
+    bool bIsAlreadyActive = HasStateTag(StateDataAsset->IdleStateTag) || HasStateTag(StateDataAsset->ChaseStateTag) || HasStateTag(StateDataAsset->AttackStateTag);
+    if (bIsAlreadyActive)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("BNBaseMonster::ActivateMonster - Monster is already active."));
         return;
     }
 
-    // [수정됨] 변수 이름을 'Tags'에서 'GameplayTags'로 변경하여 명확성을 높입니다.
-    const FBNMonsterGameplayTags& GameplayTags = FBNMonsterGameplayTags::Get();
-    if (AbilitySystemComponent->HasMatchingGameplayTag(GameplayTags.Character_Monster_Active))
-    {
-        UE_LOG(LogTemp, Warning, TEXT("BNBaseMonster::ActivateMonster - Monster is already active.")); // [로그 추가]
-        return;
-    }
+    UE_LOG(LogTemp, Warning, TEXT("[%s] is being activated. Removing Dormant State."), *GetName());
 
-    // [로그 추가] 상태 변경 전 로그를 출력합니다.
-    UE_LOG(LogTemp, Warning, TEXT("[%s] is being activated. Removing Dormant State and adding Active State."), *GetName());
-
-    // [수정됨] 더 이상 존재하지 않는 DormantStateTag, ActiveStateTag 변수 대신,
-    // FBNMonsterGameplayTags 싱글톤에서 직접 태그를 가져와 사용합니다.
-    AbilitySystemComponent->RemoveReplicatedLooseGameplayTag(GameplayTags.Character_Monster_Dormant);
-    AbilitySystemComponent->AddReplicatedLooseGameplayTag(GameplayTags.Character_Monster_Active);
-
-    // AI 로직을 시작하고, 초기 행동 상태를 'Idle'(대기)로 설정합니다.
+    // Dormant 태그를 제거하고, Idle 상태로 전환합니다.
+    AbilitySystemComponent->RemoveReplicatedLooseGameplayTag(StateDataAsset->DormantStateTag);
     EnterIdleState();
 }
 
 void ABNBaseMonster::EnterIdleState()
 {
-    TransitionToState(FBNMonsterGameplayTags::Get().Character_Monster_Active_Idle);
+    if (!StateDataAsset) return;
+    TransitionToState(StateDataAsset->IdleStateTag);
 }
 
 void ABNBaseMonster::EnterChasingState()
 {
-    TransitionToState(FBNMonsterGameplayTags::Get().Character_Monster_Active_Chasing);
+    if (!StateDataAsset) return;
+    TransitionToState(StateDataAsset->ChaseStateTag);
 }
 
 void ABNBaseMonster::EnterAttackingState()
 {
-    TransitionToState(FBNMonsterGameplayTags::Get().Character_Monster_Active_Attacking);
+    if (!StateDataAsset) return;
+    TransitionToState(StateDataAsset->AttackStateTag);
 }
 
 void ABNBaseMonster::TransitionToState(const FGameplayTag& NewStateTag)
 {
-    if (!AbilitySystemComponent || !NewStateTag.IsValid()) return;
+    if (!AbilitySystemComponent || !StateDataAsset || !NewStateTag.IsValid()) return;
 
-    // [수정됨] 변수 이름을 'Tags'에서 'MonsterTags'로 변경하여 부모 클래스와의 충돌을 피합니다.
-    const FBNMonsterGameplayTags& MonsterTags = FBNMonsterGameplayTags::Get();
+    // 데이터 에셋에 정의된 모든 상태 태그를 제거 리스트에 추가합니다.
     FGameplayTagContainer TagsToRemove;
-    TagsToRemove.AddTag(MonsterTags.Character_Monster_Active_Idle);
-    TagsToRemove.AddTag(MonsterTags.Character_Monster_Active_Chasing);
-    TagsToRemove.AddTag(MonsterTags.Character_Monster_Active_Attacking);
+    TagsToRemove.AddTag(StateDataAsset->DormantStateTag);
+    TagsToRemove.AddTag(StateDataAsset->IdleStateTag);
+    TagsToRemove.AddTag(StateDataAsset->ChaseStateTag);
+    TagsToRemove.AddTag(StateDataAsset->AttackStateTag);
     AbilitySystemComponent->RemoveReplicatedLooseGameplayTags(TagsToRemove);
     
-    // 새로운 행동 상태 태그를 추가합니다.
+    // 새로운 상태 태그를 추가합니다.
     AbilitySystemComponent->AddReplicatedLooseGameplayTag(NewStateTag);
+    UE_LOG(LogTemp, Log, TEXT("[%s] transitioned to state: %s"), *GetName(), *NewStateTag.ToString());
 
-    // AI가 현재 상태를 알 수 있도록 블랙보드(Blackboard)의 값을 업데이트합니다.
+    // 블랙보드의 값을 업데이트합니다.
     AAIController* AIController = Cast<AAIController>(GetController());
     if (AIController)
     {

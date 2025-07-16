@@ -8,7 +8,6 @@
 
 class UBehaviorTreeComponent;
 class UAIPerceptionComponent;
-// [수정됨] FAIStimulus는 class가 아닌 struct입니다.
 struct FAIStimulus;
 
 /**
@@ -24,6 +23,9 @@ public:
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
+
+	// [추가] 몬스터가 자신의 초기 상태를 블랙보드에 설정하기 위해 호출할 함수입니다.
+	void SetInitialStateOnBlackboard(FName InitialState);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI Components")

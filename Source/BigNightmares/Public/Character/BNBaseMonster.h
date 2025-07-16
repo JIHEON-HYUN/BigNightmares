@@ -10,6 +10,7 @@
 
 class UBehaviorTree;
 class UBNBaseAbilitySystemComponent;
+class UDataAsset_State_Monster;
 
 /**
  * 
@@ -28,6 +29,10 @@ public:
 	// 이 몬스터가 사용할 비헤이비어 트리 에셋입니다. AI 컨트롤러가 이 정보를 사용합니다.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
+
+	// 블루프린트에서 각 몬스터 종류에 맞는 데이터 에셋을 할당해줍니다.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|State")
+	TObjectPtr<UDataAsset_State_Monster> StateDataAsset;
 
 protected:
 	// AI 컨트롤러에 의해 빙의될 때 호출됩니다.
