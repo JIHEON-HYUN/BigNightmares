@@ -18,6 +18,8 @@ class BIGNIGHTMARES_API ABNGameState : public AGameStateBase
 {
 	GENERATED_BODY()
 
+#pragma region Lobby
+	
 public:
 	void AddLobbyPlayer(const FLobbyPlayerData& NewPlayer);
 	void RemoveLobbyPlayer(class ABNPlayerState* ExitPlayerState);
@@ -35,4 +37,12 @@ protected:
 	void OnRep_LobbyPlayerDataList();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+#pragma endregion Lobby
+
+#pragma region InGame
+
+	
+	
+#pragma endregion InGame
 };

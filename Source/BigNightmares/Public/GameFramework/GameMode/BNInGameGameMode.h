@@ -7,6 +7,7 @@
 #include "BNInGameGameMode.generated.h"
 
 class UBNMonoCharacterDataAsset;
+
 /**
  * 
  */
@@ -16,10 +17,12 @@ class BIGNIGHTMARES_API ABNInGameGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
+	virtual void BeginPlay() override;
+	
 	UBNMonoCharacterDataAsset* GetBNMonoCharacterDataAsset() const;
 	
 private:
-	// 서버에서만 처리해야할 데이터는 gamemode에 선언되어야 함. 해당 변수는 캐릭터의 기본 베이스 데이터에셋임.
+	// 캐릭터 기본 베이스 데이터에셋
 	UPROPERTY(EditDefaultsOnly, Category="Custom Values|Class Defaults")
 	TObjectPtr<UBNMonoCharacterDataAsset> MonoCharacterDefaultDataAsset;
 };

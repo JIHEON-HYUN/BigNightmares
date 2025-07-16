@@ -23,15 +23,16 @@ class BIGNIGHTMARES_API ABNPlayerController : public APlayerController, public I
 	GENERATED_BODY()
 
 public:
+	ABNPlayerController();
+	virtual void BeginPlay() override;
+
+#pragma region Lobby
+	
 	TSubclassOf<class UUserWidget> LobbyClass;
 	
 	UPROPERTY()
 	class UBNLobbyWidget* LobbyWidget;
 	
-	ABNPlayerController();
-	virtual void BeginPlay() override;
-
-	// LobbyWidget 기능
 	UFUNCTION(BlueprintCallable)
 	virtual void LoadLobbyMenu() override;
 	UFUNCTION(BlueprintCallable)
@@ -47,8 +48,9 @@ public:
 	UFUNCTION()
 	void OnLobbyPlayerUpdated_Handler(const TArray<FLobbyPlayerData>& UpdatedList);
 
-	
-	
+#pragma endregion Lobby
+
+public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UBNInventoryWidgetController* GetBNInventoryWidgetController();

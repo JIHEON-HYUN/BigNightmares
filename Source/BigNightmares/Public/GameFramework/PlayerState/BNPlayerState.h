@@ -10,10 +10,18 @@
 #include "UI/InGame/InventoryInterface.h"
 #include "BNPlayerState.generated.h"
 
+UENUM(BlueprintType)
+enum class EPlayerType : uint8
+{
+	Prey,
+	Resident
+};
+
 class UInventoryComponent;
 class UBNTarotCardAttributeSet;
 class UBNBaseAttributeSet;
 class UBNBaseAbilitySystemComponent;
+
 /**
  * 
  */
@@ -25,8 +33,19 @@ class BIGNIGHTMARES_API ABNPlayerState : public APlayerState, public IAbilitySys
 public:
 	ABNPlayerState();
 
-#pragma region Abilities
+#pragma region InGame
+
+private:
+	EPlayerType PlayerType;
+
+public:
+	void SetPlayerType(EPlayerType NewType);
 	
+#pragma endregion InGame
+
+#pragma region Abilities
+
+public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
 	// FORCEINLINE UBNBaseAbilitySystemComponent* GetBNBaseAbilitySystemComponent() const { return BNBaseAbilitySystemComponent.Get(); }
