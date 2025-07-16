@@ -39,21 +39,27 @@ void ABNBaseMonster::BeginPlay()
 
     if (AbilitySystemComponent && StateDataAsset)
     {
-        const FGameplayTag DormantTag = StateDataAsset->DormantStateTag;
-        AbilitySystemComponent->AddReplicatedLooseGameplayTag(DormantTag);
-        UE_LOG(LogTemp, Warning, TEXT("[%s] has entered %s State."), *GetName(), *DormantTag.ToString());
+        // [수정] 데이터 에셋에서 '초기 상태' 태그를 가져옵니다. (보통 Dormant)
+        const FGameplayTag InitialStateTag = StateDataAsset->DormantStateTag;
+        
+        // 초기 상태 태그를 부여합니다.
+        AbilitySystemComponent->AddReplicatedLooseGameplayTag(InitialStateTag);
+		
+        // [수정] 현재 부여된 '초기 상태'를 로그로 출력하도록 변경하여 명확성을 높입니다.
+        UE_LOG(LogTemp, Warning, TEXT("[%s] has entered initial state: %s"), *GetName(), *InitialStateTag.ToString());
 
-        // [핵심 수정] BeginPlay 시점에 컨트롤러가 이미 존재한다면, 상태를 알려줍니다.
-        // OnPossess가 먼저 호출된 경우를 대비한 안전장치입니다.
+        // AI 컨트롤러에게도 초기 상태를 알려줍니다.
         if (ABNBaseAIController* MyController = Cast<ABNBaseAIController>(GetController()))
         {
-            MyController->SetInitialStateOnBlackboard(DormantTag.GetTagName());
+            MyController->SetInitialStateOnBlackboard(InitialStateTag.GetTagName());
         }
     }
     else
     {
         UE_LOG(LogTemp, Error, TEXT("[%s] does not have a valid StateDataAsset!"), *GetName());
     }
+
+    //ActivateMonster();
 }
 
 // ... (ActivateMonster, EnterIdleState 등 나머지 함수는 기존과 동일) ...
