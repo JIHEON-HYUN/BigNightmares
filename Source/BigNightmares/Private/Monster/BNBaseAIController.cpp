@@ -21,11 +21,24 @@ void ABNBaseAIController::OnPossess(APawn* InPawn)
 	
 	if (ABNBaseMonster* Monster = Cast<ABNBaseMonster>(InPawn))
 	{
-		// [수정] OnPossess는 이제 비헤이비어 트리를 실행하는 책임만 가집니다.
-		// 초기 상태 설정은 몬스터가 BeginPlay에서 직접 처리합니다.
 		if (Monster->BehaviorTree)
 		{
 			RunBehaviorTree(Monster->BehaviorTree);
+
+			// [테스트용 수정] 몬스터가 빙의되면 즉시 활성화시킵니다.
+			// 테스트가 끝나면 이 줄을 주석 처리하고 아래의 원래 로직을 활성화하세요.
+			Monster->ActivateMonster();
+			
+			// [핵심 수정] OnPossess 시점에 몬스터의 상태를 확인하고 블랙보드를 설정합니다.
+			// 이 시점에는 BeginPlay가 이미 호출되었을 수도, 아닐 수도 있습니다.
+			// if (Monster->StateDataAsset)
+			// {
+			// 	const FGameplayTag DormantTag = Monster->StateDataAsset->DormantStateTag;
+			// 	if (Monster->HasStateTag(DormantTag))
+			// 	{
+			// 		SetInitialStateOnBlackboard(DormantTag.GetTagName());
+			// 	}
+			// }
 		}
 		
 		if (AIPerceptionComponent)

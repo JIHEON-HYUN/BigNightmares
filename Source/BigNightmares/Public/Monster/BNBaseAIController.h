@@ -21,12 +21,12 @@ class BIGNIGHTMARES_API ABNBaseAIController : public AAIController
 public:
 	ABNBaseAIController();
 
-protected:
-	virtual void OnPossess(APawn* InPawn) override;
-
 	// [추가] 몬스터가 자신의 초기 상태를 블랙보드에 설정하기 위해 호출할 함수입니다.
 	void SetInitialStateOnBlackboard(FName InitialState);
-
+	
+protected:
+	virtual void OnPossess(APawn* InPawn) override;
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI Components")
 	TObjectPtr<UBehaviorTreeComponent> BehaviorTreeComponent;

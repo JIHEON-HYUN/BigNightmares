@@ -4,7 +4,7 @@
 #include "Character/BNBaseMonster.h"
 #include "Abilities/BNBaseAbilitySystemComponent.h"
 #include "DataAsset/DataAsset_State_Monster.h"
-#include "AIController.h"
+#include "Monster/BNBaseAIController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -37,11 +37,18 @@ void ABNBaseMonster::BeginPlay()
 {
     Super::BeginPlay();
 
-    // 데이터 에셋의 DormantStateTag를 초기 상태로 부여합니다.
     if (AbilitySystemComponent && StateDataAsset)
     {
-        AbilitySystemComponent->AddReplicatedLooseGameplayTag(StateDataAsset->DormantStateTag);
-        UE_LOG(LogTemp, Warning, TEXT("[%s] has entered %s State."), *GetName(), *StateDataAsset->DormantStateTag.ToString());
+        const FGameplayTag DormantTag = StateDataAsset->DormantStateTag;
+        AbilitySystemComponent->AddReplicatedLooseGameplayTag(DormantTag);
+        UE_LOG(LogTemp, Warning, TEXT("[%s] has entered %s State."), *GetName(), *DormantTag.ToString());
+
+        // [핵심 수정] BeginPlay 시점에 컨트롤러가 이미 존재한다면, 상태를 알려줍니다.
+        // OnPossess가 먼저 호출된 경우를 대비한 안전장치입니다.
+        if (ABNBaseAIController* MyController = Cast<ABNBaseAIController>(GetController()))
+        {
+            MyController->SetInitialStateOnBlackboard(DormantTag.GetTagName());
+        }
     }
     else
     {
