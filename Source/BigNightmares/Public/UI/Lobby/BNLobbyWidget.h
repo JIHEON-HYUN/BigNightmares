@@ -32,7 +32,6 @@ protected:
 public:
 	// LobbyInterface에 의존성 주입
 	void SetLobbyInterface(IBNLobbyInterface* NewLobbyInterface);
-
 	void SetPlayerList(const TArray<FLobbyPlayerData>& PlayerDataList);
 	
 	void OpenMenu();

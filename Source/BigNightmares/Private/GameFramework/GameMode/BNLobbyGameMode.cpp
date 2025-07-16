@@ -21,17 +21,15 @@ void ABNLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	if (NewPlayer == nullptr) return;
 
 	FLobbyPlayerData NewLobbyPlayer;
-	auto NewPlayerState = NewPlayer->GetPlayerState<ABNPlayerState>();
-	auto GS = GetGameState<ABNGameState>();
+	auto PS = NewPlayer->GetPlayerState<ABNPlayerState>();
+	if (PS == nullptr) return;
 	
-	if (NewPlayerState != nullptr)
-	{
-		NewLobbyPlayer.PlayerName = NewPlayerState->GetPlayerName();
-		NewLobbyPlayer.ReadyState = false;
-		GS->AddLobbyPlayer(NewLobbyPlayer);
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Name = %s"), *NewLobbyPlayer.PlayerName);
+	auto GS = GetGameState<ABNGameState>();
+	if (GS == nullptr) return;
+	
+	NewLobbyPlayer.PlayerName = PS->GetPlayerName();
+	NewLobbyPlayer.ReadyState = false;
+	GS->AddLobbyPlayer(NewLobbyPlayer);
 }
 
 void ABNLobbyGameMode::Logout(AController* Exiting)
@@ -39,12 +37,12 @@ void ABNLobbyGameMode::Logout(AController* Exiting)
 	Super::Logout(Exiting);
 	if (Exiting == nullptr) return;
 
-	auto ExitPlayerState = Exiting->GetPlayerState<ABNPlayerState>();
+	auto PS = Exiting->GetPlayerState<ABNPlayerState>();
 	auto GS = GetGameState<ABNGameState>();
 	
-	if (ExitPlayerState != nullptr)
+	if (PS != nullptr)
 	{
-		GS->RemoveLobbyPlayer(ExitPlayerState);
+		GS->RemoveLobbyPlayer(PS);
 	}
 }
 

@@ -13,20 +13,17 @@ UCLASS()
 class BIGNIGHTMARES_API UBNPlayerList : public UUserWidget
 {
 	GENERATED_BODY()
-
-public:
+	
+protected:
 	// Widget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UTextBlock* SteamID;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UImage* CheckReady;
-
-	void Setup(class UBNLobbyWidget* NewParent);
+	
+public:
+	void Setup(FString NewSteamID, bool ReadyState);
 	void ChangeReadyState();
-
-private:
-	// 부모 로비 메뉴 위젯
-	UPROPERTY()
-	class UBNLobbyWidget* Parent;
+	const FString& GetSteamID();
 };

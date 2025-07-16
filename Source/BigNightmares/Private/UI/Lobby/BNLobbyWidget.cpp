@@ -55,9 +55,8 @@ void UBNLobbyWidget::SetPlayerList(const TArray<FLobbyPlayerData>& PlayerDataLis
 		auto Player = CreateWidget<UBNPlayerList>(World, PlayerListClass);
 		if (Player == nullptr) return;
 		
-		Player->SteamID->SetText(FText::FromString(PlayerData.PlayerName));
+		Player->Setup(PlayerData.PlayerName, PlayerData.ReadyState);
 
-		Player->Setup(this);
 		PlayerListBox->AddChild(Player);
 	}
 }
@@ -111,7 +110,7 @@ void UBNLobbyWidget::OnClickedReady()
 		auto Player = Cast<UBNPlayerList>(PlayerListBox->GetChildAt(i));
 		if (Player == nullptr) return;
 
-		if (Player->SteamID->GetText().ToString() == SteamID)
+		if (Player->GetSteamID() == SteamID)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("TLqkf"));
 			Player->ChangeReadyState();

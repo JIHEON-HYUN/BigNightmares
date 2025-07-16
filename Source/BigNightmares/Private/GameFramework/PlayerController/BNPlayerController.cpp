@@ -27,11 +27,11 @@ ABNPlayerController::ABNPlayerController()
 void ABNPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	auto GS = GetWorld()->GetGameState<ABNGameState>();
+	if (GS == nullptr) return;
 	
-	if (ABNGameState* GS = GetWorld()->GetGameState<ABNGameState>())
-	{
-		GS->OnLobbyPlayerUpdated.AddDynamic(this, &ABNPlayerController::OnLobbyPlayerUpdated_Handler);
-	}
+	GS->OnLobbyPlayerUpdated.AddDynamic(this, &ABNPlayerController::OnLobbyPlayerUpdated_Handler);
 }
 
 void ABNPlayerController::LoadLobbyMenu()
@@ -46,7 +46,9 @@ void ABNPlayerController::LoadLobbyMenu()
 
 void ABNPlayerController::OpenLobbyMenu()
 {
-	auto GS = Cast<ABNGameState>(GetWorld()->GetGameState());
+	auto GS = GetWorld()->GetGameState<ABNGameState>();
+	if (GS == nullptr) return;
+	
 	LobbyWidget->SetPlayerList(GS->GetLobbyPlayers());
 	LobbyWidget->OpenMenu();
 }

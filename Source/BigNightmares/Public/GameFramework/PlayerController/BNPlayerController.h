@@ -10,6 +10,7 @@
 #include "BNPlayerController.generated.h"
 
 struct FLobbyPlayerData;
+
 class UBNSystemWidget;
 class UInventoryComponent;
 /**
