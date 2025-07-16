@@ -61,9 +61,4 @@ protected:
 	virtual void EnterIdleState() override;
 	virtual void EnterChasingState() override;
 	virtual void EnterAttackingState() override;
-	
-private:
-
-	// [추가됨] 몬스터 자동 활성화를 위한 타이머 핸들입니다.
-	FTimerHandle ActivateTimerHandle;
 };

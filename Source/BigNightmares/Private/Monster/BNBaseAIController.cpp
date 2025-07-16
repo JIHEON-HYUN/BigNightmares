@@ -7,6 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Character/BNBaseMonster.h"
+#include "Monster/BNMonsterGameplayTags.h"
 
 ABNBaseAIController::ABNBaseAIController()
 {
@@ -17,25 +18,29 @@ ABNBaseAIController::ABNBaseAIController()
 void ABNBaseAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-
-	// [로그 추가] 어떤 컨트롤러가 어떤 폰에 빙의되었는지 확인합니다.
-	if (InPawn)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AI Controller '%s' has possessed '%s'"), *GetName(), *InPawn->GetName());
-	}
 	
 	if (ABNBaseMonster* Monster = Cast<ABNBaseMonster>(InPawn))
 	{
 		if (Monster->BehaviorTree && Monster->BehaviorTree->BlackboardAsset)
 		{
-			// [수정됨] UseBlackboard 함수는 두 번째 인자로 일반 포인터의 참조(UBlackboardComponent*&)를 요구합니다.
-			// 따라서 TObjectPtr인 멤버 변수 'Blackboard'를 직접 전달할 수 없습니다.
-			// 대신, 임시 일반 포인터 변수를 만들어 전달하여 함수 시그니처를 만족시킵니다.
+			// 1. 블랙보드를 설정합니다.
 			UBlackboardComponent* TempBlackboardComp = nullptr;
 			if (UseBlackboard(Monster->BehaviorTree->BlackboardAsset, TempBlackboardComp))
 			{
-				// UseBlackboard 함수가 성공하면, 컨트롤러의 내장 Blackboard 멤버 변수가 자동으로 설정됩니다.
-				// 이제 비헤이비어 트리를 시작할 수 있습니다.
+				// 2. [핵심 수정] 몬스터의 현재 상태(GameplayTag)를 읽어서 블랙보드의 초기값을 설정합니다.
+				// OnPossess는 BeginPlay 이후에 호출되므로, 몬스터는 이미 Dormant 태그를 가지고 있습니다.
+				const FBNMonsterGameplayTags& GameplayTags = FBNMonsterGameplayTags::Get();
+				FName InitialStateName = NAME_None;
+
+				if (Monster->HasStateTag(GameplayTags.Character_Monster_Dormant))
+				{
+					InitialStateName = GameplayTags.Character_Monster_Dormant.GetTagName();
+					UE_LOG(LogTemp, Log, TEXT("AIController possessed a Dormant monster. Setting Blackboard State to: %s"), *InitialStateName.ToString());
+				}
+				
+				Blackboard->SetValueAsName(TEXT("State"), InitialStateName);
+
+				// 3. 이제 블랙보드가 올바른 초기 상태를 알게 되었으므로, 비헤이비어 트리를 시작합니다.
 				BehaviorTreeComponent->StartTree(*(Monster->BehaviorTree));
 			}
 		}
@@ -49,7 +54,6 @@ void ABNBaseAIController::OnPossess(APawn* InPawn)
 
 void ABNBaseAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	// Blackboard는 AAIController의 멤버 변수이므로 직접 접근할 수 있습니다.
 	if (!Actor || !Blackboard)
 	{
 		return;

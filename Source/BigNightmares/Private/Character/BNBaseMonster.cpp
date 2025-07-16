@@ -25,7 +25,8 @@ UAbilitySystemComponent* ABNBaseMonster::GetAbilitySystemComponent() const
 
 void ABNBaseMonster::PossessedBy(AController* NewController)
 {
-    // Super::PossessedBy를 호출하지 않는 것은 그대로 유지합니다.
+    Super::PossessedBy(NewController);
+    
     if (AbilitySystemComponent)
     {
         AbilitySystemComponent->InitAbilityActorInfo(this, this);
@@ -49,8 +50,6 @@ void ABNBaseMonster::BeginPlay()
 // ... (ActivateMonster, EnterIdleState 등 나머지 함수는 기존과 동일) ...
 void ABNBaseMonster::ActivateMonster()
 {
-    UE_LOG(LogTemp, Warning, TEXT("BNBaseMonster::ActivateMonster - Base function called.")); // [로그 추가]
-
     // [수정됨] 필수 컴포넌트 유무만 확인합니다. 태그 유효성 검사는 더 이상 필요 없습니다.
     if (!AbilitySystemComponent)
     {

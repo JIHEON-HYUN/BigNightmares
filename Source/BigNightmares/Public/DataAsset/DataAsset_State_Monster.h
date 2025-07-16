@@ -17,7 +17,7 @@ class BIGNIGHTMARES_API UDataAsset_State_Monster : public UPrimaryDataAsset
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State Tags")
-	FGameplayTag InactiveStateTag;
+	FGameplayTag DormantStateTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State Tags")
 	FGameplayTag IdleStateTag;
