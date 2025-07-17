@@ -7,7 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Character/BNBaseMonster.h"
-#include "DataAsset/DataAsset_State_Monster.h"
+#include "DataAsset/DataAsset_State_Monster.h" // [오류 수정] 이 헤더 파일이 반드시 포함되어야 합니다.
 #include "Monster/BNBlackboardKeys.h"
 
 ABNBaseAIController::ABNBaseAIController()
@@ -53,20 +53,36 @@ void ABNBaseAIController::SetInitialStateOnBlackboard(FName InitialState)
 
 void ABNBaseAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	// GetBlackboardComponent()를 직접 사용하도록 수정하여 Blackboard 멤버 변수에 대한 의존성을 제거합니다.
-	if (!Actor || !GetBlackboardComponent())
+	UBlackboardComponent* MyBlackboard = GetBlackboardComponent();
+	if (!Actor || !MyBlackboard)
 	{
+		return;
+	}
+
+	ABNBaseMonster* Monster = Cast<ABNBaseMonster>(GetPawn());
+	if (!Monster || !Monster->StateDataAsset)
+	{
+		return;
+	}
+
+	// [수정] 블랙보드에서 현재 상태 값을 직접 가져와서 확인합니다.
+	const FName CurrentStateName = MyBlackboard->GetValueAsName(BBKeys::State);
+	const FName DormantStateName = Monster->StateDataAsset->DormantStateTag.GetTagName();
+
+	if (CurrentStateName == DormantStateName)
+	{
+		// 현재 상태가 Dormant라면, 아무것도 하지 않고 즉시 함수를 종료합니다.
 		return;
 	}
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		// [개선] 문자열 대신 정의된 키를 사용하여 안전하게 값을 설정합니다.
-		GetBlackboardComponent()->SetValueAsObject(BBKeys::TargetActor, Actor);
+		MyBlackboard->SetValueAsObject(BBKeys::TargetActor, Actor);
+		Monster->EnterChasingState();
 	}
 	else
 	{
-		// [개선] 문자열 대신 정의된 키를 사용하여 안전하게 값을 초기화합니다.
-		GetBlackboardComponent()->ClearValue(BBKeys::TargetActor);
+		MyBlackboard->ClearValue(BBKeys::TargetActor);
+		Monster->EnterIdleState();
 	}
 }
