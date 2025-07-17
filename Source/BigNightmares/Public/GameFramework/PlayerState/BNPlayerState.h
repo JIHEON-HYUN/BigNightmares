@@ -10,17 +10,17 @@
 #include "UI/InGame/InventoryInterface.h"
 #include "BNPlayerState.generated.h"
 
+class UInventoryComponent;
+class UBNTarotCardAttributeSet;
+class UBNBaseAttributeSet;
+class UBNBaseAbilitySystemComponent;
+
 UENUM(BlueprintType)
 enum class EPlayerType : uint8
 {
 	Prey,
 	Resident
 };
-
-class UInventoryComponent;
-class UBNTarotCardAttributeSet;
-class UBNBaseAttributeSet;
-class UBNBaseAbilitySystemComponent;
 
 /**
  * 
@@ -36,7 +36,7 @@ public:
 #pragma region InGame
 
 private:
-	EPlayerType PlayerType;
+	EPlayerType PlayerType = EPlayerType::Prey;
 
 public:
 	void SetPlayerType(EPlayerType NewType);

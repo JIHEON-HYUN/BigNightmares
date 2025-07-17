@@ -6,7 +6,21 @@
 #include "GameFramework/GameModeBase.h"
 #include "BNInGameGameMode.generated.h"
 
+enum class EPlayerType : uint8;
+
 class UBNMonoCharacterDataAsset;
+
+USTRUCT(BlueprintType)
+struct FInGamePlayerData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString PlayerName;
+	
+	UPROPERTY(BlueprintReadWrite)
+	EPlayerType PlayerType;
+};
 
 /**
  * 
@@ -17,7 +31,8 @@ class BIGNIGHTMARES_API ABNInGameGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-	virtual void BeginPlay() override;
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void Logout(AController* Exiting) override;
 	
 	UBNMonoCharacterDataAsset* GetBNMonoCharacterDataAsset() const;
 	

@@ -6,6 +6,7 @@
 #include "Net/UnrealNetwork.h"
 
 #include "GameFramework/GameMode/BNLobbyGameMode.h"
+#include "GameFramework/GameMode/BNInGameGameMode.h"
 #include "GameFramework/PlayerState/BNPlayerState.h"
 
 void ABNGameState::AddLobbyPlayer(const FLobbyPlayerData& NewPlayer)
@@ -63,4 +64,22 @@ void ABNGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ABNGameState, LobbyPlayerDataList);
+}
+
+void ABNGameState::AddInGamePlayer(const FInGamePlayerData& NewPlayer)
+{
+	InGamePlayerDataList.Add(NewPlayer);
+}
+
+void ABNGameState::RemoveInGamePlayer(class ABNPlayerState* ExitPlayerState)
+{
+	InGamePlayerDataList.RemoveAll([ExitPlayerState](const FInGamePlayerData& RemovePlayerData)
+		{
+			return RemovePlayerData.PlayerName == ExitPlayerState->GetPlayerName();
+		});
+}
+
+const TArray<FInGamePlayerData>& ABNGameState::GetInGamePlayers() const
+{
+	return InGamePlayerDataList;
 }

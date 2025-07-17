@@ -7,6 +7,7 @@
 #include "BNGameState.generated.h"
 
 struct FLobbyPlayerData;
+struct FInGamePlayerData;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLobbyPlayerUpdated, const TArray<FLobbyPlayerData>&, NewList);
 
@@ -42,7 +43,13 @@ protected:
 
 #pragma region InGame
 
-	
+public:
+	void AddInGamePlayer(const FInGamePlayerData& NewPlayer);
+	void RemoveInGamePlayer(class ABNPlayerState* ExitPlayerState);
+	const TArray<FInGamePlayerData>& GetInGamePlayers() const;
+
+protected:
+	TArray<FInGamePlayerData> InGamePlayerDataList;
 	
 #pragma endregion InGame
 };
