@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "NaniteSceneProxy.h"
 #include "Components/BoxComponent.h"
 
 // Sets default values
@@ -54,4 +55,19 @@ void ABaseMissionActor::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedCompone
 
 		Destroy();
 	}
+}
+
+UBoxComponent* ABaseMissionActor::GetOverlapComponent() const
+{
+	return OverlapBox;
+}
+
+UStaticMeshComponent* ABaseMissionActor::GetStaticMeshComponent() const
+{
+	return ActorMesh;
+}
+
+TSubclassOf<UGameplayEffect> ABaseMissionActor::GetOverlapEffect() const
+{
+	return OverlapEffect;
 }
