@@ -42,7 +42,7 @@ void ABNBaseMonster::BeginPlay()
     if (AbilitySystemComponent && StateDataAsset)
     {
         // [수정] 데이터 에셋에서 '초기 상태' 태그를 가져옵니다. (보통 Dormant)
-        const FGameplayTag InitialStateTag = StateDataAsset->IdleStateTag;
+        const FGameplayTag InitialStateTag = StateDataAsset->DormantStateTag;
         
         // 초기 상태 태그를 부여합니다.
         AbilitySystemComponent->AddReplicatedLooseGameplayTag(InitialStateTag);
