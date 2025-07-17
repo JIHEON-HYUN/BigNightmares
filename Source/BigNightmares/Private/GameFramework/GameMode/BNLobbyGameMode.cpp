@@ -58,7 +58,7 @@ void ABNLobbyGameMode::Ready()
 	if (ReadyCount == MaxReadyCount)
 	{
 		// ReadyCount가 정원이 되면, 3초 후에 게임 시작
-		GetWorldTimerManager().SetTimer(GameStartTimer, this, &ABNLobbyGameMode::StartGame, 1);
+		GetWorldTimerManager().SetTimer(GameStartTimer, this, &ABNLobbyGameMode::StartGame, 1.0f);
 	}
 }
 

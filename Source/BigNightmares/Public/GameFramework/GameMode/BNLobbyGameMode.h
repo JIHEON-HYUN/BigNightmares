@@ -38,7 +38,7 @@ public:
 
 private:
 	uint8 ReadyCount = 0;
-	uint8 MaxReadyCount = 3;
+	uint8 MaxReadyCount = 2;
 	FTimerHandle GameStartTimer;
 	
 	void StartGame();
