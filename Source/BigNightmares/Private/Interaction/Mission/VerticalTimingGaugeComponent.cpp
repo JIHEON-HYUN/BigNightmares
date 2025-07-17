@@ -10,6 +10,11 @@ UVerticalTimingGaugeComponent::UVerticalTimingGaugeComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	SetIsReplicatedByDefault(true);
+	//bAlwaysRelevant = true; //멀리 있어도 항상 복제 되도록 설정 (AActor 자료형에서 가능)
+	
+	
+
 	// ...
 }
 
