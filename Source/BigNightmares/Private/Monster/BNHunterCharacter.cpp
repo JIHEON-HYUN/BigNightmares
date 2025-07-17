@@ -29,14 +29,10 @@ ABNHunterCharacter::ABNHunterCharacter()
 
 void ABNHunterCharacter::ActivateMonster()
 {
-	// --- [추가된 디버그 코드 시작] ---
 	AController* MyController = GetController();
 	if (MyController)
 	{
-		// 현재 캐릭터의 이름과, 이 캐릭터에 빙의된 컨트롤러의 이름을 함께 출력합니다.
 		UE_LOG(LogTemp, Log, TEXT("Log: Character '%s' is possessed by Controller '%s'"), *GetName(), *MyController->GetName());
-
-		// 만약 컨트롤러가 AI 컨트롤러가 맞는지 더 확실하게 확인하고 싶다면, 캐스팅을 시도해볼 수 있습니다.
 		if (ABNBaseAIController* MyAIController = Cast<ABNBaseAIController>(MyController))
 		{
 			UE_LOG(LogTemp, Log, TEXT("Log: Controller is confirmed to be an ABNBaseAIController."));
@@ -48,10 +44,8 @@ void ABNHunterCharacter::ActivateMonster()
 	}
 	else
 	{
-		// 이 로그가 출력된다면, ActivateMonster가 호출되는 시점에 아직 컨트롤러가 빙의되지 않았다는 의미입니다.
 		UE_LOG(LogTemp, Error, TEXT("Error: Character '%s' has NO controller at the moment of activation!"), *GetName());
 	}
-
 	Super::ActivateMonster();
 }
 
@@ -59,10 +53,10 @@ void ABNHunterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// --- 무기 생성 및 장착 로직 ---
+	// [복원] 무기 생성 및 장착 로직을 다시 추가합니다.
 	if (DefaultWeaponClass)
 	{
-		if (UWorld* World = GetWorld()) // 월드가 유효한지 확인하는 구문 추가
+		if (UWorld* World = GetWorld())
 		{
 			EquippedWeapon = World->SpawnActor<ABNMonsterWeapon>(DefaultWeaponClass);
 			if (EquippedWeapon)
@@ -72,7 +66,7 @@ void ABNHunterCharacter::BeginPlay()
 		}
 	}
 
-	// --- 랜턴 생성 및 장착 로직 ---
+	// [복원] 랜턴 생성 및 장착 로직을 다시 추가합니다.
 	if (DefaultLanternClass)
 	{
 		if (UWorld* World = GetWorld())
@@ -84,6 +78,7 @@ void ABNHunterCharacter::BeginPlay()
 			}
 		}
 	}
+	
 }
 
 void ABNHunterCharacter::EnterIdleState()

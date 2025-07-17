@@ -7,6 +7,7 @@
 #include "Monster/BNBaseAIController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Monster/BNBlackboardKeys.h"
 
 ABNBaseMonster::ABNBaseMonster()
 {
@@ -29,6 +30,7 @@ void ABNBaseMonster::PossessedBy(AController* NewController)
     
     if (AbilitySystemComponent)
     {
+        // [복원] 어빌리티 시스템을 초기화하는 코드만 남깁니다.
         AbilitySystemComponent->InitAbilityActorInfo(this, this);
     }
 }
@@ -62,7 +64,6 @@ void ABNBaseMonster::BeginPlay()
     //ActivateMonster();
 }
 
-// ... (ActivateMonster, EnterIdleState 등 나머지 함수는 기존과 동일) ...
 void ABNBaseMonster::ActivateMonster()
 {
     if (!AbilitySystemComponent || !StateDataAsset)
@@ -127,7 +128,7 @@ void ABNBaseMonster::TransitionToState(const FGameplayTag& NewStateTag)
         UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
         if (BlackboardComp)
         {
-            BlackboardComp->SetValueAsName(TEXT("State"), NewStateTag.GetTagName());
+            BlackboardComp->SetValueAsName(BBKeys::State, NewStateTag.GetTagName());
         }
     }
 }
