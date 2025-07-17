@@ -6,6 +6,8 @@
 #include "GameFramework/GameStateBase.h"
 #include "BNGameState.generated.h"
 
+enum class EPlayerType : uint8;
+
 struct FLobbyPlayerData;
 struct FInGamePlayerData;
 
@@ -47,9 +49,21 @@ public:
 	void AddInGamePlayer(const FInGamePlayerData& NewPlayer);
 	void RemoveInGamePlayer(class ABNPlayerState* ExitPlayerState);
 	const TArray<FInGamePlayerData>& GetInGamePlayers() const;
+	void SetPlayerType(uint8 Index, EPlayerType NewType);
 
 protected:
 	TArray<FInGamePlayerData> InGamePlayerDataList;
+
+public:
+	uint8 RemainingPrivateMissionCount = 1;
+	uint8 RemainingCooperativeMissionCount = 1;
+	uint8 RemainingSacrificeMissionCount = 1;
+	uint8 RemainingAssignableMissionCount = 1;
+
+	void ClearPrivateMission();
+	void ClearCooperativeMission();
+	void ClearSacrificeMission();
+	void ClearAssignableMission();
 	
 #pragma endregion InGame
 };

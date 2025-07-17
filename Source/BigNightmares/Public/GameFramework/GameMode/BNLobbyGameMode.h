@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "BNLobbyGameMode.generated.h"
 
+// 플레이어 데이터 구조체 (이름, 준비상태)
 USTRUCT(BlueprintType)
 struct FLobbyPlayerData
 {
@@ -32,13 +33,11 @@ public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
 
-	void SetMaxReadyCount(uint8 NewMaxReadyCount);
 	void Ready();
 	void UnReady();
 
 private:
 	uint8 ReadyCount = 0;
-	uint8 MaxReadyCount = 2;
 	FTimerHandle GameStartTimer;
 	
 	void StartGame();

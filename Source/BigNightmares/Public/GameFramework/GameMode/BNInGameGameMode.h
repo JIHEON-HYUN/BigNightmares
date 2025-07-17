@@ -6,10 +6,17 @@
 #include "GameFramework/GameModeBase.h"
 #include "BNInGameGameMode.generated.h"
 
-enum class EPlayerType : uint8;
-
 class UBNMonoCharacterDataAsset;
 
+// 플레이어 직업 enum
+UENUM(BlueprintType)
+enum class EPlayerType : uint8
+{
+	Prey,
+	Resident
+};
+
+// 플레이어 데이터 구조체 (이름, 직업)
 USTRUCT(BlueprintType)
 struct FInGamePlayerData
 {
@@ -37,6 +44,8 @@ public:
 	UBNMonoCharacterDataAsset* GetBNMonoCharacterDataAsset() const;
 	
 private:
+	uint8 PlayerCount = 0;
+	
 	// 캐릭터 기본 베이스 데이터에셋
 	UPROPERTY(EditDefaultsOnly, Category="Custom Values|Class Defaults")
 	TObjectPtr<UBNMonoCharacterDataAsset> MonoCharacterDefaultDataAsset;

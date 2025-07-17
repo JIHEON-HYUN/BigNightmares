@@ -41,6 +41,8 @@ public:
 
 private:
 	TSubclassOf<class UUserWidget> MainMenuClass;
+	
+	UPROPERTY()
 	class UBNMainMenuWidget* MainMenuWidget;
 
 	FString DesiredSessionName;
@@ -58,4 +60,8 @@ private:
 	void OnNetworkFailure(UWorld * World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString = TEXT(""));
 	void OnFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+public:
+	UPROPERTY(BlueprintReadWrite)
+	uint8 MaxPlayerCount = 3;
 };

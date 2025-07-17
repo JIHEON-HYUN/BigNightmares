@@ -10,6 +10,7 @@
 #include "Online/OnlineSessionNames.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+#include "GameFramework/GameState/BNGameState.h"
 #include "UI/MainMenu/BNMainMenuWidget.h"
 
 const static FName SESSION_NAME = TEXT("GameSession");
@@ -144,7 +145,7 @@ void UBNGameInstance::CreateSession()
 			SessionSettings.bIsLANMatch = false;
 		}
 		
-		SessionSettings.NumPublicConnections = 6;
+		SessionSettings.NumPublicConnections = MaxPlayerCount;
 		// 온라인 세션 검색에 노출할지 결정, false면 세션 검색에서 제외됨
 		SessionSettings.bShouldAdvertise = true;
 		// Presence 세션으로 등록되서, Presence 기반 search에 노출됨

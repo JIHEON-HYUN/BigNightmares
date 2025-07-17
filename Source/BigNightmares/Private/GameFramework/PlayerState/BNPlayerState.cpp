@@ -37,11 +37,6 @@ ABNPlayerState::ABNPlayerState()
 	
 }
 
-void ABNPlayerState::SetPlayerType(EPlayerType NewType)
-{
-	PlayerType = NewType;
-}
-
 UAbilitySystemComponent* ABNPlayerState::GetAbilitySystemComponent() const
 {
 	return BNBaseAbilitySystemComponent;

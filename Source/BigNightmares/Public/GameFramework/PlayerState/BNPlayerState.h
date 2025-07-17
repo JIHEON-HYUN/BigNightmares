@@ -15,13 +15,6 @@ class UBNTarotCardAttributeSet;
 class UBNBaseAttributeSet;
 class UBNBaseAbilitySystemComponent;
 
-UENUM(BlueprintType)
-enum class EPlayerType : uint8
-{
-	Prey,
-	Resident
-};
-
 /**
  * 
  */
@@ -35,11 +28,7 @@ public:
 
 #pragma region InGame
 
-private:
-	EPlayerType PlayerType = EPlayerType::Prey;
 
-public:
-	void SetPlayerType(EPlayerType NewType);
 	
 #pragma endregion InGame
 
