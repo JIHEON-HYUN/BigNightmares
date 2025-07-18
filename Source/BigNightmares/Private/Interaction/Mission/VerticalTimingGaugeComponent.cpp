@@ -140,17 +140,16 @@ void UVerticalTimingGaugeComponent::Client_StartGaugeUI_Implementation(const ABN
 		UE_LOG(LogTemp, Error, TEXT("Client_StartGaugeUI: BNPlayerController is null. Cannot create widget."));
 		return;
 	}
-
-	ABNPlayerController* NonConstBNPlayerController = const_cast<ABNPlayerController*>(BNPlayerController);
-	if (NonConstBNPlayerController)
+	
+	ABNPlayerController* LocalPlayerController = Cast<ABNPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (LocalPlayerController)
 	{
-		VerticalGaugeWidgetInstance = CreateWidget<UUserWidget>(NonConstBNPlayerController, VerticalGaugeWidgetClass);
-		bIsGaugeActiveLocal = true;
+		VerticalGaugeWidgetInstance = CreateWidget<UUserWidget>(LocalPlayerController, VerticalGaugeWidgetClass);
 		if (VerticalGaugeWidgetInstance)
-		{			
+		{
 			VerticalGaugeWidgetInstance->AddToViewport();
 			bIsGaugeActiveLocal = true;
-			
+
 			Border_GaugeBackground = Cast<UBorder>(VerticalGaugeWidgetInstance->GetWidgetFromName(TEXT("Border_GaugeBackground")));
 			Image_Green = Cast<UImage>(VerticalGaugeWidgetInstance->GetWidgetFromName(TEXT("Image_Green")));
 			Image_Pointer = Cast<UImage>(VerticalGaugeWidgetInstance->GetWidgetFromName(TEXT("Image_Pointer")));
@@ -160,7 +159,6 @@ void UVerticalTimingGaugeComponent::Client_StartGaugeUI_Implementation(const ABN
 				Server_RequestEndGaugeInternal(GaugeID, EVerticalGaugeResult::EVGR_Fail);
 				return;
 			}
-
 		}
 		
 		CachedGaugeHeight = Border_GaugeBackground->GetCachedGeometry().GetLocalSize().Y;
