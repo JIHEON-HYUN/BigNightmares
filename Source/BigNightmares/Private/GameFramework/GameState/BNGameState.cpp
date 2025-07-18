@@ -98,6 +98,12 @@ bool ABNGameState::Server_TryStartSpecificGaugeChallenge(FGuid GaugeID, const AB
 	if (!HasAuthority()) return false;
 	if (!PlayerController || !PlayerController->PlayerState) return false;
 
+	if (!IsValid(PlayerController))
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameState : Server_RequestStartGaugeInternal: Requesting BNPlayerController is null."));
+		return false; 
+	}
+
 	FGaugeChallengeInfo* FoundInfo = Rep_ActiveGaugeChallenges.FindByPredicate([&] (const FGaugeChallengeInfo& Info)
 	{
 		return Info.GaugeID == GaugeID;

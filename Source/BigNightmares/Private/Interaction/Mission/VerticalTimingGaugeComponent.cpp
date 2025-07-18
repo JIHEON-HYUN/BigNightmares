@@ -50,7 +50,7 @@ void UVerticalTimingGaugeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeP
 	DOREPLIFETIME(UVerticalTimingGaugeComponent, GreenZoneLength);
 }
 
-void UVerticalTimingGaugeComponent::RequestStartGauge()
+void UVerticalTimingGaugeComponent::RequestStartGauge(const ABNPlayerController* BNPlayerController)
 {
 	if (!GetWorld()) return;
 
@@ -68,11 +68,11 @@ void UVerticalTimingGaugeComponent::RequestStartGauge()
 
 	// 클라이언트든 서버든 (리스닝 서버의 호스트 클라이언트 부분 포함),
 	// 게이지 시작 요청은 항상 서버 RPC를 통해 이루어집니다.
-	Server_RequestStartGaugeInternal(GaugeID);
+	Server_RequestStartGaugeInternal(GaugeID, BNPlayerController);
 }
 
 // Server_RequestStartGaugeInternal RPC 유효성 검사
-bool UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Validate(FGuid InGaugeID)
+bool UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Validate(FGuid InGaugeID, const ABNPlayerController* BNPlayerController)
 {
 	//1. 게이지 ID의 유효성 검사
 	//GameState의 유효성
@@ -94,31 +94,31 @@ bool UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Validate(FG
 }
 
 // Server_RequestStartGaugeInternal RPC 구현 (서버에서 실행)
-void UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Implementation(FGuid InGaugeID)
+void UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Implementation(FGuid InGaugeID, const ABNPlayerController* BNPlayerController)
 {
-	ABNPlayerController* BNPlayerController = Cast<ABNPlayerController>(GetOwner()->GetInstigatorController());
 	if (!BNPlayerController)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Server_RequestStartGaugeInternal: Requesting BNPlayerController is null."));
+		UE_LOG(LogTemp, Error, TEXT("VerticalTimingGaugeComponent: Server_RequestStartGaugeInternal: Requesting BNPlayerController is null."));
 		return;
-	}
-
-	ABNGameState* GS = GetWorld()->GetGameState<ABNGameState>();
-	if (GS && GS->Server_TryStartSpecificGaugeChallenge(GaugeID, BNPlayerController))
-	{
-		//서버에서 GreenZone의 위치를 랜덤 결정
-		GreenZoneStart = FMath::FRandRange(0.0f, 1.0f - GreenZoneLength);
-		//해당 변수는 값이 바뀌는 순간 ReplicatedUsing에 의해 클라에 복제
-
-		Client_StartGaugeUI(); //서버 자신의 클라이언트 부분도 UI시작	
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Server: Client's request to start gauge challenge ID '%s' denied by GameState."), *InGaugeID.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("VerticalTimingGaugeComponent: Server_RequestStartGaugeInternal: Requesting BNPlayerController."));
 	}
+	
+	//서버에서 GreenZone의 위치를 랜덤 결정
+	GreenZoneStart = FMath::FRandRange(0.0f, 1.0f - GreenZoneLength);
+	//해당 변수는 값이 바뀌는 순간 ReplicatedUsing에 의해 클라에 복제
+
+	Client_StartGaugeUI(BNPlayerController); //서버 자신의 클라이언트 부분도 UI시작
+
+	bIsGaugeActiveLocal = true;
+
+	UE_LOG(LogTemp, Log, TEXT("Server: Gauge ID '%s' UI/logic initiated for Player %s (targeting specific client)."), 
+		*GaugeID.ToString(), *BNPlayerController->GetName());
 }
 
-void UVerticalTimingGaugeComponent::Client_StartGaugeUI_Implementation()
+void UVerticalTimingGaugeComponent::Client_StartGaugeUI_Implementation(const ABNPlayerController* BNPlayerController)
 {
 	//클라 실행
 	//서버로부터 '게이지 UI를 시작하라'는 명령을 받았을 때만 실행
@@ -131,45 +131,55 @@ void UVerticalTimingGaugeComponent::Client_StartGaugeUI_Implementation()
 	//기존 위젯이 있다면 제거 (시작시)
 	if (VerticalGaugeWidgetInstance)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Client_StartGaugeUI: VerticalGaugeWidgetInstance is Created."));
 		VerticalGaugeWidgetInstance->RemoveFromParent();
+		UE_LOG(LogTemp, Warning, TEXT("Client_StartGaugeUI: VerticalGaugeWidgetInstance is Removed."));
 		VerticalGaugeWidgetInstance = nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("Client_StartGaugeUI: VerticalGaugeWidgetInstance is nullptr."));
+	}
 
-		ABNPlayerController* BNPlayerController = Cast<ABNPlayerController>(GetWorld()->GetFirstPlayerController());
-		if (BNPlayerController)
+	if (!BNPlayerController)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Client_StartGaugeUI: BNPlayerController is null. Cannot create widget."));
+		return;
+	}
+
+	ABNPlayerController* NonConstBNPlayerController = const_cast<ABNPlayerController*>(BNPlayerController);
+	if (NonConstBNPlayerController)
+	{
+		VerticalGaugeWidgetInstance = CreateWidget<UUserWidget>(NonConstBNPlayerController, VerticalGaugeWidgetClass);
+		if (VerticalGaugeWidgetInstance)
 		{
-			VerticalGaugeWidgetInstance = CreateWidget<UUserWidget>(BNPlayerController, VerticalGaugeWidgetClass);
-			if (VerticalGaugeWidgetInstance)
+			VerticalGaugeWidgetInstance->AddToViewport();
+			if (!Border_GaugeBackground || !Image_Green || !Image_Pointer)
 			{
-				VerticalGaugeWidgetInstance->AddToViewport();
-				if (!Border_GaugeBackground || !Image_Green || !Image_Pointer)
-				{
-					Server_RequestEndGaugeInternal(GaugeID, EVerticalGaugeResult::EVGR_Fail);
-					return;
-				}
-
-			}
-			
-			CachedGaugeHeight = Border_GaugeBackground->GetCachedGeometry().GetLocalSize().Y;
-			if (CachedGaugeHeight == 0.0f)
-			{
-				CachedPointerHeight = 400.0f;
-				UE_LOG(LogTemp, Warning, TEXT("CachedGaugeHeight was 0.0f for ID %s. Defaulting to %f."), *GaugeID.ToString(), CachedGaugeHeight);
-			}
-			CachedPointerHeight =Image_Pointer->GetCachedGeometry().GetLocalSize().Y;
-			if (CachedPointerHeight == 0.0f)
-			{
-				CachedPointerHeight = 50.0f;
-				UE_LOG(LogTemp, Warning, TEXT("CachedPointerHeight was 0.0f for ID %s. Defaulting to %f."), *GaugeID.ToString(), CachedPointerHeight);
+				Server_RequestEndGaugeInternal(GaugeID, EVerticalGaugeResult::EVGR_Fail);
+				return;
 			}
 
-			UpdateGreenZoneUI();
-			CurrentGaugeValue = 0.0f;
-			GaugeDirection = 1.0f;
-			bIsGaugeActive = true;
-			UE_LOG(LogTemp, Log, TEXT("Client: Gauge UI for ID '%s' started."), *GaugeID.ToString());
 		}
+		
+		CachedGaugeHeight = Border_GaugeBackground->GetCachedGeometry().GetLocalSize().Y;
+		if (CachedGaugeHeight == 0.0f)
+		{
+			CachedPointerHeight = 400.0f;
+			UE_LOG(LogTemp, Warning, TEXT("CachedGaugeHeight was 0.0f for ID %s. Defaulting to %f."), *GaugeID.ToString(), CachedGaugeHeight);
+		}
+		CachedPointerHeight =Image_Pointer->GetCachedGeometry().GetLocalSize().Y;
+		if (CachedPointerHeight == 0.0f)
+		{
+			CachedPointerHeight = 50.0f;
+			UE_LOG(LogTemp, Warning, TEXT("CachedPointerHeight was 0.0f for ID %s. Defaulting to %f."), *GaugeID.ToString(), CachedPointerHeight);
+		}
+
+		UpdateGreenZoneUI();
+		CurrentGaugeValue = 0.0f;
+		GaugeDirection = 1.0f;
+		bIsGaugeActive = true;
+		UE_LOG(LogTemp, Log, TEXT("Client: Gauge UI for ID '%s' started."), *GaugeID.ToString());
 	}
 }
+
 
 void UVerticalTimingGaugeComponent::HandleGaugeInput()
 {
@@ -253,6 +263,7 @@ void UVerticalTimingGaugeComponent::Client_EndGaugeUI_Implementation(EVerticalGa
 		VerticalGaugeWidgetInstance = nullptr;
 		UE_LOG(LogTemp, Log, TEXT("Client: Gauge UI for ID '%s' ended."), *GaugeID.ToString());
 	}
+	bIsGaugeActiveLocal = false; // 로컬 상태 비활성화
 	
 	OnGaugeFinished.Broadcast(Result);
 }

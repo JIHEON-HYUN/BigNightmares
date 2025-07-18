@@ -9,6 +9,7 @@
 
 #include "VerticalTimingGaugeComponent.generated.h"
 
+class ABNPlayerController;
 class UImage;
 class UBorder;
 enum class EVerticalGaugeResult : uint8;
@@ -31,6 +32,10 @@ protected:
 
 	// 복제 속성 등록
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	// UI 활성화는 Client RPC로 직접 제어하는 것이 더 정확
+	UPROPERTY() // bIsGaugeActive는 복제 불필요. 클라이언트 로컬 상태로 관리
+	bool bIsGaugeActiveLocal; // 클라이언트 로컬에서만 사용될 게이지 활성화 상태 변수 (옵션)
 
 public:	
 	// Called every frame
@@ -84,11 +89,11 @@ public:
 
 	//서버에 게이지 시작을 요청
 	UFUNCTION(BlueprintCallable, Category="Timing Gauge | Control")
-	void RequestStartGauge();
+	void RequestStartGauge(const ABNPlayerController* BNPlayerController);
 
 	//클라이언트에서 게이지 실제로 시작
 	UFUNCTION(Client, Reliable)
-	void Client_StartGaugeUI();
+	void Client_StartGaugeUI(const ABNPlayerController* BNPlayerController);
 
 	//플레이어 입력을 처리 (클라이언트에서 서버로 결과 전송용)
 	UFUNCTION(BlueprintCallable, Category = "Timing Gauge | Control")
@@ -119,7 +124,7 @@ private:
 
 	//서버로 게이지 시작 요청 RPC
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_RequestStartGaugeInternal(FGuid InGaugeID);
+	void Server_RequestStartGaugeInternal(FGuid InGaugeID, const ABNPlayerController* BNPlayerController);
 
 	//서버로 게이지 종료 요청 RPC
 	UFUNCTION(Server, Reliable, WithValidation)

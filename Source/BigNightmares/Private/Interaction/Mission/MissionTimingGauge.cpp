@@ -44,23 +44,24 @@ void AMissionTimingGauge::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedCompo
 	if (HasAuthority() && OtherActor)
 	{
 		APawn* OverlappingPawn = Cast<APawn>(OtherActor);
-		if (OverlappingPawn && OverlappingPawn->GetPlayerState())
+		if (IsValid(OverlappingPawn) && OverlappingPawn->GetPlayerState())
 		{
 			ABNPlayerController* BNPC = Cast<ABNPlayerController>(OverlappingPawn->GetController());
-			if (BNPC)
+			if (IsValid(BNPC))
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Server: Overlapping Pawn's Controller is a valid ABNPlayerController. OtherActor: %s"), *OtherActor->GetName());
 				ABNPlayerState* BNPS = Cast<ABNPlayerState>(OverlappingPawn->GetPlayerState());
-				if (BNPS)
+				if (IsValid(BNPS))
 				{
 					ABNGameState* BNGS = GetWorld()->GetGameState<ABNGameState>();
-					if (BNGS && IsValid(TimingGaugeComponent))
+					if (IsValid(BNGS) && IsValid(TimingGaugeComponent))
 					{
 						if (BNGS->Server_TryStartSpecificGaugeChallenge(TimingGaugeComponent->GaugeID, BNPC))
 						{
 							CurrentChallengingPlayerState = Cast<ABNPlayerState>(BNPS);
 							UE_LOG(LogTemp, Log, TEXT("Server: Player %s started challenge for Gauge ID %s"), *BNPS->GetPlayerName(), *TimingGaugeComponent->GaugeID.ToString());
 
-							TimingGaugeComponent->RequestStartGauge();
+							TimingGaugeComponent->RequestStartGauge(BNPC);
 						}
 						else
 						{
@@ -68,6 +69,10 @@ void AMissionTimingGauge::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedCompo
 						}
 					}
 				}				
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("Server: Overlapping Pawn's Controller is not a valid ABNPlayerController or is null. OtherActor: %s"), *OtherActor->GetName());
 			}
 		}
 	}
