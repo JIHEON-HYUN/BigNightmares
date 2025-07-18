@@ -63,5 +63,5 @@ private:
 
 public:
 	UPROPERTY(BlueprintReadWrite)
-	uint8 MaxPlayerCount = 3;
+	uint8 MaxPlayerCount = 2;
 };

@@ -47,6 +47,8 @@ void ABNPlayerController::BeginPlay()
 		{
 			Talker->RegisterWithPlayerState(PS);
 			UE_LOG(LogTemp, Error, TEXT("hihihihihihihihihiihihihihihi234234234234234"));
+
+			this->StartTalking();
 		}
 	}
 }
