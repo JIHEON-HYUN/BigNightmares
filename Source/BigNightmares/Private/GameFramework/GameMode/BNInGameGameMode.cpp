@@ -63,10 +63,15 @@ void ABNInGameGameMode::PlayerDead(EPlayerType DeadPlayerType)
 	{
 		--PreyPlayerCount;
 	}
-	
+
+	// 제물 플레이어가 0명이 되면 제물 플레이어 패배, 로비로 이동
 	if (PreyPlayerCount == 0)
 	{
-		// 제물 플레이어 패배
+		UWorld* World = GetWorld();
+		if (World == nullptr) return;
+	
+		bUseSeamlessTravel = true;
+		World->ServerTravel("/Game/Levels/L_Lobby?listen");
 	}
 }
 
