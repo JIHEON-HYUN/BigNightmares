@@ -21,5 +21,9 @@ class BIGNIGHTMARES_API IBNInGameInterface
 	GENERATED_BODY()
 
 public:
-	
+	virtual void LoadInGameMenu() = 0;
+	virtual void OpenInGameMenu() = 0;
+	virtual void CloseInGameMenu() = 0;
+	virtual void ReturnToMainMenu() = 0;
+	virtual void ChangePlayerStatusAlive() = 0;
 };

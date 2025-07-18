@@ -32,6 +32,7 @@ struct FGaugeChallengeInfo
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLobbyPlayerUpdated, const TArray<FLobbyPlayerData>&, NewList);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInGamePlayerUpdated, const TArray<FInGamePlayerData>&, NewList);
 
 /**
  * 
@@ -48,7 +49,7 @@ protected:
 	
 public:
 	void AddLobbyPlayer(const FLobbyPlayerData& NewPlayer);
-	void RemoveLobbyPlayer(class ABNPlayerState* ExitPlayerState);
+	void RemoveLobbyPlayer(ABNPlayerState* ExitPlayerState);
 	const TArray<FLobbyPlayerData>& GetLobbyPlayers() const;
 	void SetPlayerReadyState(const FString& PlayerName);
 
@@ -68,12 +69,20 @@ protected:
 
 public:
 	void AddInGamePlayer(const FInGamePlayerData& NewPlayer);
-	void RemoveInGamePlayer(class ABNPlayerState* ExitPlayerState);
+	void RemoveInGamePlayer(ABNPlayerState* ExitPlayerState);
 	const TArray<FInGamePlayerData>& GetInGamePlayers() const;
 	void SetPlayerType(uint8 Index, EPlayerType NewType);
+	void SetPlayerStatusAlive(const FString& PlayerName);
+
+	UPROPERTY(BlueprintAssignable)
+	FInGamePlayerUpdated OnInGamePlayerUpdated;
 
 protected:
+	UPROPERTY(ReplicatedUsing = OnRep_InGamePlayerDataList)
 	TArray<FInGamePlayerData> InGamePlayerDataList;
+
+	UFUNCTION()
+	void OnRep_InGamePlayerDataList();
 
 #pragma endregion InGame
 	

@@ -1,13 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/Lobby/BNPlayerList.h"
+#include "UI/Lobby/BNLobbyPlayerList.h"
 
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
-#include "UI/Lobby/BNLobbyWidget.h"
 
-void UBNPlayerList::Setup(FString NewSteamID, bool ReadyState)
+void UBNLobbyPlayerList::Setup(FString NewSteamID, bool ReadyState)
 {
 	if (SteamID == nullptr) return;
 	if (CheckReady == nullptr) return;
@@ -23,7 +22,7 @@ void UBNPlayerList::Setup(FString NewSteamID, bool ReadyState)
 	}
 }
 
-void UBNPlayerList::ChangeReadyState()
+void UBNLobbyPlayerList::ChangeReadyState()
 {
 	if (CheckReady == nullptr) return;
 
@@ -37,7 +36,7 @@ void UBNPlayerList::ChangeReadyState()
 	}
 }
 
-const FString UBNPlayerList::GetSteamID()
+const FString UBNLobbyPlayerList::GetSteamID()
 {
 	if (SteamID == nullptr) return TEXT("SteamID is nullptr");
 	

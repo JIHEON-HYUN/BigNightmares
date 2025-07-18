@@ -24,6 +24,7 @@ void ABNInGameGameMode::PostLogin(APlayerController* NewPlayer)
 	FInGamePlayerData NewInGamePlayer;
 	NewInGamePlayer.PlayerName = PS->GetPlayerName();
 	NewInGamePlayer.PlayerType = EPlayerType::Prey;
+	NewInGamePlayer.StatusAlive = true;
 	GS->AddInGamePlayer(NewInGamePlayer);
 
 	auto GI = GetGameInstance<UBNGameInstance>();
@@ -34,6 +35,8 @@ void ABNInGameGameMode::PostLogin(APlayerController* NewPlayer)
 	{
 		GS->SetPlayerType(FMath::RandRange(0, PlayerCount - 1), EPlayerType::Resident);
 		UE_LOG(LogTemp, Error, TEXT("Resident Player is setted"));
+
+		PreyPlayerCount = PlayerCount - 1;
 	}
 }
 
@@ -52,6 +55,19 @@ void ABNInGameGameMode::Logout(AController* Exiting)
 	
 	// PostLogout이 되면 GameState의 InGamePlayerDataList에서 해당 플레이어 삭제
 	GS->RemoveLobbyPlayer(PS);
+}
+
+void ABNInGameGameMode::PlayerDead(EPlayerType DeadPlayerType)
+{
+	if (DeadPlayerType == EPlayerType::Prey)
+	{
+		--PreyPlayerCount;
+	}
+	
+	if (PreyPlayerCount == 0)
+	{
+		// 제물 플레이어 패배
+	}
 }
 
 UBNMonoCharacterDataAsset* ABNInGameGameMode::GetBNMonoCharacterDataAsset() const

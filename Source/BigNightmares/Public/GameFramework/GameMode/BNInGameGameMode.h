@@ -26,7 +26,10 @@ struct FInGamePlayerData
 	FString PlayerName;
 	
 	UPROPERTY(BlueprintReadWrite)
-	EPlayerType PlayerType;
+	EPlayerType PlayerType = EPlayerType::Prey;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool StatusAlive = true;
 };
 
 /**
@@ -40,11 +43,14 @@ class BIGNIGHTMARES_API ABNInGameGameMode : public AGameModeBase
 public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
+
+	void PlayerDead(EPlayerType DeadPlayerType);
 	
 	UBNMonoCharacterDataAsset* GetBNMonoCharacterDataAsset() const;
 	
 private:
 	uint8 PlayerCount = 0;
+	uint8 PreyPlayerCount = 0;
 	
 	// 캐릭터 기본 베이스 데이터에셋
 	UPROPERTY(EditDefaultsOnly, Category="Custom Values|Class Defaults")

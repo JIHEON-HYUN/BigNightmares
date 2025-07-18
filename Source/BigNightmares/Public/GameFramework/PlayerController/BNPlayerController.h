@@ -7,9 +7,11 @@
 #include "GameFramework/PlayerController.h"
 #include "UI/InGame/InventoryInterface.h"
 #include "UI/Lobby/BNLobbyInterface.h"
+#include "UI/InGame/BNInGameInterface.h"
 #include "BNPlayerController.generated.h"
 
 struct FLobbyPlayerData;
+struct FInGamePlayerData;
 
 class UBNSystemWidget;
 class UInventoryComponent;
@@ -18,7 +20,7 @@ class UInventoryComponent;
  */
 
 UCLASS()
-class BIGNIGHTMARES_API ABNPlayerController : public APlayerController, public IAbilitySystemInterface, public IBNLobbyInterface
+class BIGNIGHTMARES_API ABNPlayerController : public APlayerController, public IAbilitySystemInterface, public IBNLobbyInterface, public IBNInGameInterface
 {
 	GENERATED_BODY()
 
@@ -26,8 +28,12 @@ public:
 	ABNPlayerController();
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable)
+	virtual void ReturnToMainMenu() override;
+
 #pragma region Lobby
-	
+
+public:
 	TSubclassOf<class UUserWidget> LobbyClass;
 	
 	UPROPERTY()
@@ -39,8 +45,6 @@ public:
 	virtual void OpenLobbyMenu() override;
 	UFUNCTION(BlueprintCallable)
 	virtual void CloseLobbyMenu() override;
-	UFUNCTION(BlueprintCallable)
-	virtual void ReturnToMainMenu() override;
 	UFUNCTION(Server, Reliable)
 	virtual void ChangePlayerReadyState() override;
 
@@ -49,6 +53,29 @@ public:
 	void OnLobbyPlayerUpdated_Handler(const TArray<FLobbyPlayerData>& UpdatedList);
 
 #pragma endregion Lobby
+
+#pragma region InGame
+
+public:
+	TSubclassOf<class UUserWidget> InGameClass;
+	
+	UPROPERTY()
+	class UBNInGameWidget* InGameWidget;
+	
+	UFUNCTION(BlueprintCallable)
+	virtual void LoadInGameMenu() override;
+	UFUNCTION(BlueprintCallable)
+	virtual void OpenInGameMenu() override;
+	UFUNCTION(BlueprintCallable)
+	virtual void CloseInGameMenu() override;
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	virtual void ChangePlayerStatusAlive() override;
+
+	// InGamePlayerDataList가 업데이트되면 콜백
+	UFUNCTION()
+	void OnInGamePlayerUpdated_Handler(const TArray<FInGamePlayerData>& UpdatedList);
+	
+#pragma endregion InGame
 
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;

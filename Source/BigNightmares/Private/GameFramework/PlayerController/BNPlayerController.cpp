@@ -6,15 +6,14 @@
 #include "Blueprint/UserWidget.h"
 #include "TimerManager.h"
 #include "AbilitySystemBlueprintLibrary.h"
-#include "VoiceModule.h"
 #include "Net/VoiceConfig.h"
-#include "Interfaces/VoiceCapture.h"
 
 #include "Abilities/BNBaseAbilitySystemComponent.h"
 #include "GameFramework/GameState/BNGameState.h"
 #include "GameFramework/PlayerState/BNPlayerState.h"
 #include "UI/InGame/BNInventoryWidgetController.h"
 #include "UI/InGame/BNSystemWidget.h"
+#include "UI/InGame/BNInGameWidget.h"
 #include "UI/Lobby/BNLobbyWidget.h"
 
 ABNPlayerController::ABNPlayerController()
@@ -24,6 +23,13 @@ ABNPlayerController::ABNPlayerController()
 	if (LobbyBPClass.Succeeded())
 	{
 		LobbyClass = LobbyBPClass.Class;
+	}
+
+	// WBP_InGame를 찾아서 저장
+	ConstructorHelpers::FClassFinder<UUserWidget> InGameBPClass(TEXT("/Game/UI/InGame/WBP_InGame"));
+	if (InGameBPClass.Succeeded())
+	{
+		InGameClass = InGameBPClass.Class;
 	}
 }
 
@@ -35,6 +41,7 @@ void ABNPlayerController::BeginPlay()
 	if (GS == nullptr) return;
 	
 	GS->OnLobbyPlayerUpdated.AddDynamic(this, &ABNPlayerController::OnLobbyPlayerUpdated_Handler);
+	GS->OnInGamePlayerUpdated.AddDynamic(this, &ABNPlayerController::OnInGamePlayerUpdated_Handler);
 
 	// Steam 보이스 시스템에서 이 클라이언트의 Talker 생성
 	if (IsLocalController())
@@ -46,7 +53,6 @@ void ABNPlayerController::BeginPlay()
 		if (Talker)
 		{
 			Talker->RegisterWithPlayerState(PS);
-			UE_LOG(LogTemp, Error, TEXT("hihihihihihihihihiihihihihihi234234234234234"));
 
 			this->StartTalking();
 		}
@@ -90,8 +96,6 @@ void ABNPlayerController::ChangePlayerReadyState_Implementation()
 	auto PS = GetPlayerState<ABNPlayerState>();
 	if (PS == nullptr) return;
 
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *PS->GetPlayerName());
-
 	GS->SetPlayerReadyState(PS->GetPlayerName());
 }
 
@@ -101,6 +105,41 @@ void ABNPlayerController::OnLobbyPlayerUpdated_Handler(const TArray<FLobbyPlayer
 	{
 		LobbyWidget->SetPlayerList(UpdatedList);
 	}
+}
+
+void ABNPlayerController::LoadInGameMenu()
+{
+	if (InGameClass == nullptr) return;
+	
+	InGameWidget = CreateWidget<UBNInGameWidget>(this, InGameClass);
+	if (InGameWidget == nullptr) return;
+
+	InGameWidget->SetInGameInterface(this);
+}
+
+void ABNPlayerController::OpenInGameMenu()
+{
+	auto GS = GetWorld()->GetGameState<ABNGameState>();
+	if (GS == nullptr) return;
+	
+	InGameWidget->SetPlayerList(GS->GetInGamePlayers());
+	InGameWidget->OpenMenu();
+}
+
+void ABNPlayerController::CloseInGameMenu()
+{
+	InGameWidget->CloseMenu();
+}
+
+void ABNPlayerController::ChangePlayerStatusAlive_Implementation()
+{
+	auto GS = GetWorld()->GetGameState<ABNGameState>();
+	if (GS == nullptr) return;
+	
+	auto PS = GetPlayerState<ABNPlayerState>();
+	if (PS == nullptr) return;
+
+	GS->SetPlayerStatusAlive(PS->GetPlayerName());
 }
 
 void ABNPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -140,6 +179,14 @@ void ABNPlayerController::TryInitializeRpcReadiness()
 			// Owner가 아직 유효하지 않거나 자신과 매칭되지 않음 (Run Under One Process에서 발생 가능)
 			GetWorldTimerManager().SetTimer(InitHandle, this, &ABNPlayerController::TryInitializeRpcReadiness, 0.1f, false);
 		}
+	}
+}
+
+void ABNPlayerController::OnInGamePlayerUpdated_Handler(const TArray<FInGamePlayerData>& UpdatedList)
+{
+	if (InGameWidget)
+	{
+		InGameWidget->SetPlayerList(UpdatedList);
 	}
 }
 

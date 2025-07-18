@@ -16,6 +16,7 @@ void ABNGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 
 	DOREPLIFETIME(ABNGameState, Rep_ActiveGaugeChallenges);
 	DOREPLIFETIME(ABNGameState, LobbyPlayerDataList);
+	DOREPLIFETIME(ABNGameState, InGamePlayerDataList);
 }
 
 void ABNGameState::AddLobbyPlayer(const FLobbyPlayerData& NewPlayer)
@@ -91,6 +92,35 @@ void ABNGameState::SetPlayerType(uint8 Index, EPlayerType NewType)
 {
 	InGamePlayerDataList[Index].PlayerType = NewType;
 }
+
+void ABNGameState::SetPlayerStatusAlive(const FString& PlayerName)
+{
+	for (auto& PlayerData : InGamePlayerDataList)
+	{
+		if (PlayerData.PlayerName == PlayerName)
+		{
+			// 생존 상태를 바꾸고, InGamePlayerDataList 변경 알림
+			PlayerData.StatusAlive = !PlayerData.StatusAlive;
+			OnInGamePlayerUpdated.Broadcast(InGamePlayerDataList);
+
+			ABNInGameGameMode* GM = GetWorld()->GetAuthGameMode<ABNInGameGameMode>();
+			if (GM == nullptr) return;
+
+			if (!PlayerData.StatusAlive)
+			{
+				GM->PlayerDead(PlayerData.PlayerType);
+			}
+			
+			break;
+		}
+	}
+}
+
+void ABNGameState::OnRep_InGamePlayerDataList()
+{
+	OnInGamePlayerUpdated.Broadcast(InGamePlayerDataList);
+}
+
 #pragma region Mission1
 
 bool ABNGameState::Server_TryStartSpecificGaugeChallenge(FGuid GaugeID, const ABNPlayerController* PlayerController)

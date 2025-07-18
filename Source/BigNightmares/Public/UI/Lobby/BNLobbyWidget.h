@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "BNLobbyInterface.h"
 #include "BNLobbyWidget.generated.h"
 
 struct FLobbyPlayerData;
+class IBNLobbyInterface;
 
 /**
  * 
@@ -20,8 +20,8 @@ class BIGNIGHTMARES_API UBNLobbyWidget : public UUserWidget
 private:
 	// IBNLobbyInterface를 상속받은 게임 인스턴스의 기능을 사용하기 위한 변수
 	IBNLobbyInterface* LobbyInterface;
-	// WBP_PlayerList를 저장하기 위한 변수
-	TSubclassOf<class UUserWidget> PlayerListClass;
+	// WBP_LobbyPlayerList를 저장하기 위한 변수
+	TSubclassOf<class UUserWidget> LobbyPlayerListClass;
 
 public:
 	UBNLobbyWidget(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());

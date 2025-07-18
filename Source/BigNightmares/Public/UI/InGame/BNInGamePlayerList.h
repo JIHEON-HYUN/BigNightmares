@@ -4,26 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "BNPlayerList.generated.h"
+#include "BNInGamePlayerList.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BIGNIGHTMARES_API UBNPlayerList : public UUserWidget
+class BIGNIGHTMARES_API UBNInGamePlayerList : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 protected:
+	bool bStatusAlive = true;
+	
 	// Widget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UTextBlock* SteamID;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	class UImage* CheckReady;
+	class UTextBlock* StatusAlive;
 	
 public:
-	void Setup(FString NewSteamID, bool ReadyState);
-	void ChangeReadyState();
+	void Setup(FString NewSteamID, bool NewStatusAlive);
+	void ChangeStatusAlive();
 	const FString GetSteamID();
 };

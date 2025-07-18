@@ -5,20 +5,20 @@
 
 #include "UObject/ConstructorHelpers.h"
 #include "Components/Button.h"
-#include "Components/TextBlock.h"
 #include "GameFramework/PlayerState.h"
-#include "UI/Lobby/BNPlayerList.h"
 
 #include "GameFramework/GameMode/BNLobbyGameMode.h"
+#include "UI/Lobby/BNLobbyInterface.h"
+#include "UI/Lobby/BNLobbyPlayerList.h"
 
 UBNLobbyWidget::UBNLobbyWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	// WBP_PlayerList를 찾아서 저장
-	ConstructorHelpers::FClassFinder<UUserWidget> PlayerListBPClass(TEXT("/Game/UI/Lobby/WBP_PlayerList"));
-	if (PlayerListBPClass.Succeeded())
+	// WBP_LobbyPlayerList를 찾아서 저장
+	ConstructorHelpers::FClassFinder<UUserWidget> LobbyPlayerListBPClass(TEXT("/Game/UI/Lobby/WBP_LobbyPlayerList"));
+	if (LobbyPlayerListBPClass.Succeeded())
 	{
-		PlayerListClass = PlayerListBPClass.Class;
+		LobbyPlayerListClass = LobbyPlayerListBPClass.Class;
 	}
 }
 
@@ -52,7 +52,7 @@ void UBNLobbyWidget::SetPlayerList(const TArray<FLobbyPlayerData>& PlayerDataLis
 	
 	for (const FLobbyPlayerData& PlayerData : PlayerDataList)
 	{
-		auto Player = CreateWidget<UBNPlayerList>(World, PlayerListClass);
+		auto Player = CreateWidget<UBNLobbyPlayerList>(World, LobbyPlayerListClass);
 		if (Player == nullptr) return;
 		
 		Player->Setup(PlayerData.PlayerName, PlayerData.ReadyState);
@@ -103,16 +103,18 @@ void UBNLobbyWidget::OnClickedExit()
 
 void UBNLobbyWidget::OnClickedReady()
 {
-	FString SteamID = GetOwningPlayerState()->GetPlayerName();
+	auto PS = GetOwningPlayerState();
+	if (PS == nullptr) return;
+
+	FString SteamID = PS->GetPlayerName();
 	
 	for (uint8 i = 0; i < PlayerListBox->GetChildrenCount(); i++)
 	{
-		auto Player = Cast<UBNPlayerList>(PlayerListBox->GetChildAt(i));
+		auto Player = Cast<UBNLobbyPlayerList>(PlayerListBox->GetChildAt(i));
 		if (Player == nullptr) return;
 
 		if (Player->GetSteamID() == SteamID)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("TLqkf"));
 			Player->ChangeReadyState();
 		}
 	}
