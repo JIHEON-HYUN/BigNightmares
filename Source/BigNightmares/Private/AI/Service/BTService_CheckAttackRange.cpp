@@ -11,7 +11,6 @@
 UBTService_CheckAttackRange::UBTService_CheckAttackRange()
 {
 	NodeName = TEXT("Check Attack Range");
-	// 서비스가 실행될 간격을 설정합니다. (예: 0.5초마다)
 	Interval = 0.5f;
 }
 
@@ -25,43 +24,29 @@ void UBTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 		return;
 	}
 
-	// 블랙보드에서 타겟 액터를 가져옵니다.
 	AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject(BBKeys::TargetActor));
 	if (!TargetActor)
 	{
 		return;
 	}
 
-	// 컨트롤러와 조종되는 몬스터를 가져옵니다.
-	AAIController* AIController = OwnerComp.GetAIOwner();
-	if (!AIController)
+	ABNBaseMonster* Monster = Cast<ABNBaseMonster>(OwnerComp.GetAIOwner()->GetPawn());
+	if (!Monster || !Monster->StateDataAsset)
 	{
 		return;
 	}
-	ABNBaseMonster* Monster = Cast<ABNBaseMonster>(AIController->GetPawn());
-	if (!Monster)
+
+	if (Monster->HasStateTag(Monster->StateDataAsset->AttackStateTag))
 	{
 		return;
 	}
 
 	const float DistanceToTarget = FVector::Dist(Monster->GetActorLocation(), TargetActor->GetActorLocation());
-	const UDataAsset_State_Monster* StateData = Monster->StateDataAsset; // 데이터 에셋 가져오기
 
 	if (DistanceToTarget <= AttackRange)
 	{
-		// 아직 공격 상태가 아닐 때만 상태를 변경합니다.
-		if (!Monster->HasStateTag(StateData->AttackStateTag))
-		{
-			Monster->EnterAttackingState();
-		}
-	}
-	else
-	{
-		// 아직 추격 상태가 아닐 때만 상태를 변경합니다.
-		// (공격 중에 플레이어가 도망갔을 경우)
-		if (!Monster->HasStateTag(StateData->ChaseStateTag))
-		{
-			Monster->EnterChasingState();
-		}
+		// 이 서비스의 유일한 역할은 블랙보드의 상태 값을 변경하여,
+		// 비헤이비어 트리가 'Attack' 가지로 넘어가도록 신호를 보내는 것입니다.
+		BlackboardComp->SetValueAsName(BBKeys::State, Monster->StateDataAsset->AttackStateTag.GetTagName());
 	}
 }

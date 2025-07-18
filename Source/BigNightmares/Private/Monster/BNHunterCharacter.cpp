@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Monster/BNBaseAIController.h"
+#include "Animation/AnimInstance.h"
 
 ABNHunterCharacter::ABNHunterCharacter()
 {
@@ -17,8 +18,6 @@ ABNHunterCharacter::ABNHunterCharacter()
 	GetCapsuleComponent()->SetCapsuleRadius(34.0f);
 
 	// --- 3. 메시 컴포넌트(외형) 설정 ---
-	// 메시의 위치와 회전만 C++에서 설정합니다.
-	// 실제 스켈레탈 메시와 애니메이션은 블루프린트에서 할당합니다.
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -95.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.f, 0.f, 0.f));
 	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
@@ -26,7 +25,6 @@ ABNHunterCharacter::ABNHunterCharacter()
 
 void ABNHunterCharacter::ActivateMonster()
 {
-	// [추가된 부분] 몬스터 활성화 시점에 컨트롤러가 유효한지 확인하는 디버깅 로그입니다.
 	AController* MyController = GetController();
 	if (MyController)
 	{
@@ -51,14 +49,11 @@ void ABNHunterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// BeginPlay는 블루프린트 변수가 모두 로드된 후 호출됩니다.
-	// 이 시점에서 캐릭터의 초기 이동 속도를 설정합니다.
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	}
 
-	// 무기 생성 및 장착 로직
 	if (DefaultWeaponClass)
 	{
 		if (UWorld* World = GetWorld())
@@ -71,7 +66,6 @@ void ABNHunterCharacter::BeginPlay()
 		}
 	}
 
-	// 랜턴 생성 및 장착 로직
 	if (DefaultLanternClass)
 	{
 		if (UWorld* World = GetWorld())
@@ -88,20 +82,26 @@ void ABNHunterCharacter::BeginPlay()
 void ABNHunterCharacter::EnterIdleState()
 {
 	Super::EnterIdleState();
-
-	// 이동 속도를 일반 걷기 속도로 변경합니다.
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void ABNHunterCharacter::EnterChasingState()
 {
 	Super::EnterChasingState();
-
-	// 이동 속도를 추격 속도로 변경합니다.
 	GetCharacterMovement()->MaxWalkSpeed = ChaseSpeed;
 }
 
 void ABNHunterCharacter::EnterAttackingState()
 {
 	Super::EnterAttackingState();
+
+	// 이 함수의 역할은 이제 순수하게 몽타주를 재생하는 것 뿐입니다.
+	if (AttackMontage)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance && !AnimInstance->Montage_IsPlaying(AttackMontage))
+		{
+			AnimInstance->Montage_Play(AttackMontage);
+		}
+	}
 }

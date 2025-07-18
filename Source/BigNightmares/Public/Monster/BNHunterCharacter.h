@@ -8,6 +8,7 @@
 
 class ABNMonsterWeapon;
 class AActor;
+class UAnimMontage;
 
 /**
  * 
@@ -20,35 +21,37 @@ class BIGNIGHTMARES_API ABNHunterCharacter : public ABNBaseMonster
 public:
 	ABNHunterCharacter();
 
-	// 몬스터를 활성화시키는 함수입니다.
 	virtual void ActivateMonster() override;
+
+	// BTTask_ExecuteAttack에서 몽타주 정보를 가져갈 수 있도록 Getter 함수를 추가합니다.
+	UAnimMontage* GetAttackMontage() const { return AttackMontage; }
 	
+	// [수정] BTTask에서 호출할 수 있도록 상태 변경 함수들을 public으로 옮깁니다.
+	virtual void EnterIdleState() override;
+	virtual void EnterChasingState() override;
+	virtual void EnterAttackingState() override;
+
 protected:
-	// 게임이 시작될 때 호출됩니다.
 	virtual void BeginPlay() override;
 
-	// 블루프린트에서 헌터의 기본 걷기 속도를 설정할 수 있습니다.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float WalkSpeed = 100.0f;
 
-	// 블루프린트에서 헌터의 추격 속도를 설정할 수 있습니다.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float ChaseSpeed = 150.0f;
 
-	// --- 무기 관련 ---
-	// 이 헌터가 장착할 무기의 종류입니다. 블루프린트에서 설정합니다.
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TSubclassOf<ABNMonsterWeapon> DefaultWeaponClass;
 
-	// 현재 장착하고 있는 무기 액터의 인스턴스입니다.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<ABNMonsterWeapon> EquippedWeapon;
 
-	// 무기를 장착할 손의 소켓 이름입니다.
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	FName WeaponAttachSocketName = TEXT("r_hand_ikinema_0_bneSocket");
 
-	// --- 랜턴 관련 ---
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	TObjectPtr<UAnimMontage> AttackMontage;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TSubclassOf<AActor> DefaultLanternClass;
 
@@ -57,8 +60,4 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	FName LanternAttachSocketName = TEXT("l_hand_ikinema_0_bneSocket");
-	
-	virtual void EnterIdleState() override;
-	virtual void EnterChasingState() override;
-	virtual void EnterAttackingState() override;
 };

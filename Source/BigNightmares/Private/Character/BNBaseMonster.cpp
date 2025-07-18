@@ -94,6 +94,16 @@ void ABNBaseMonster::TransitionToState(const FGameplayTag& NewStateTag)
 {
     if (!AbilitySystemComponent || !StateDataAsset || !NewStateTag.IsValid()) return;
 
+    // [수정된 부분] 공격 진행 중 태그가 있다면 다른 상태로의 변경을 막습니다.
+    if (AbilitySystemComponent->HasMatchingGameplayTag(StateDataAsset->AttackInProgressTag))
+    {
+        // 공격 중에 또 다른 공격 상태로 들어가는 것은 허용할 수 있습니다 (콤보 등).
+        if (NewStateTag != StateDataAsset->AttackStateTag)
+        {
+            return; // 상태 변경을 막습니다.
+        }
+    }
+
     FGameplayTagContainer TagsToRemove;
     TagsToRemove.AddTag(StateDataAsset->DormantStateTag);
     TagsToRemove.AddTag(StateDataAsset->IdleStateTag);

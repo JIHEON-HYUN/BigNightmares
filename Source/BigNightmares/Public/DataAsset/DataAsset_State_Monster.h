@@ -27,4 +27,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State Tags")
 	FGameplayTag AttackStateTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State Tags")
+	FGameplayTag AttackInProgressTag;
 };
