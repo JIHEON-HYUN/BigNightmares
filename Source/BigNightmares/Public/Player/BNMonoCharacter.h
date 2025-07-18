@@ -81,15 +81,14 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetMaxWalkSpeed(float NewSpeed);
+
+	// PlayerRole 변수를 public 영역으로 옮겨서 GameMode가 접근할 수 있도록 합니다.
+	UPROPERTY(BlueprintReadWrite, Replicated, Category = "Role")
+	EPlayerRole PlayerRole = EPlayerRole::None;
 	
 protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
-
-	// 2. 플레이어의 역할을 저장할 변수를 추가
-	// 'Replicated' 키워드는 이 변수의 값이 서버에서 클라이언트로 복제되어야 함을 의미 (2인 협력 미션을 위한 설정)
-	UPROPERTY(BlueprintReadWrite, Replicated, Category = "Role")
-	EPlayerRole PlayerRole = EPlayerRole::None;
 
 public:
 	template<typename T>
