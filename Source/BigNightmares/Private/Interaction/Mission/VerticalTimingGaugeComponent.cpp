@@ -3,14 +3,16 @@
 
 #include "Interaction/Mission/VerticalTimingGaugeComponent.h"
 
-#include "Blueprint/UserWidget.h"
 #include "Components/Border.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
-#include "GameFramework/GameState/BNGameState.h"
-#include "GameFramework/PlayerController/BNPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+
+#include "Blueprint/UserWidget.h"
+#include "GameFramework/GameState/BNGameState.h"
+#include "GameFramework/PlayerController/BNPlayerController.h"
+#include "UI/InGame/BNInGameWidget.h"
 
 // Sets default values for this component's properties
 UVerticalTimingGaugeComponent::UVerticalTimingGaugeComponent()
@@ -96,7 +98,7 @@ bool UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Validate(FG
 // Server_RequestStartGaugeInternal RPC 구현 (서버에서 실행)
 void UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Implementation(FGuid InGaugeID, const ABNPlayerController* BNPlayerController)
 {
-	if (!BNPlayerController)
+	if (!IsValid(BNPlayerController))
 	{
 		UE_LOG(LogTemp, Error, TEXT("VerticalTimingGaugeComponent: Server_RequestStartGaugeInternal: Requesting BNPlayerController is null."));
 		return;
@@ -110,7 +112,7 @@ void UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Implementat
 	GreenZoneStart = FMath::FRandRange(0.0f, 1.0f - GreenZoneLength);
 	//해당 변수는 값이 바뀌는 순간 ReplicatedUsing에 의해 클라에 복제
 
-	Client_StartGaugeUI(BNPlayerController); //서버 자신의 클라이언트 부분도 UI시작
+	Client_StartGaugeUI(); //서버 자신의 클라이언트 부분도 UI시작
 
 	bIsGaugeActiveLocal = true;
 
@@ -118,7 +120,7 @@ void UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Implementat
 		*GaugeID.ToString(), *BNPlayerController->GetName());
 }
 
-void UVerticalTimingGaugeComponent::Client_StartGaugeUI_Implementation(const ABNPlayerController* BNPlayerController)
+void UVerticalTimingGaugeComponent::Client_StartGaugeUI_Implementation()
 {
 	//클라 실행
 	//서버로부터 '게이지 UI를 시작하라'는 명령을 받았을 때만 실행
@@ -134,18 +136,13 @@ void UVerticalTimingGaugeComponent::Client_StartGaugeUI_Implementation(const ABN
 		VerticalGaugeWidgetInstance->RemoveFromParent();
 		VerticalGaugeWidgetInstance = nullptr;
 	}
-
-	if (!BNPlayerController)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Client_StartGaugeUI: BNPlayerController is null. Cannot create widget."));
-		return;
-	}
 	
 	ABNPlayerController* LocalPlayerController = Cast<ABNPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	if (LocalPlayerController)
+	UE_LOG(LogTemp, Log, TEXT("Client_StartGaugeUI: LocalPlayerController pointer: %p"), LocalPlayerController); // 주소값 출력	
+	if (IsValid(LocalPlayerController))
 	{
-		VerticalGaugeWidgetInstance = CreateWidget<UUserWidget>(LocalPlayerController, VerticalGaugeWidgetClass);
-		if (VerticalGaugeWidgetInstance)
+		VerticalGaugeWidgetInstance = CreateWidget<UBNInGameWidget>(LocalPlayerController, VerticalGaugeWidgetClass);
+		if (IsValid(VerticalGaugeWidgetInstance))
 		{
 			VerticalGaugeWidgetInstance->AddToViewport();
 			bIsGaugeActiveLocal = true;
@@ -160,6 +157,7 @@ void UVerticalTimingGaugeComponent::Client_StartGaugeUI_Implementation(const ABN
 				return;
 			}
 		}
+
 		
 		CachedGaugeHeight = Border_GaugeBackground->GetCachedGeometry().GetLocalSize().Y;
 		if (CachedGaugeHeight == 0.0f)

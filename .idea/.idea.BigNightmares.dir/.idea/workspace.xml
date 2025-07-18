@@ -7,7 +7,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2759a859-ae4b-443f-8b7b-7dcfb08bd0f9" name="Changes" comment="" />
+    <list default="true" id="761905b1-3250-4b5a-8c5b-d5e4f837e1aa" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BigNightmares.uproject.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/BigNightmares.uproject.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/MissionActor/BP_TestActor.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MissionActor/BP_TestActor.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/BigNightmares.Build.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/BigNightmares.Build.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/VerticalTimingGaugeComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/VerticalTimingGaugeComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Public/Interaction/Mission/VerticalTimingGaugeComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Public/Interaction/Mission/VerticalTimingGaugeComponent.h" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,60 +27,11 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Developer/TraceInsights/Private/Insights/TimingProfilerCommands.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Developer/TraceInsights/Private/Insights/ViewModels/TimingEvent.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Developer/TraceInsights/Private/Insights/ViewModels/TimingGraphTrack.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Private/HAL/LowLevelMemTracker.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Private/HAL/MallocMimalloc.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Private/HAL/UnrealMemory.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Private/ProfilingDebugging/TagTrace.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Private/UObject/UnrealNames.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Containers/Array.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Containers/BitArray.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Containers/ContainerAllocationPolicies.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Containers/Map.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Containers/Set.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Containers/SparseArray.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Containers/UnrealString.h.inl" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/GenericPlatform/GenericPlatformMath.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/GenericPlatform/GenericPlatformMemory.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/HAL/FMemory.inl" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/HAL/LowLevelMemTracker.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/HAL/MemoryBase.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Logging/LogCategory.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Microsoft/MinimalWindowsApi.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Misc/Guid.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Misc/ScopeRWLock.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Templates/SharedPointer.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/UObject/NameTypes.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Private/UObject/Class.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Private/UObject/ObjectPtr.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Private/UObject/ScriptCore.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Public/Templates/Casts.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Public/UObject/Object.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Public/UObject/ObjectHandle.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Public/UObject/ObjectHandleTracking.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Public/UObject/ObjectMacros.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Public/UObject/ObjectPtr.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectBaseUtility.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Classes/Components/ActorComponent.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Private/PlayerState.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/ImageWrapper/Private/Formats/TiffImageWrapper.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Net/Core/Private/Net/Core/PushModel/PushModel.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Net/Core/Public/Net/Core/PushModel/PushModel.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/TraceLog/Public/Trace/Detail/Channel.inl" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/UMG/Public/Blueprint/UserWidget.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/ThirdParty/mimalloc/2.0.0/include/mimalloc-internal.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/include/atomic" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Intermediate/Build/Win64/UnrealEditor/Inc/BigNightmares/UHT/BNPlayerState.gen.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/GameState/BNGameState.cpp" root0="SKIP_HIGHLIGHTING" />
-  </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 5
 }</component>
-  <component name="ProjectId" id="301jypzf7LSJgYwHGrmdyaaPH28" />
+  <component name="ProjectId" id="302FytJJ2QJJNdbg5fHZEMAMYJt" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -169,17 +128,13 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="2759a859-ae4b-443f-8b7b-7dcfb08bd0f9" name="Changes" comment="" />
-      <created>1752802230455</created>
+      <changelist id="761905b1-3250-4b5a-8c5b-d5e4f837e1aa" name="Changes" comment="" />
+      <created>1752818019422</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1752802230455</updated>
-      <workItem from="1752802231801" duration="1073000" />
-      <workItem from="1752803603971" duration="121000" />
-      <workItem from="1752803858343" duration="2438000" />
-      <workItem from="1752806672434" duration="101000" />
-      <workItem from="1752806866630" duration="1151000" />
-      <workItem from="1752808549274" duration="609000" />
+      <updated>1752818019422</updated>
+      <workItem from="1752818021011" duration="96000" />
+      <workItem from="1752818177554" duration="817000" />
     </task>
     <servers />
   </component>
@@ -205,11 +160,6 @@
           <properties exception="System.Threading.ThreadAbortException" breakIfHandledByOtherCode="false" displayValue="System.Threading.ThreadAbortException" />
           <option name="timeStamp" value="3" />
         </breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/MissionTimingGauge.cpp</url>
-          <line>58</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

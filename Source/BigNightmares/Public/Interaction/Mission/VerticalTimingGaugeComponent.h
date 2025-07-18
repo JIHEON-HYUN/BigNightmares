@@ -9,6 +9,7 @@
 
 #include "VerticalTimingGaugeComponent.generated.h"
 
+class UBNInGameWidget;
 class ABNPlayerController;
 class UImage;
 class UBorder;
@@ -47,11 +48,11 @@ public:
 
 	// 게이지 위젯 블루프린트 클래스
 	UPROPERTY(EditDefaultsOnly, Category="Timing Gauge | UI")
-	TSubclassOf<UUserWidget> VerticalGaugeWidgetClass;
+	TSubclassOf<UBNInGameWidget> VerticalGaugeWidgetClass;
 
 	//현재 게이지 위젯 인스턴스
 	UPROPERTY()
-	TObjectPtr<UUserWidget> VerticalGaugeWidgetInstance;
+	TObjectPtr<UBNInGameWidget> VerticalGaugeWidgetInstance;
 
 	//UI 요소들 바인딩
 	UPROPERTY(meta=(BindWidget))
@@ -93,7 +94,7 @@ public:
 
 	//클라이언트에서 게이지 실제로 시작
 	UFUNCTION(Client, Reliable)
-	void Client_StartGaugeUI(const ABNPlayerController* BNPlayerController);
+	void Client_StartGaugeUI();
 
 	//플레이어 입력을 처리 (클라이언트에서 서버로 결과 전송용)
 	UFUNCTION(BlueprintCallable, Category = "Timing Gauge | Control")
