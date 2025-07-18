@@ -15,11 +15,13 @@ class BIGNIGHTMARES_API UBTTask_ExecuteAttack : public UBTTaskNode
 	GENERATED_BODY()
 
 public:
+	// 생성자
 	UBTTask_ExecuteAttack();
 
 protected:
+	// BehaviorTree에 의해 실행될 때 최초로 호출되는 함수
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
-	// [추가] TickTask 함수를 사용하겠다고 선언합니다.
+	// 애니메이션 재생이 완료되었는지 확인
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 };

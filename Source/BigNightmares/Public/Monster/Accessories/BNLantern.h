@@ -14,15 +14,16 @@ class BIGNIGHTMARES_API ABNLantern : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
+public:
+	// 생성자
 	ABNLantern();
 
 protected:
-	// 랜턴의 외형을 표시할 스켈레탈 메시 컴포넌트입니다.
+	// 랜턴 외형 스켈레탈 메시 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USkeletalMeshComponent* LanternMesh;
 
-	// 랜턴의 불빛을 표현할 스포트라이트 컴포넌트입니다.
+	// 랜턴 불빛 스포트라이트 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpotLightComponent* SpotLight;
 };

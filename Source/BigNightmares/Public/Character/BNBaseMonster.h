@@ -21,43 +21,48 @@ class BIGNIGHTMARES_API ABNBaseMonster : public ABNBaseCharacter
 	GENERATED_BODY()
 
 public:
+	// 생성자
 	ABNBaseMonster();
 
-	// IAbilitySystemInterface 구현 함수
+	// 어빌리티 시스템 컴포넌트 Getter
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	// 이 몬스터가 사용할 비헤이비어 트리 에셋입니다. AI 컨트롤러가 이 정보를 사용합니다.
+	// AI가 사용할 비헤이비어 트리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 
-	// 블루프린트에서 각 몬스터 종류에 맞는 데이터 에셋을 할당해줍니다.
+	// 몬스터 상태 데이터 에셋
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|State")
 	TObjectPtr<UDataAsset_State_Monster> StateDataAsset;
 
 protected:
-	// AI 컨트롤러에 의해 빙의될 때 호출됩니다.
+	// AI 컨트롤러 빙의 시 호출
 	virtual void PossessedBy(AController* NewController) override;
 
-	// 게임이 시작될 때 또는 스폰될 때 호출됩니다.
+	// 게임 시작 또는 스폰 시 호출
 	virtual void BeginPlay() override;
 
-	// GAS의 핵심 컴포넌트입니다. BNBaseMonster가 직접 소유합니다.
+	// 게임플레이 어빌리티 시스템 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UBNBaseAbilitySystemComponent> AbilitySystemComponent;
 
-	// [추가된 부분]
-	// 애니메이션 블루프린트에서 현재 상태를 알 수 있도록 이 변수를 추가합니다.
+	// 현재 상태 태그 (애니메이션용)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	FGameplayTag CurrentStateTag;
 
 public:
+	// 몬스터 활성화 함수
 	virtual void ActivateMonster();
+	// 특정 상태 태그 보유 여부 확인 함수
 	bool HasStateTag(FGameplayTag StateTag) const;
+	// 대기 상태 진입 함수
 	virtual void EnterIdleState();
+	// 추격 상태 진입 함수
 	virtual void EnterChasingState();
+	// 공격 상태 진입 함수
 	virtual void EnterAttackingState();
 
 private:
-	// AI 관련 로직이 모두 AIController로 이전되었으므로, 관련 함수 선언을 모두 삭제합니다.
+	// 상태 변경 처리 함수
 	void TransitionToState(const FGameplayTag& NewStateTag);
 };

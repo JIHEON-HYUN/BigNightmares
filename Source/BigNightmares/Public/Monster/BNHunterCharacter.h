@@ -19,45 +19,59 @@ class BIGNIGHTMARES_API ABNHunterCharacter : public ABNBaseMonster
 	GENERATED_BODY()
 
 public:
+	// 생성자
 	ABNHunterCharacter();
 
+	// 몬스터 활성화 함수 (오버라이드)
 	virtual void ActivateMonster() override;
 
-	// BTTask_ExecuteAttack에서 몽타주 정보를 가져갈 수 있도록 Getter 함수를 추가합니다.
+	// 공격 몽타주 Getter
 	UAnimMontage* GetAttackMontage() const { return AttackMontage; }
 	
-	// [수정] BTTask에서 호출할 수 있도록 상태 변경 함수들을 public으로 옮깁니다.
+	// 대기 상태 진입 (오버라이드)
 	virtual void EnterIdleState() override;
+	// 추격 상태 진입 (오버라이드)
 	virtual void EnterChasingState() override;
+	// 공격 상태 진입 (오버라이드)
 	virtual void EnterAttackingState() override;
 
 protected:
+	// 게임 시작 또는 스폰 시 호출
 	virtual void BeginPlay() override;
 
+	// 걷기 속도
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float WalkSpeed = 100.0f;
 
+	// 추격 속도
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float ChaseSpeed = 150.0f;
 
+	// 기본 무기 클래스
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TSubclassOf<ABNMonsterWeapon> DefaultWeaponClass;
 
+	// 장착된 무기 액터
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<ABNMonsterWeapon> EquippedWeapon;
 
+	// 무기 부착 소켓 이름
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	FName WeaponAttachSocketName = TEXT("r_hand_ikinema_0_bneSocket");
 
+	// 공격 애니메이션 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<UAnimMontage> AttackMontage;
 
+	// 기본 랜턴 클래스
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TSubclassOf<AActor> DefaultLanternClass;
 
+	// 장착된 랜턴 액터
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<AActor> EquippedLantern;
 
+	// 랜턴 부착 소켓 이름
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	FName LanternAttachSocketName = TEXT("l_hand_ikinema_0_bneSocket");
 };

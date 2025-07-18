@@ -15,12 +15,14 @@ class BIGNIGHTMARES_API UBTTask_FindPatrolPos : public UBTTaskNode
 	GENERATED_BODY()
 
 public:
+	// 생성자
 	UBTTask_FindPatrolPos();
 
 protected:
+	// AI의 다음 순찰 위치를 계산하고 그 결과를 Blackboard에 저장
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
-	// AI가 순찰할 위치를 찾을 반경입니다. 블루프린트에서 수정할 수 있습니다.
+	// AI가 순찰할 지점을 정하는 기준이 되는 범위 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	float PatrolRadius = 500.0f;
 };

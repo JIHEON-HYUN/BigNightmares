@@ -12,9 +12,10 @@ class BIGNIGHTMARES_API ABNMonsterWeapon : public AActor
 	GENERATED_BODY()
 	
 public:
+	// 생성자
 	ABNMonsterWeapon();
 
-	// 무기의 외형을 표시할 스켈레탈 메시 컴포넌트입니다.
+	// 무기 외형 스켈레탈 메시 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USkeletalMeshComponent* WeaponMesh;
 };

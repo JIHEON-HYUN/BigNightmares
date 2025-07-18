@@ -10,8 +10,6 @@ class UAISenseConfig_Sight;
 class AActor;
 class UBehaviorTree;
 
-class UAISenseConfig_Sight;
-
 /**
  * 
  */
@@ -21,10 +19,11 @@ class BIGNIGHTMARES_API ABNHunterAIController : public ABNBaseAIController
 	GENERATED_BODY()
 
 public:
+	// 생성자
 	ABNHunterAIController();
 
 protected:
-	// 헌터의 시각 감지 설정을 위한 변수입니다.
+	// 시야 감지 설정 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI Perception")
 	TObjectPtr<UAISenseConfig_Sight> SightConfig;
 };

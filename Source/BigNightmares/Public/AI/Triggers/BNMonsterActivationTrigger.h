@@ -9,20 +9,20 @@
 class UBoxComponent;
 class ABNBaseMonster;
 
-// [추가] 에디터에서 몬스터 활성화 조건을 선택할 수 있도록 Enum을 정의합니다.
+// 몬스터 활성화 조건 Enum
 UENUM(BlueprintType)
 enum class EActivationCondition : uint8
 {
-	// 플레이어가 볼륨에 진입했을 때 활성화됩니다. (기존 방식)
+	// 플레이어 진입
 	OnPlayerOverlap,
 	
-	// 특정 시간이 경과했을 때 활성화됩니다.
+	// 시간 경과 시
 	OnTimeElapsed,
 
-	// 특정 미션 갯수를 클리어했을 때 활성화됩니다.
+	// 미션 카운트 달성 시
 	OnMissionCount,
 
-	// 다른 블루프린트나 C++ 코드에서 직접 호출할 때만 활성화됩니다.
+	// 외부 이벤트 호출 시
 	OnExternalEvent
 };
 
@@ -31,54 +31,55 @@ class BIGNIGHTMARES_API ABNMonsterActivationTrigger : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
+public:
+	// 생성자
 	ABNMonsterActivationTrigger();
 	
-	// [추가] 외부(게임 스테이트, 레벨 블루프린트 등)에서 이 트리거를 직접 발동시킬 때 호출하는 함수입니다.
+	// 외부에서 트리거를 직접 발동시키는 함수
 	UFUNCTION(BlueprintCallable, Category = "Trigger")
 	void TryActivate();
 
 protected:
+	// 액터 생성 시 최초 실행 함수
 	virtual void BeginPlay() override;
 
-	// 트리거의 범위를 나타내는 박스 컴포넌트입니다. OnPlayerOverlap 조건일 때만 사용됩니다.
+	// 트리거 범위 Box 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UBoxComponent> TriggerVolume;
 
 	// --- 활성화 조건 설정 ---
-	// 에디터에서 몬스터를 활성화할 조건을 선택합니다.
+	// 활성화 조건 선택 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger Settings")
 	EActivationCondition ActivationCondition = EActivationCondition::OnPlayerOverlap;
 
-	// [추가] OnTimeElapsed 조건일 때, 활성화될 때까지 기다릴 시간(초)입니다.
+	// OnTimeElapsed 조건 시 대기 시간
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger Settings", meta = (EditCondition = "ActivationCondition == EActivationCondition::OnTimeElapsed"))
 	float TimeToWait = 5.0f;
 
-	// [추가] OnMissionCount 조건일 때, 활성화에 필요한 미션 클리어 갯수입니다.
+	// OnMissionCount 조건 시 필요 미션 수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger Settings", meta = (EditCondition = "ActivationCondition == EActivationCondition::OnMissionCount"))
 	int32 RequiredMissionCount = 0;
 	// ---
 
-	// 에디터에서 활성화시킬 몬스터들을 지정할 수 있는 배열입니다.
+	// 활성화시킬 몬스터 배열
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger Settings")
 	TArray<TObjectPtr<ABNBaseMonster>> MonstersToActivate;
 
-	// 트리거가 한 번만 작동하도록 설정합니다.
+	// 한 번만 발동할지 여부
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger Settings")
 	bool bTriggerOnce = true;
 
 private:
-	// 다른 액터가 이 볼륨에 오버랩(진입)했을 때 호출될 함수입니다.
+	// 오버랩(진입) 이벤트 발생 시 호출될 함수
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	// 실제로 몬스터들을 활성화시키는 핵심 로직 함수입니다.
+	// 몬스터 활성화 로직 함수
 	void ActivateMonsters();
 
-	// 타이머가 만료되었을 때 호출될 함수입니다.
+	// 타이머 만료 시 호출될 함수
 	void OnTimerFinished();
 
-	// 트리거가 이미 작동했는지 여부를 저장하는 변수입니다.
+	// 트리거 발동 여부 저장 변수
 	bool bHasBeenTriggered = false;
-
 };

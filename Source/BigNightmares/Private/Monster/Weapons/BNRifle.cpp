@@ -4,15 +4,19 @@
 #include "Monster/Weapons/BNRifle.h"
 #include "Kismet/GameplayStatics.h"
 
+// 총 발사 함수
 void ABNRifle::Fire()
 {
-	// 총구 위치에 발사 이펙트(파티클, 사운드)를 재생합니다.
+	// 총구 화염 이펙트 유효성 확인
 	if (MuzzleFlashEffect)
 	{
+		// 이펙트 스폰
 		UGameplayStatics::SpawnEmitterAttached(MuzzleFlashEffect, WeaponMesh, MuzzleSocketName);
 	}
+	// 발사 사운드 유효성 확인
 	if (FireSound)
 	{
+		// 사운드 재생
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
 
