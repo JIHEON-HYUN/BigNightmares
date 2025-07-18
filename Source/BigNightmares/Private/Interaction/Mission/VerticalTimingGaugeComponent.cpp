@@ -131,11 +131,8 @@ void UVerticalTimingGaugeComponent::Client_StartGaugeUI_Implementation(const ABN
 	//기존 위젯이 있다면 제거 (시작시)
 	if (VerticalGaugeWidgetInstance)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Client_StartGaugeUI: VerticalGaugeWidgetInstance is Created."));
 		VerticalGaugeWidgetInstance->RemoveFromParent();
-		UE_LOG(LogTemp, Warning, TEXT("Client_StartGaugeUI: VerticalGaugeWidgetInstance is Removed."));
 		VerticalGaugeWidgetInstance = nullptr;
-		UE_LOG(LogTemp, Warning, TEXT("Client_StartGaugeUI: VerticalGaugeWidgetInstance is nullptr."));
 	}
 
 	if (!BNPlayerController)
@@ -148,9 +145,16 @@ void UVerticalTimingGaugeComponent::Client_StartGaugeUI_Implementation(const ABN
 	if (NonConstBNPlayerController)
 	{
 		VerticalGaugeWidgetInstance = CreateWidget<UUserWidget>(NonConstBNPlayerController, VerticalGaugeWidgetClass);
+		bIsGaugeActiveLocal = true;
 		if (VerticalGaugeWidgetInstance)
-		{
+		{			
 			VerticalGaugeWidgetInstance->AddToViewport();
+			bIsGaugeActiveLocal = true;
+			
+			Border_GaugeBackground = Cast<UBorder>(VerticalGaugeWidgetInstance->GetWidgetFromName(TEXT("Border_GaugeBackground")));
+			Image_Green = Cast<UImage>(VerticalGaugeWidgetInstance->GetWidgetFromName(TEXT("Image_Green")));
+			Image_Pointer = Cast<UImage>(VerticalGaugeWidgetInstance->GetWidgetFromName(TEXT("Image_Pointer")));
+			
 			if (!Border_GaugeBackground || !Image_Green || !Image_Pointer)
 			{
 				Server_RequestEndGaugeInternal(GaugeID, EVerticalGaugeResult::EVGR_Fail);
