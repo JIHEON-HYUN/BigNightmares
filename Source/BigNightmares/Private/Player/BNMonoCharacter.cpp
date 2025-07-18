@@ -21,7 +21,7 @@
 #include "Input/BNBaseEnhancedInputComponent.h"
 #include "Library/BNAbilitySystemLibrary.h"
 #include "Player/InventoryComponent.h"
-
+#include "Net/UnrealNetwork.h"
 
 ABNMonoCharacter::ABNMonoCharacter()
 {
@@ -283,4 +283,13 @@ void ABNMonoCharacter::Client_ApplyMoveSpeed_Implementation(float NewSpeed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
 	//UE_LOG(LogTemp, Warning, TEXT("클라이언트에 속도 적용: %f"), NewSpeed);
+}
+
+// PlayerRole 변수를 네트워크를 통해 복제하도록 설정
+void ABNMonoCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// PlayerRole 변수가 복제 대상임을 엔진에 알림
+	DOREPLIFETIME(ABNMonoCharacter, PlayerRole);
 }

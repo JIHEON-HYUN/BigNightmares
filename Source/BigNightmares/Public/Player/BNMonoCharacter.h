@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Character/BNBaseCharacter.h"
+#include "Player/BNPlayerRole.h"
 #include "BNMonoCharacter.generated.h"
 
 struct FOnAttributeChangeData;
@@ -85,12 +86,20 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
 
+	// 2. 플레이어의 역할을 저장할 변수를 추가
+	// 'Replicated' 키워드는 이 변수의 값이 서버에서 클라이언트로 복제되어야 함을 의미 (2인 협력 미션을 위한 설정)
+	UPROPERTY(BlueprintReadWrite, Replicated, Category = "Role")
+	EPlayerRole PlayerRole = EPlayerRole::None;
+
 public:
 	template<typename T>
 	T* GetAttributeSet() const
 	{
 		return Cast<T>(MonoCharacterAttributeSet.Get());
 	}
+
+	// 네트워크를 통해 변수를 복제하기 위한 함수
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 #pragma region Client
 public:
