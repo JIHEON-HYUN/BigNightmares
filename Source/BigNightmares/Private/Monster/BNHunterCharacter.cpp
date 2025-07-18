@@ -22,18 +22,16 @@ ABNHunterCharacter::ABNHunterCharacter()
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -95.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.f, 0.f, 0.f));
 	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
-
-	// 캐릭터 무브먼트 컴포넌트의 기본 최대 속도를 WalkSpeed로 설정합니다.
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void ABNHunterCharacter::ActivateMonster()
 {
+	// [추가된 부분] 몬스터 활성화 시점에 컨트롤러가 유효한지 확인하는 디버깅 로그입니다.
 	AController* MyController = GetController();
 	if (MyController)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Log: Character '%s' is possessed by Controller '%s'"), *GetName(), *MyController->GetName());
-		if (ABNBaseAIController* MyAIController = Cast<ABNBaseAIController>(MyController))
+		if (Cast<ABNBaseAIController>(MyController))
 		{
 			UE_LOG(LogTemp, Log, TEXT("Log: Controller is confirmed to be an ABNBaseAIController."));
 		}
@@ -53,7 +51,14 @@ void ABNHunterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// [복원] 무기 생성 및 장착 로직을 다시 추가합니다.
+	// BeginPlay는 블루프린트 변수가 모두 로드된 후 호출됩니다.
+	// 이 시점에서 캐릭터의 초기 이동 속도를 설정합니다.
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	}
+
+	// 무기 생성 및 장착 로직
 	if (DefaultWeaponClass)
 	{
 		if (UWorld* World = GetWorld())
@@ -66,7 +71,7 @@ void ABNHunterCharacter::BeginPlay()
 		}
 	}
 
-	// [복원] 랜턴 생성 및 장착 로직을 다시 추가합니다.
+	// 랜턴 생성 및 장착 로직
 	if (DefaultLanternClass)
 	{
 		if (UWorld* World = GetWorld())
@@ -78,12 +83,10 @@ void ABNHunterCharacter::BeginPlay()
 			}
 		}
 	}
-	
 }
 
 void ABNHunterCharacter::EnterIdleState()
 {
-	// 부모의 상태 전환 로직(태그 변경 등)을 먼저 실행합니다.
 	Super::EnterIdleState();
 
 	// 이동 속도를 일반 걷기 속도로 변경합니다.
@@ -92,7 +95,6 @@ void ABNHunterCharacter::EnterIdleState()
 
 void ABNHunterCharacter::EnterChasingState()
 {
-	// 부모의 상태 전환 로직(태그 변경 등)을 먼저 실행합니다.
 	Super::EnterChasingState();
 
 	// 이동 속도를 추격 속도로 변경합니다.
@@ -103,6 +105,3 @@ void ABNHunterCharacter::EnterAttackingState()
 {
 	Super::EnterAttackingState();
 }
-
-
-

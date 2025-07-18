@@ -23,5 +23,5 @@ protected:
 
 	// 몬스터가 공격을 시작할 거리입니다.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
-	float AttackRange = 200.0f;
+	float AttackRange = 100.0f;
 };

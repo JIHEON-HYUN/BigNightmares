@@ -5,6 +5,7 @@
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/BNBaseMonster.h"
+#include "DataAsset/DataAsset_State_Monster.h"
 #include "Monster/BNBlackboardKeys.h"
 
 UBTService_CheckAttackRange::UBTService_CheckAttackRange()
@@ -43,18 +44,24 @@ void UBTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 		return;
 	}
 
-	// 몬스터와 타겟 사이의 거리를 계산합니다.
 	const float DistanceToTarget = FVector::Dist(Monster->GetActorLocation(), TargetActor->GetActorLocation());
+	const UDataAsset_State_Monster* StateData = Monster->StateDataAsset; // 데이터 에셋 가져오기
 
 	if (DistanceToTarget <= AttackRange)
 	{
-		// 거리가 공격 범위 이내라면, 공격 상태로 전환합니다.
-		Monster->EnterAttackingState();
+		// 아직 공격 상태가 아닐 때만 상태를 변경합니다.
+		if (!Monster->HasStateTag(StateData->AttackStateTag))
+		{
+			Monster->EnterAttackingState();
+		}
 	}
 	else
 	{
-		// 거리가 공격 범위 밖이라면, 다시 추격 상태로 돌아갑니다.
-		// (공격 중에 플레이어가 도망갔을 경우를 대비한 로직)
-		Monster->EnterChasingState();
+		// 아직 추격 상태가 아닐 때만 상태를 변경합니다.
+		// (공격 중에 플레이어가 도망갔을 경우)
+		if (!Monster->HasStateTag(StateData->ChaseStateTag))
+		{
+			Monster->EnterChasingState();
+		}
 	}
 }

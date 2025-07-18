@@ -45,6 +45,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UBNBaseAbilitySystemComponent> AbilitySystemComponent;
 
+	// [추가된 부분]
+	// 애니메이션 블루프린트에서 현재 상태를 알 수 있도록 이 변수를 추가합니다.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	FGameplayTag CurrentStateTag;
+
 public:
 	virtual void ActivateMonster();
 	bool HasStateTag(FGameplayTag StateTag) const;

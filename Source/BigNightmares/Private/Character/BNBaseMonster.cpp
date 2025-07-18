@@ -28,7 +28,7 @@ void ABNBaseMonster::PossessedBy(AController* NewController)
 {
     Super::PossessedBy(NewController);
     
-    // [복원] 어빌리티 시스템 초기화 코드만 남깁니다.
+    // 어빌리티 시스템 초기화 코드만 남깁니다.
     if (AbilitySystemComponent)
     {
         AbilitySystemComponent->InitAbilityActorInfo(this, this);
@@ -102,6 +102,11 @@ void ABNBaseMonster::TransitionToState(const FGameplayTag& NewStateTag)
     AbilitySystemComponent->RemoveReplicatedLooseGameplayTags(TagsToRemove);
 	
     AbilitySystemComponent->AddReplicatedLooseGameplayTag(NewStateTag);
+    
+    // [추가된 부분]
+    // 방금 선언한 멤버 변수에 현재 상태 태그를 저장합니다.
+    this->CurrentStateTag = NewStateTag;
+
     UE_LOG(LogTemp, Log, TEXT("[%s] transitioned to state: %s"), *GetName(), *NewStateTag.ToString());
 
     ABNBaseAIController* AIController = Cast<ABNBaseAIController>(GetController());
