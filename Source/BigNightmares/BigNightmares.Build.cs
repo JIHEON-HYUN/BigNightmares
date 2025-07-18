@@ -18,7 +18,7 @@ public class BigNightmares : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"BigNightmares"
+			"BigNightmares", "Voice"
 		});
 
 		// Uncomment if you are using Slate UI

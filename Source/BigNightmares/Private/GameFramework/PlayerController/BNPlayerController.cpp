@@ -6,7 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "TimerManager.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "VoiceModule.h"
 #include "Net/VoiceConfig.h"
+#include "Interfaces/VoiceCapture.h"
 
 #include "Abilities/BNBaseAbilitySystemComponent.h"
 #include "GameFramework/GameState/BNGameState.h"
@@ -44,9 +46,9 @@ void ABNPlayerController::BeginPlay()
 		if (Talker)
 		{
 			Talker->RegisterWithPlayerState(PS);
+			UE_LOG(LogTemp, Error, TEXT("hihihihihihihihihiihihihihihi234234234234234"));
 		}
 	}
-
 }
 
 void ABNPlayerController::LoadLobbyMenu()
