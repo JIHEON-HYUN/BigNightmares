@@ -56,15 +56,15 @@ protected:
 	TArray<FInGamePlayerData> InGamePlayerDataList;
 
 public:
-	uint8 RemainingPrivateMissionCount = 1;
-	uint8 RemainingCooperativeMissionCount = 1;
-	uint8 RemainingSacrificeMissionCount = 1;
-	uint8 RemainingAssignableMissionCount = 1;
-
-	void ClearPrivateMission();
-	void ClearCooperativeMission();
-	void ClearSacrificeMission();
-	void ClearAssignableMission();
+	// uint8 RemainingPrivateMissionCount = 1;
+	// uint8 RemainingCooperativeMissionCount = 1;
+	// uint8 RemainingSacrificeMissionCount = 1;
+	// uint8 RemainingAssignableMissionCount = 1;
+	//
+	// void ClearPrivateMission();
+	// void ClearCooperativeMission();
+	// void ClearSacrificeMission();
+	// void ClearAssignableMission();
 	
 #pragma endregion InGame
 };

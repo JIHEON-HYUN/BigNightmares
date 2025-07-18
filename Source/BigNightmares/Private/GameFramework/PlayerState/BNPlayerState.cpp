@@ -18,17 +18,6 @@ ABNPlayerState::ABNPlayerState()
 	BNBaseAbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed); //
 	
 	BNBaseAttributeSet = CreateAttributeSet<UBNTarotCardAttributeSet>("BNTarotCardAttributeSet");
-	
-	if (!IsValid(BNBaseAttributeSet))
-	{
-		UE_LOG(LogTemp, Error, TEXT("IsValid(BNBaseAttributeSet) : NOT!!!!"));			
-	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("BeginPlay PlayerState: %p"), this);
-	UE_LOG(LogTemp, Warning, TEXT("BNBaseAttributeSet: %p"), BNBaseAttributeSet.Get());
-
-	UE_LOG(LogTemp, Warning, TEXT("BNBaseAttributeSet 생성됨: %p"), BNBaseAttributeSet.Get());
-	UE_LOG(LogTemp, Warning, TEXT("Class: %s"), *GetClass()->GetName());
 
 	bReplicates = true;
 
@@ -55,12 +44,6 @@ UBNBaseAttributeSet* ABNPlayerState::GetBNBaseAttributeSet() const
 void ABNPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UE_LOG(LogTemp, Warning, TEXT("PlayerState BeginPlay called"));
-	UE_LOG(LogTemp, Warning, TEXT("AttributeSet pointer: %p"), GetBNBaseAttributeSet());
-
-	UE_LOG(LogTemp, Warning, TEXT("IsServer: %s"), HasAuthority() ? TEXT("true") : TEXT("false"));
-	UE_LOG(LogTemp, Warning, TEXT("AttributeSet in BeginPlay: %p"), GetBNBaseAttributeSet());
 }
 
 void ABNPlayerState::PostInitializeComponents()

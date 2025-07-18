@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "TimerManager.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Net/VoiceConfig.h"
 
 #include "Abilities/BNBaseAbilitySystemComponent.h"
 #include "GameFramework/GameState/BNGameState.h"
@@ -32,6 +33,20 @@ void ABNPlayerController::BeginPlay()
 	if (GS == nullptr) return;
 	
 	GS->OnLobbyPlayerUpdated.AddDynamic(this, &ABNPlayerController::OnLobbyPlayerUpdated_Handler);
+
+	// Steam 보이스 시스템에서 이 클라이언트의 Talker 생성
+	if (IsLocalController())
+	{
+		auto PS = GetPlayerState<ABNPlayerState>();
+		if (PS == nullptr) return;
+		
+		UVOIPTalker* Talker = UVOIPTalker::CreateTalkerForPlayer(PS);
+		if (Talker)
+		{
+			Talker->RegisterWithPlayerState(PS);
+		}
+	}
+
 }
 
 void ABNPlayerController::LoadLobbyMenu()
@@ -113,18 +128,12 @@ void ABNPlayerController::TryInitializeRpcReadiness()
 		{
 			// 이제 PlayerState의 Owner가 현재 컨트롤러로 제대로 설정.
 			bCanCallServerRPC = true;
-			UE_LOG(LogTemp, Warning, TEXT("Client %d: PlayerState Owner is valid (%s). RPCs are now enabled."),
-				  GetLocalPlayer()->GetControllerId(), *GetNameSafe(PlayerStateOwner));
 
 			GetWorldTimerManager().ClearTimer(InitHandle);
 		}
 		else
 		{
 			// Owner가 아직 유효하지 않거나 자신과 매칭되지 않음 (Run Under One Process에서 발생 가능)
-			UE_LOG(LogTemp, Warning, TEXT("Client %d: PlayerState Owner is NOT yet valid or not matching this controller (Owner: %s, This: %s). Retrying..."),
-				   GetLocalPlayer()->GetControllerId(),
-				   IsValid(PlayerStateOwner) ? *GetNameSafe(PlayerStateOwner) : TEXT("NULL"),
-				   *GetNameSafe(this));
 			GetWorldTimerManager().SetTimer(InitHandle, this, &ABNPlayerController::TryInitializeRpcReadiness, 0.1f, false);
 		}
 	}

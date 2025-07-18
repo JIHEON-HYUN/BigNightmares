@@ -89,22 +89,22 @@ void ABNGameState::SetPlayerType(uint8 Index, EPlayerType NewType)
 	InGamePlayerDataList[Index].PlayerType = NewType;
 }
 
-void ABNGameState::ClearPrivateMission()
-{
-	--RemainingPrivateMissionCount;
-}
-
-void ABNGameState::ClearCooperativeMission()
-{
-	--RemainingCooperativeMissionCount;
-}
-
-void ABNGameState::ClearSacrificeMission()
-{
-	--RemainingSacrificeMissionCount;
-}
-
-void ABNGameState::ClearAssignableMission()
-{
-	--RemainingAssignableMissionCount;
-}
+// void ABNGameState::ClearPrivateMission()
+// {
+// 	--RemainingPrivateMissionCount;
+// }
+//
+// void ABNGameState::ClearCooperativeMission()
+// {
+// 	--RemainingCooperativeMissionCount;
+// }
+//
+// void ABNGameState::ClearSacrificeMission()
+// {
+// 	--RemainingSacrificeMissionCount;
+// }
+//
+// void ABNGameState::ClearAssignableMission()
+// {
+// 	--RemainingAssignableMissionCount;
+// }
