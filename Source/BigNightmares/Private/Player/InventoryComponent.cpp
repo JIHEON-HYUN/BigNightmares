@@ -5,11 +5,9 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "GameFramework/GameSession.h"
-#include "GameFramework/PlayerController/BNPlayerController.h"
-#include "GameFramework/PlayerState/BNPlayerState.h"
-#include "Library/BNAbilitySystemLibrary.h"
 #include "Net/UnrealNetwork.h"
+
+#include "Library/BNAbilitySystemLibrary.h"
 
 bool FPackagedInventory::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess)
 {
@@ -41,6 +39,8 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetimePrope
 void UInventoryComponent::AddItemByTag(const FGameplayTag& ItemTag, int32 NumItems)
 {
 	AActor* Owner = GetOwner();
+
+#pragma region Debug IsValid(Owner)
 	if (!IsValid(Owner))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
@@ -52,10 +52,11 @@ void UInventoryComponent::AddItemByTag(const FGameplayTag& ItemTag, int32 NumIte
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald,
 		FString::Printf(TEXT("Owner :  %s"), *Owner->GetName()));
 	}
-
+#pragma endregion
+	
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Owner Role: %s"),
 		*UEnum::GetValueAsString(TEXT("Engine.ENetRole"), Owner->GetLocalRole())));
-
+	
 	if (!Owner->HasAuthority())
 	{
 		ServerAddItem(ItemTag, NumItems);

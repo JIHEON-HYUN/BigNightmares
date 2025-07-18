@@ -59,13 +59,3 @@ UBNBaseAbilitySystemComponent* ABNBaseCharacter::GetBNBaseAbilitySystemComponent
 	}
 	return nullptr;
 }
-
-// UBNTarotCardAttributeSet* ABNBaseCharacter::GetBNBaseAttributeSet() const
-// {
-// 	if (const ABNPlayerState* PS = GetPlayerState<ABNPlayerState>())
-// 	{
-// 		return Cast<UBNTarotCardAttributeSet>(PS->GetBNBaseAttributeSet());
-// 	}
-// 	return nullptr;
-// }
-

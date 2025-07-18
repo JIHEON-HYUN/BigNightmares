@@ -31,7 +31,6 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 
 	UBNBaseAbilitySystemComponent* GetBNBaseAbilitySystemComponent() const;
-	//UBNTarotCardAttributeSet* GetBNBaseAttributeSet() const;
 
 public:
 	template<typename T>

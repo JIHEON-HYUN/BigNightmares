@@ -3,9 +3,10 @@
 
 #include "GameFramework/PlayerState/BNPlayerState.h"
 
+#include "Net/UnrealNetwork.h"
+
 #include "Abilities/BNBaseAbilitySystemComponent.h"
 #include "Abilities/BNTarotCardAttributeSet.h"
-#include "Net/UnrealNetwork.h"
 #include "Player/InventoryComponent.h"
 
 ABNPlayerState::ABNPlayerState()

@@ -13,7 +13,7 @@ public class BigNightmares : ModuleRules
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
 			"GameplayAbilities", "GameplayTags", "GameplayTasks", "AnimGraphRuntime",
 			"OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemSteam", 
-			"AIModule", "NavigationSystem"
+			"AIModule", "NavigationSystem" , "NetCore"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]

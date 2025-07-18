@@ -2,6 +2,3 @@
 
 
 #include "UI/InGame/BNInGameWidget.h"
-
-#include "Components/Image.h"
-#include "DataAsset/Item/BNBaseItemDataAsset.h"

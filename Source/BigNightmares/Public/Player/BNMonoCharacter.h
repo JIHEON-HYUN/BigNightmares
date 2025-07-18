@@ -25,7 +25,7 @@ class BIGNIGHTMARES_API ABNMonoCharacter : public ABNBaseCharacter
 
 	ABNMonoCharacter();
 
-protected:
+protected: 
 	virtual void BeginPlay() override;
 	
 #pragma region Camera
@@ -73,8 +73,6 @@ private:
 #pragma endregion
 	
 public:
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
-	// TObjectPtr<UInventoryComponent> InventoryComponent;
 	
 	void OnMoveSpeedChanged(const FOnAttributeChangeData Data);
 
@@ -96,5 +94,6 @@ public:
 public:
 	UFUNCTION(Client, Reliable)
 	void Client_ApplyMoveSpeed(float NewSpeed);
+
 #pragma endregion
 };

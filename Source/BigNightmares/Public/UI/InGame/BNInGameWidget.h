@@ -6,8 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "BNInGameWidget.generated.h"
 
-class UBNBaseItemDataAsset;
-class UImage;
 /**
  * 
  */

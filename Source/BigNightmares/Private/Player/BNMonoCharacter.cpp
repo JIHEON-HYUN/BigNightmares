@@ -3,25 +3,24 @@
 
 #include "Player/BNMonoCharacter.h"
 
-#include "Abilities/BNBaseAbilitySystemComponent.h"
-#include "Abilities/BNBaseAttributeSet.h"
-#include "Abilities/BNTarotCardAttributeSet.h"
-#include "Animation/AnimInstance/BNMonoAnimInstance.h"
-#include "BaseGamePlayTags.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "DataAsset/Input/DataAsset_InputConfig_Player.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameplayEffectTypes.h"
 #include "GameplayTagContainer.h"
+
+#include "Abilities/BNBaseAbilitySystemComponent.h"
+#include "Abilities/BNBaseAttributeSet.h"
+#include "Abilities/BNTarotCardAttributeSet.h"
+#include "Animation/AnimInstance/BNMonoAnimInstance.h"
+#include "BaseGamePlayTags.h"
+#include "DataAsset/Input/DataAsset_InputConfig_Player.h"
 #include "DataAsset/BNMonoCharacterDataAsset.h"
 #include "GameFramework/PlayerState/BNPlayerState.h"
 #include "Input/BNBaseEnhancedInputComponent.h"
 #include "Library/BNAbilitySystemLibrary.h"
-#include "Player/InventoryComponent.h"
-
 
 ABNMonoCharacter::ABNMonoCharacter()
 {
@@ -68,9 +67,6 @@ ABNMonoCharacter::ABNMonoCharacter()
 	{
 		GetMesh()->SetAnimInstanceClass(ABP_BNMonoAnimInstance.Class);
 	}
-
-	//InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
-
 }
 
 void ABNMonoCharacter::BeginPlay()
@@ -163,17 +159,18 @@ void ABNMonoCharacter::InitAbilityActorInfo()
 		AbilitySystemComponent = BNPlayerState->GetBNBaseAbilitySystemComponent();
 		MonoCharacterAttributeSet = BNPlayerState->GetBNBaseAttributeSet();
 
-		//Debugging : IsValid(MonoCharacterAttributeSet)
+#pragma region Debugging : IsValid(MonoCharacterAttributeSet)
 		/*if (IsValid(MonoCharacterAttributeSet))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("MonoCharacterAttributeSet IsValid"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("MonoCharacterAttributeSet Not IsValid"));			
+			UE_LOG(LogTemp, Error, TEXT("MonoCharacterAttributeSet Not IsValid"));
 			UE_LOG(LogTemp, Error, TEXT("%s"), *MonoCharacterAttributeSet.GetName());			
 		}
 		*/
+#pragma endregion
 
 		if (!IsValid(MonoCharacterAttributeSet)) return;
 		
@@ -248,6 +245,8 @@ void ABNMonoCharacter::OnMoveSpeedChanged(const FOnAttributeChangeData Data)
 void ABNMonoCharacter::Server_SetMaxWalkSpeed_Implementation(float NewSpeed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
+	Client_ApplyMoveSpeed(NewSpeed);
+	//CurrentMoveSpeed = NewSpeed;
 }
 
 void ABNMonoCharacter::PossessedBy(AController* NewController)
@@ -260,7 +259,7 @@ void ABNMonoCharacter::PossessedBy(AController* NewController)
 		InitAbilityActorInfo();
 	}
 
-	//Debugging Code: GetBNBaseAbilitySystemComponent() && GetAttributeSet<UBNTarotCardAttributeSet>()
+#pragma region Debugging Code: GetBNBaseAbilitySystemComponent() && GetAttributeSet<UBNTarotCardAttributeSet>()
 	/*if (GetBNBaseAbilitySystemComponent() && GetAttributeSet<UBNTarotCardAttributeSet>())
 	{
 		const FString AppendString = FString::Printf(TEXT("Owner Actor: %s, AvatarActor: %s"),
@@ -269,6 +268,7 @@ void ABNMonoCharacter::PossessedBy(AController* NewController)
 		
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *AppendString);
 	}*/
+#pragma endregion
 }
 
 void ABNMonoCharacter::OnRep_PlayerState()

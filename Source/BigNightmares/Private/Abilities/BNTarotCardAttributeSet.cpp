@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Abilities/BNTarotCardAttributeSet.h"
-#include "GameplayEffectExtension.h"
 
-#include "BaseGamePlayTags.h"
+#include "GameplayEffectExtension.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+
 #include "Player/BNMonoCharacter.h"
 
 UBNTarotCardAttributeSet::UBNTarotCardAttributeSet()
