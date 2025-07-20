@@ -87,7 +87,7 @@ void AMissionTimingGauge::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AAct
 		if (OverlappingPawn && OverlappingPawn->GetPlayerState())
 		{
 			ABNPlayerState* BNPS = Cast<ABNPlayerState>(OverlappingPawn->GetPlayerState());
-			if (IsValid(CurrentChallengingPlayerState) && CurrentChallengingPlayerState ==BNPS)
+			if (IsValid(CurrentChallengingPlayerState) && CurrentChallengingPlayerState == BNPS)
 			{
 				ABNPlayerController* BNPC = Cast<ABNPlayerController>(OverlappingPawn->GetController());
 				if (BNPC)
@@ -96,7 +96,7 @@ void AMissionTimingGauge::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AAct
 					if (BNGS && IsValid(TimingGaugeComponent))
 					{
 						BNGS->Server_EndSpecificGaugeChallenge(TimingGaugeComponent->GaugeID, BNPC);
-					}
+					} 
 					if (IsValid(TimingGaugeComponent))
 					{
 						TimingGaugeComponent->Client_EndGaugeUI(EVerticalGaugeResult::EVGR_Fail);

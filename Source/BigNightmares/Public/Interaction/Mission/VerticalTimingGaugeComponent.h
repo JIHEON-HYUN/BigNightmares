@@ -11,9 +11,6 @@
 
 class UBNInGameWidget;
 class ABNPlayerController;
-class UImage;
-class UBorder;
-enum class EVerticalGaugeResult : uint8;
 
 // 결과 전달을 위한 델리게이트
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVerticalGaugeFinishedSignature, EVerticalGaugeResult, Result);
@@ -45,25 +42,7 @@ public:
 	// 해당 컴포넌트의 고유 ID (FGuid : 고유한 식별자를 의미합니다. 128비트)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timing Gauge | ID")
 	FGuid GaugeID;
-
-	// 게이지 위젯 블루프린트 클래스
-	UPROPERTY(EditDefaultsOnly, Category="Timing Gauge | UI")
-	TSubclassOf<UBNInGameWidget> VerticalGaugeWidgetClass;
-
-	//현재 게이지 위젯 인스턴스
-	UPROPERTY()
-	TObjectPtr<UBNInGameWidget> VerticalGaugeWidgetInstance;
-
-	//UI 요소들 바인딩
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UBorder> Border_GaugeBackground;
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UImage> Image_Green;
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UImage> Image_Pointer;
-
+	
 	// 게이지 커서 움식임 속도 (0.0 ~ 1.0 사이 값, 초당) < 언제든 변경 가능
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timing Gauge | Settings")
 	float GaugeSpeed;
@@ -83,26 +62,14 @@ public:
 	//녹색 영역의 길이 - 블루프린트에서 고정, 서버에서 복제
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing=OnRep_GreenZoneLocation, Category = "Timing Gauge | Zones", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float GreenZoneLength;
-
-	// UI활성화 여부
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Timing Gauge | State")
-	bool bIsGaugeActive;
-
+	
 	//서버에 게이지 시작을 요청
 	UFUNCTION(BlueprintCallable, Category="Timing Gauge | Control")
-	void RequestStartGauge(const ABNPlayerController* BNPlayerController);
+	void RequestStartGauge(ABNPlayerController* BNPlayerController);
 
-	//클라이언트에서 게이지 실제로 시작
-	UFUNCTION(Client, Reliable)
-	void Client_StartGaugeUI();
-
-	//플레이어 입력을 처리 (클라이언트에서 서버로 결과 전송용)
+	//플레이어 입력을 처리 (클라이언트에서 서버로 결과 전송용) //TODO : Controller로 위치 변경 할 수도?
 	UFUNCTION(BlueprintCallable, Category = "Timing Gauge | Control")
 	void HandleGaugeInput();
-
-	// 클라이언트에서 게이지 UI를 실제 종료 (서버로 부터 호출)
-	UFUNCTION(Client, Reliable)
-	void Client_EndGaugeUI(EVerticalGaugeResult Result);
 
 	/** 게이지 결과를 외부에 알리는 이벤트 (블루프린트에서 리슨 가능) */
 	UPROPERTY(BlueprintAssignable, Category = "Timing Gauge | Events")
@@ -112,20 +79,11 @@ protected:
 	//GreenZone위치 복제시 클라이언트에서 호출되는 함수
 	UFUNCTION()
 	void OnRep_GreenZoneLocation();
-
-	//녹색 영영의 UI의 위치와 크키 업데이트
-	void UpdateGreenZoneUI();
-
-	//커서의 UI위치를 업데이트
-	void UpdatePointerUI();
-
 private:
-	float CachedGaugeHeight;	//게이지 바 전체 높이 캐시
-	float CachedPointerHeight;	//커서 높이 캐시
-
+	
 	//서버로 게이지 시작 요청 RPC
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_RequestStartGaugeInternal(FGuid InGaugeID, const ABNPlayerController* BNPlayerController);
+	void Server_RequestStartGaugeInternal(FGuid InGaugeID, ABNPlayerController* BNPlayerController);
 
 	//서버로 게이지 종료 요청 RPC
 	UFUNCTION(Server, Reliable, WithValidation)

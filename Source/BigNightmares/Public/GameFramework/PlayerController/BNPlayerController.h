@@ -9,6 +9,11 @@
 #include "UI/Lobby/BNLobbyInterface.h"
 #include "BNPlayerController.generated.h"
 
+class UVerticalTimingGaugeComponent;
+enum class EVerticalGaugeResult : uint8;
+class UImage;
+class UBorder;
+class UBNInGameWidget;
 struct FLobbyPlayerData;
 
 class UBNSystemWidget;
@@ -25,6 +30,7 @@ class BIGNIGHTMARES_API ABNPlayerController : public APlayerController, public I
 public:
 	ABNPlayerController();
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 #pragma region Lobby
 	
@@ -50,6 +56,7 @@ public:
 
 #pragma endregion Lobby
 
+#pragma region Inventory
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
@@ -73,6 +80,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Custom Values|Widgets")
 	TSubclassOf<UBNSystemWidget> InventoryWidgetClass;
 
+#pragma endregion
+
 #pragma region PlayerState_IsValid
 
 public:
@@ -88,4 +97,52 @@ protected:
 	FTimerHandle InitHandle; //타이머 핸들, player controller가 초기화가 제대로 안됬다면 일정 시간 후 다시 반복하기 위함
 	
 #pragma endregion PlayerState_IsValid
+
+#pragma region Missions1
+public:
+	UPROPERTY(EditDefaultsOnly, Category="Timing Gauge | UI")
+	TSubclassOf<UBNInGameWidget> VerticalGaugeWidgetClass;
+
+	//현재 게이지 위젯 인스턴스
+	UPROPERTY()
+	TObjectPtr<UBNInGameWidget> VerticalGaugeWidgetInstance;
+
+	//UI 요소들 바인딩
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UBorder> Border_GaugeBackground;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UImage> Image_Green;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UImage> Image_Pointer;
+
+	UPROPERTY(transient)
+	TWeakObjectPtr<UVerticalTimingGaugeComponent> ActiveGaugeComponent;
+	
+	// UI활성화 여부
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Timing Gauge | State")
+	bool bIsGaugeActive;
+	
+	float CachedGaugeHeight;	//게이지 바 전체 높이 캐시
+	float CachedPointerHeight;	//커서 높이 캐시
+
+	//클라이언트에서 게이지 실제로 시작
+	UFUNCTION(Client, Reliable)
+	void Client_StartGaugeUI(UVerticalTimingGaugeComponent* InGaugeComponent);
+	
+	// 클라이언트에서 게이지 UI를 실제 종료 (서버로 부터 호출)
+	UFUNCTION(Client, Reliable)
+	void Client_EndGaugeUI(EVerticalGaugeResult Result);
+	
+	//녹색 영영의 UI의 위치와 크키 업데이트
+	void UpdateGreenZoneUI(float GreenZoneStart, float GreenZoneLength);
+
+	//커서의 UI위치를 업데이트
+	void UpdatePointerUI(float CurrentGaugeValue);
+
+	UFUNCTION(Server, Reliable, WithValidation) // WithValidation 데이터 유효화 검사
+	void Server_NotifyGaugeFinished(FGuid InGaugeID, EVerticalGaugeResult Result);
+	
+#pragma endregion
 };
