@@ -52,7 +52,7 @@ void UBNInGameWidget::SetPlayerList(const TArray<FInGamePlayerData>& PlayerDataL
 		auto Player = CreateWidget<UBNInGamePlayerList>(World, InGamePlayerListClass);
 		if (Player == nullptr) return;
 		
-		Player->Setup(PlayerData.PlayerName, PlayerData.StatusAlive);
+		Player->Setup(PlayerData.PlayerName, PlayerData.bStatusAlive);
 
 		PlayerListBox->AddChild(Player);
 	}

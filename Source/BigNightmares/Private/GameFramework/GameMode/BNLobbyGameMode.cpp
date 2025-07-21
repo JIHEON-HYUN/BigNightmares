@@ -10,11 +10,6 @@
 #include "GameFramework/GameState/BNGameState.h"
 #include "GameFramework/PlayerState/BNPlayerState.h"
 
-ABNLobbyGameMode::ABNLobbyGameMode(const FObjectInitializer& FObjectInitializer)
-	: Super(FObjectInitializer)
-{
-}
-
 void ABNLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
@@ -29,7 +24,7 @@ void ABNLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	// PostLogin이 되면 GameState의 LobbyPlayerDataList에 추가
 	FLobbyPlayerData NewLobbyPlayer;
 	NewLobbyPlayer.PlayerName = PS->GetPlayerName();
-	NewLobbyPlayer.ReadyState = false;
+	NewLobbyPlayer.bReadyState = false;
 	GS->AddLobbyPlayer(NewLobbyPlayer);
 }
 

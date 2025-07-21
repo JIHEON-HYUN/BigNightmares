@@ -50,7 +50,9 @@ protected:
 public:
 	void AddLobbyPlayer(const FLobbyPlayerData& NewPlayer);
 	void RemoveLobbyPlayer(ABNPlayerState* ExitPlayerState);
+	
 	const TArray<FLobbyPlayerData>& GetLobbyPlayers() const;
+	
 	void SetPlayerReadyState(const FString& PlayerName);
 
 	UPROPERTY(BlueprintAssignable)
@@ -70,8 +72,12 @@ protected:
 public:
 	void AddInGamePlayer(const FInGamePlayerData& NewPlayer);
 	void RemoveInGamePlayer(ABNPlayerState* ExitPlayerState);
+	
 	const TArray<FInGamePlayerData>& GetInGamePlayers() const;
 	const EPlayerType GetPlayerType(ABNPlayerState* PlayerState) const;
+	uint8 GetInGamePlayerCount() const;
+	uint8 GetPreyPlayerCount() const;
+	
 	void SetPlayerType(uint8 Index, EPlayerType NewType);
 	void SetPlayerStatusAlive(const FString& PlayerName);
 
@@ -86,9 +92,6 @@ protected:
 	void OnRep_InGamePlayerDataList();
 
 private:
-	UPROPERTY(Replicated)
-	uint8 PlayerCount = 0;
-	
 	UPROPERTY(Replicated)
 	uint8 PreyPlayerCount = 0;
 

@@ -17,6 +17,7 @@ void ABNGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ABNGameState, Rep_ActiveGaugeChallenges);
 	DOREPLIFETIME(ABNGameState, LobbyPlayerDataList);
 	DOREPLIFETIME(ABNGameState, InGamePlayerDataList);
+	DOREPLIFETIME(ABNGameState, PreyPlayerCount);
 }
 
 void ABNGameState::AddLobbyPlayer(const FLobbyPlayerData& NewPlayer)
@@ -44,14 +45,14 @@ void ABNGameState::SetPlayerReadyState(const FString& PlayerName)
 		if (PlayerData.PlayerName == PlayerName)
 		{
 			// 레디 상태를 바꾸고, LobbyPlayerDataList 변경 알림
-			PlayerData.ReadyState = !PlayerData.ReadyState;
+			PlayerData.bReadyState = !PlayerData.bReadyState;
 			OnLobbyPlayerUpdated.Broadcast(LobbyPlayerDataList);
 
 			ABNLobbyGameMode* GM = GetWorld()->GetAuthGameMode<ABNLobbyGameMode>();
 			if (GM == nullptr) return;
 			
 			// LobbyGameMode의 레디 상태에 반영
-			if (PlayerData.ReadyState)
+			if (PlayerData.bReadyState)
 			{
 				GM->Ready();
 			}
@@ -73,7 +74,6 @@ void ABNGameState::OnRep_LobbyPlayerDataList()
 void ABNGameState::AddInGamePlayer(const FInGamePlayerData& NewPlayer)
 {
 	InGamePlayerDataList.Add(NewPlayer);
-	++PlayerCount;
 }
 
 void ABNGameState::RemoveInGamePlayer(class ABNPlayerState* ExitPlayerState)
@@ -87,8 +87,6 @@ void ABNGameState::RemoveInGamePlayer(class ABNPlayerState* ExitPlayerState)
 	{
 		-- PreyPlayerCount;
 	}
-
-	--PlayerCount;
 }
 
 const TArray<FInGamePlayerData>& ABNGameState::GetInGamePlayers() const
@@ -109,12 +107,40 @@ const EPlayerType ABNGameState::GetPlayerType(ABNPlayerState* PlayerState) const
 	return EPlayerType::None;
 }
 
+uint8 ABNGameState::GetInGamePlayerCount() const
+{
+	return InGamePlayerDataList.Num();
+}
+
+uint8 ABNGameState::GetPreyPlayerCount() const
+{
+	return PreyPlayerCount;
+}
+
 void ABNGameState::SetPlayerType(uint8 Index, EPlayerType NewType)
 {
 	InGamePlayerDataList[Index].PlayerType = NewType;
 	if (NewType == EPlayerType::Resident)
 	{
-		PreyPlayerCount = PlayerCount - 1;
+		PreyPlayerCount = GetInGamePlayerCount() - 1;
+	}
+
+	for (const auto& PlayerData : InGamePlayerDataList)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Prey Count : %d"), GetPreyPlayerCount());
+		UE_LOG(LogTemp, Error, TEXT("Player Name : %s"), *PlayerData.PlayerName);
+		if (PlayerData.PlayerType == EPlayerType::Resident)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Player Type : Resident"));
+		}
+		else if (PlayerData.PlayerType == EPlayerType::Prey)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Player Type : Prey"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Player Type : None"));
+		}
 	}
 }
 
@@ -125,15 +151,20 @@ void ABNGameState::SetPlayerStatusAlive(const FString& PlayerName)
 		if (PlayerData.PlayerName == PlayerName)
 		{
 			// 생존 상태를 바꾸고, InGamePlayerDataList 변경 알림
-			PlayerData.StatusAlive = !PlayerData.StatusAlive;
+			PlayerData.bStatusAlive = !PlayerData.bStatusAlive;
 			OnInGamePlayerUpdated.Broadcast(InGamePlayerDataList);
 
 			ABNInGameGameMode* GM = GetWorld()->GetAuthGameMode<ABNInGameGameMode>();
 			if (GM == nullptr) return;
 
-			if (!PlayerData.StatusAlive)
+			if (PlayerData.PlayerType == EPlayerType::Prey)
 			{
-				GM->PlayerDead(PlayerData.PlayerType);
+				--PreyPlayerCount;
+			}
+			
+			if (!PlayerData.bStatusAlive)
+			{
+				GM->PlayerDead();
 			}
 			
 			break;

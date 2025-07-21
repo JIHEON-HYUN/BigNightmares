@@ -55,7 +55,7 @@ void UBNLobbyWidget::SetPlayerList(const TArray<FLobbyPlayerData>& PlayerDataLis
 		auto Player = CreateWidget<UBNLobbyPlayerList>(World, LobbyPlayerListClass);
 		if (Player == nullptr) return;
 		
-		Player->Setup(PlayerData.PlayerName, PlayerData.ReadyState);
+		Player->Setup(PlayerData.PlayerName, PlayerData.bReadyState);
 
 		PlayerListBox->AddChild(Player);
 	}

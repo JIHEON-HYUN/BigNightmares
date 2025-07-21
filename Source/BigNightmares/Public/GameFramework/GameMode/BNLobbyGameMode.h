@@ -16,7 +16,9 @@ struct FLobbyPlayerData
 	FString PlayerName;
 	
 	UPROPERTY(BlueprintReadWrite)
-	bool ReadyState = false;
+	bool bReadyState;
+
+	FLobbyPlayerData() : PlayerName(TEXT("")), bReadyState(false) {}
 };
 
 /**
@@ -28,8 +30,6 @@ class BIGNIGHTMARES_API ABNLobbyGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-	ABNLobbyGameMode(const FObjectInitializer& FObjectInitializer= FObjectInitializer::Get());
-	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
 

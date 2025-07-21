@@ -27,10 +27,12 @@ struct FInGamePlayerData
 	FString PlayerName;
 	
 	UPROPERTY(BlueprintReadWrite)
-	EPlayerType PlayerType = EPlayerType::Prey;
+	EPlayerType PlayerType;
 
 	UPROPERTY(BlueprintReadWrite)
-	bool StatusAlive = true;
+	bool bStatusAlive;
+
+	FInGamePlayerData() : PlayerName(TEXT("")), PlayerType(EPlayerType::None), bStatusAlive(false) {}
 };
 
 /**
@@ -45,7 +47,7 @@ public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
 
-	void PlayerDead(EPlayerType DeadPlayerType);
+	void PlayerDead();
 	
 	UFUNCTION(BlueprintCallable)
 	void ReturnToLobby();
@@ -53,7 +55,10 @@ public:
 	UBNMonoCharacterDataAsset* GetBNMonoCharacterDataAsset() const;
 	
 private:
-	uint8 PlayerCount = 0;
+	FTimerHandle PostLoginTimer;
+	float LastPostLoginTime;
+
+	void CheckPostLoginTimeOut();
 	
 	// 캐릭터 기본 베이스 데이터에셋
 	UPROPERTY(EditDefaultsOnly, Category="Custom Values|Class Defaults")
