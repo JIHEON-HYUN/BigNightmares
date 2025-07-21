@@ -3,16 +3,13 @@
 
 #include "Interaction/Mission/VerticalTimingGaugeComponent.h"
 
-#include "Components/Border.h"
-#include "Components/CanvasPanelSlot.h"
-#include "Components/Image.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/GameState/BNGameState.h"
 #include "GameFramework/PlayerController/BNPlayerController.h"
-#include "UI/InGame/BNInGameWidget.h"
+#include "UI/InGame/BNMission1Widget.h"
 
 // Sets default values for this component's properties
 UVerticalTimingGaugeComponent::UVerticalTimingGaugeComponent()
@@ -52,6 +49,7 @@ void UVerticalTimingGaugeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeP
 	
 	DOREPLIFETIME(UVerticalTimingGaugeComponent, CurrentGaugeValue);
 	DOREPLIFETIME(UVerticalTimingGaugeComponent, bIsLogicActive);
+	DOREPLIFETIME(UVerticalTimingGaugeComponent, GaugeDirection);
 }
 
 void UVerticalTimingGaugeComponent::RequestStartGauge(ABNPlayerController* BNPlayerController)
@@ -197,7 +195,7 @@ void UVerticalTimingGaugeComponent::OnRep_GreenZoneLocation()
 	
 	if (IsValid(LocalBNPC) && LocalBNPC->ActiveGaugeComponent.Get() == this)
 	{
-		LocalBNPC->UpdateGreenZoneUI(GreenZoneStart, GreenZoneLength);
+		LocalBNPC->Mission1WidgetInstance->UpdateGreenZoneUI(GreenZoneStart, GreenZoneLength);
 	}
 }
 
@@ -208,17 +206,20 @@ void UVerticalTimingGaugeComponent::TickComponent(float DeltaTime, ELevelTick Ti
 
 	if (GetOwner()->HasAuthority() && bIsLogicActive)
 	{
-		CurrentGaugeValue = GaugeDirection * GaugeSpeed * DeltaTime;
+		if (bIsLogicActive)
+		{
+			CurrentGaugeValue += GaugeDirection * GaugeSpeed * DeltaTime;
 
-		if (CurrentGaugeValue >= 1.0f)
-		{
-			CurrentGaugeValue = 1.0f;
-			GaugeDirection = -1.0f;
-		}
-		else if (CurrentGaugeValue <= 0.0f)
-		{
-			CurrentGaugeValue = 0.0f;
-			GaugeDirection = 1.0f;
+			if (CurrentGaugeValue >= 1.0f)
+			{
+				CurrentGaugeValue = 1.0f;
+				GaugeDirection = -1.0f;
+			}
+			else if (CurrentGaugeValue <= 0.0f)
+			{
+				CurrentGaugeValue = 0.0f;
+				GaugeDirection = 1.0f;
+			}
 		}
 	}
 }
