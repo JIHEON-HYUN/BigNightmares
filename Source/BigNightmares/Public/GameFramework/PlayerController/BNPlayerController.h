@@ -121,7 +121,7 @@ public:
 	TWeakObjectPtr<UVerticalTimingGaugeComponent> ActiveGaugeComponent;
 	
 	// UI활성화 여부
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Timing Gauge | State")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category="Timing Gauge | State")
 	bool bIsGaugeActive;
 	
 	float CachedGaugeHeight;	//게이지 바 전체 높이 캐시

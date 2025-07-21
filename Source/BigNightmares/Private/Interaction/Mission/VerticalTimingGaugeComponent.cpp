@@ -20,7 +20,7 @@ UVerticalTimingGaugeComponent::UVerticalTimingGaugeComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	bIsGaugeActiveLocal = false;
+	bIsLogicActive = false;
 
 	// 컴포넌트 자체 복제 허용
 	SetIsReplicatedByDefault(true);
@@ -45,13 +45,13 @@ void UVerticalTimingGaugeComponent::BeginPlay()
 void UVerticalTimingGaugeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
+	
 	//녹색 영역의 시작 위치와 길이를 모든 클라에 복제
 	DOREPLIFETIME(UVerticalTimingGaugeComponent, GreenZoneStart);
 	DOREPLIFETIME(UVerticalTimingGaugeComponent, GreenZoneLength);
 	
 	DOREPLIFETIME(UVerticalTimingGaugeComponent, CurrentGaugeValue);
-	DOREPLIFETIME(UVerticalTimingGaugeComponent, bIsGaugeActiveLocal);
+	DOREPLIFETIME(UVerticalTimingGaugeComponent, bIsLogicActive);
 }
 
 void UVerticalTimingGaugeComponent::RequestStartGauge(ABNPlayerController* BNPlayerController)
@@ -64,7 +64,7 @@ void UVerticalTimingGaugeComponent::RequestStartGauge(ABNPlayerController* BNPla
 		return;
 	}
 
-	if (bIsGaugeActiveLocal)
+	if (bIsLogicActive)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("GaugeID '%s' is already active"), *GaugeID.ToString());
 		return;
@@ -112,7 +112,7 @@ void UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Implementat
 
 	if (this->GaugeID !=  InGaugeID) return;
 
-	if (bIsGaugeActiveLocal) return;
+	if (bIsLogicActive) return;
 	
 	//서버에서 GreenZone의 위치를 랜덤 결정
 	GreenZoneStart = FMath::FRandRange(0.0f, 1.0f - GreenZoneLength);
@@ -120,81 +120,11 @@ void UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Implementat
 
 	BNPlayerController->Client_StartGaugeUI(this);
 
-	bIsGaugeActiveLocal = true;
+	bIsLogicActive = true;
 
 	UE_LOG(LogTemp, Log, TEXT("Server: Gauge ID '%s' UI/logic initiated for Player %s (targeting specific client)."), 
 		*GaugeID.ToString(), *BNPlayerController->GetName());
 }
-
-void UVerticalTimingGaugeComponent::Client_StartGaugeUI_Implementation()
-{
-	// 현재 월드의 네트워크 모드를 가져옵니다.
-	// GetWorld()는 컴포넌트를 소유한 액터의 월드를 반환합니다.
-	ENetMode NetMode = GetWorld()->GetNetMode();
-
-	if (NetMode == NM_Client || NetMode == NM_ListenServer)
-	{
-		APlayerController* LocalPlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0); 
-		ABNPlayerController* CurrentBNPlayerController = Cast<ABNPlayerController>(LocalPlayerController);
-
-		//클라 실행
-		//서버로부터 '게이지 UI를 시작하라'는 명령을 받았을 때만 실행
-		if (!VerticalGaugeWidgetClass || !GetWorld())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("VerticalGaugeWidgetClass not set or World is null for ID %s!"), *GaugeID.ToString());
-			return;
-		}
-
-		//기존 위젯이 있다면 제거 (시작시)
-		if (VerticalGaugeWidgetInstance)
-		{
-			VerticalGaugeWidgetInstance->RemoveFromParent();
-			VerticalGaugeWidgetInstance = nullptr;
-		}
-			
-		UE_LOG(LogTemp, Log, TEXT("Client_StartGaugeUI: LocalPlayerController pointer: %p"), CurrentBNPlayerController); // 주소값 출력
-		if (IsValid(CurrentBNPlayerController))
-		{
-			VerticalGaugeWidgetInstance = CreateWidget<UBNInGameWidget>(CurrentBNPlayerController, VerticalGaugeWidgetClass); //이놈이 문제야
-			if (IsValid(VerticalGaugeWidgetInstance))
-			{
-				VerticalGaugeWidgetInstance->AddToViewport();
-				bIsGaugeActiveLocal = true;
-
-				Border_GaugeBackground = Cast<UBorder>(VerticalGaugeWidgetInstance->GetWidgetFromName(TEXT("Border_GaugeBackground")));
-				Image_Green = Cast<UImage>(VerticalGaugeWidgetInstance->GetWidgetFromName(TEXT("Image_Green")));
-				Image_Pointer = Cast<UImage>(VerticalGaugeWidgetInstance->GetWidgetFromName(TEXT("Image_Pointer")));
-				
-				if (!Border_GaugeBackground || !Image_Green || !Image_Pointer)
-				{
-					Server_RequestEndGaugeInternal(GaugeID, EVerticalGaugeResult::EVGR_Fail);
-					return;
-				}
-			}
-
-			
-			CachedGaugeHeight = Border_GaugeBackground->GetCachedGeometry().GetLocalSize().Y; //위에서 생성안되서 여기서 터짐
-			if (CachedGaugeHeight == 0.0f)
-			{
-				CachedPointerHeight = 400.0f;
-				UE_LOG(LogTemp, Warning, TEXT("CachedGaugeHeight was 0.0f for ID %s. Defaulting to %f."), *GaugeID.ToString(), CachedGaugeHeight);
-			}
-			CachedPointerHeight =Image_Pointer->GetCachedGeometry().GetLocalSize().Y;
-			if (CachedPointerHeight == 0.0f)
-			{
-				CachedPointerHeight = 50.0f;
-				UE_LOG(LogTemp, Warning, TEXT("CachedPointerHeight was 0.0f for ID %s. Defaulting to %f."), *GaugeID.ToString(), CachedPointerHeight);
-			}
-
-			UpdateGreenZoneUI();
-			CurrentGaugeValue = 0.0f;
-			GaugeDirection = 1.0f;
-			bIsGaugeActive = true;
-			UE_LOG(LogTemp, Log, TEXT("Client: Gauge UI for ID '%s' started."), *GaugeID.ToString());
-		}
-	}
-}
-
 
 void UVerticalTimingGaugeComponent::HandleGaugeInput()
 {
@@ -251,9 +181,9 @@ void UVerticalTimingGaugeComponent::Server_RequestEndGaugeInternal_Implementatio
 	if (!IsValid(GetOwner()) || !GetOwner()->HasAuthority()) return;
 
 	if (GaugeID != InGaugeID) return;
-	if (!bIsGaugeActiveLocal) return;
+	if (!bIsLogicActive) return;
 
-	bIsGaugeActiveLocal = false; //서버 게이지 로직 비활성화
+	bIsLogicActive = false; //서버 게이지 로직 비활성화
 	CurrentGaugeValue = 0.0f; //초기화
 	GaugeDirection = 1.0f; //초기화
 	
@@ -271,104 +201,12 @@ void UVerticalTimingGaugeComponent::OnRep_GreenZoneLocation()
 	}
 }
 
-void UVerticalTimingGaugeComponent::Client_EndGaugeUI_Implementation(EVerticalGaugeResult Result)
-{
-	//클라 실행
-	//서버로부터 UI종료 명령을 받았을 때 실행
-	bIsGaugeActive = false;
-	if (VerticalGaugeWidgetInstance)
-	{
-		VerticalGaugeWidgetInstance->RemoveFromParent();
-		VerticalGaugeWidgetInstance = nullptr;
-		UE_LOG(LogTemp, Log, TEXT("Client: Gauge UI for ID '%s' ended."), *GaugeID.ToString());
-	}
-	bIsGaugeActiveLocal = false; // 로컬 상태 비활성화
-	
-	OnGaugeFinished.Broadcast(Result);
-}
-
-
-void UVerticalTimingGaugeComponent::UpdateGreenZoneUI()
-{
-	if (Image_Green && Border_GaugeBackground)
-	{
-		//UMG UI에서 위젯의 위치나 크기를 런타임에 동적으로 변경하고 싶을 때, 부모 패널의 슬롯 설정을 변경하는 것이 일반적
-		//Image_Green->Slot 특정 위젯이 부모 패널에 의해 할당받은 '슬롯' 객체를 가져오는 멤버
-		UCanvasPanelSlot* GreenZoneSlot = Cast<UCanvasPanelSlot>(Image_Green->Slot);
-		UCanvasPanelSlot* GaugeBackGroundSlot = Cast<UCanvasPanelSlot>(Border_GaugeBackground->Slot);
-
-		if (GreenZoneSlot && GaugeBackGroundSlot)
-		{
-			// GetCachedGeometry() : 위젯의 현재 위치(절대 좌표), 크기(로컬 및 절대 크기), 스케일, 변환(transform) 등 레이아웃에 관련된 모든 정보를 포함
-			FVector2D BackgroundSize = Border_GaugeBackground->GetCachedGeometry().GetLocalSize();
-			if (BackgroundSize.IsZero())
-			{
-				// WBP_VerticalTimingGauge의 Border_GaugeBackground 크기와 일치해야 함
-				BackgroundSize = FVector2D(50.0f, 800.f);
-			}
-
-			float GaugeWidth = BackgroundSize.X;
-			float GaugeHeight = BackgroundSize.Y;
-			FVector2D GaugeBackgroundPos = GaugeBackGroundSlot->GetPosition();
-
-			float ZonePixelHeight = GaugeHeight * GreenZoneLength;
-
-			float ZonePixelY = GaugeBackgroundPos.Y + (GaugeHeight - (GreenZoneStart + GreenZoneLength) * GaugeHeight);
-
-			GreenZoneSlot->SetPosition(FVector2D(GaugeBackgroundPos.X, ZonePixelY));
-			GreenZoneSlot->SetSize(FVector2D(GaugeWidth, ZonePixelHeight));
-		}
-	}
-}
-
-void UVerticalTimingGaugeComponent::UpdatePointerUI()
-{
-	if (Image_Pointer && Border_GaugeBackground)
-	{
-		UCanvasPanelSlot* PointerSlot = Cast<UCanvasPanelSlot>(Image_Pointer->Slot);
-		UCanvasPanelSlot* GaugeBackgroundSlot = Cast<UCanvasPanelSlot>(Border_GaugeBackground->Slot);
-
-		if (PointerSlot && GaugeBackgroundSlot)
-		{
-			FVector2D BackgroundSize = Border_GaugeBackground->GetCachedGeometry().GetLocalSize();
-			if (BackgroundSize.IsZero())
-			{
-				BackgroundSize = FVector2D(50.0f, 800.f);
-			}
-
-			float GaugeWidth = BackgroundSize.X;
-			float GaugeHeight = BackgroundSize.Y;
-			float PointerWidth = Image_Pointer->GetCachedGeometry().GetLocalSize().X;
-			float PointerHeight = Image_Pointer->GetCachedGeometry().GetLocalSize().Y;
-			
-			FVector2D GaugeBackgroundPos = GaugeBackgroundSlot->GetPosition();
-
-			// 커서의 Y 위치 계산 (CurrentGaugeValue 0.0~1.0을 픽셀 위치로 변환)
-			// CurrentGaugeValue가 0.0 (게이지 맨 아래)일 때, Y는 GaugeHeight - PointerHeight (UMG 기준)
-			// CurrentGaugeValue가 1.0 (게이지 맨 위)일 때, Y는 0.0 (UMG 기준)
-			float PointerYInGauge = (1.f - CurrentGaugeValue) * (GaugeHeight - PointerHeight);
-
-			//게이지 배경 위젯의 Y위치를 기준으로 최종 절대 Y좌표 계산
-			float AbsolutePointerY = GaugeBackgroundSlot->GetPosition().Y + PointerYInGauge;
-
-			float SomeOffSet = 20.0f; // 게이지 바와 커서 사이의 간격
-			float PointerX = GaugeBackgroundSlot->GetPosition().X + GaugeWidth + SomeOffSet;
-
-			//커서가 게이지 바 영영의 Y축 범위 내에 있도록 클램프
-			AbsolutePointerY = FMath::Clamp(AbsolutePointerY, GaugeBackgroundSlot->GetPosition().Y, GaugeBackgroundPos.Y + GaugeHeight - PointerHeight);
-
-			PointerSlot->SetPosition(FVector2D(PointerX, AbsolutePointerY));
-		}
-	}
-}
-
-
 // Called every frame
 void UVerticalTimingGaugeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (GetOwner()->HasAuthority() && bIsGaugeActiveLocal)
+	if (GetOwner()->HasAuthority() && bIsLogicActive)
 	{
 		CurrentGaugeValue = GaugeDirection * GaugeSpeed * DeltaTime;
 

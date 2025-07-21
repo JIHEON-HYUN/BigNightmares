@@ -11,6 +11,7 @@
 #include "GameFramework/PlayerState/BNPlayerState.h"
 
 #include "Interaction/Mission/VerticalTimingGaugeComponent.h"
+#include "Player/BNMonoCharacter.h"
 
 AMissionTimingGauge::AMissionTimingGauge()
 {
@@ -81,28 +82,19 @@ void AMissionTimingGauge::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedCompo
 void AMissionTimingGauge::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (HasAuthority() && OtherActor)
+	if (HasAuthority())
 	{
-		APawn* OverlappingPawn = Cast<APawn>(OtherActor);
-		if (OverlappingPawn && OverlappingPawn->GetPlayerState())
+		ABNMonoCharacter* OverlappingMonoCharacter = Cast<ABNMonoCharacter>(OtherActor);
+		if (IsValid(OverlappingMonoCharacter))
 		{
-			ABNPlayerState* BNPS = Cast<ABNPlayerState>(OverlappingPawn->GetPlayerState());
-			if (IsValid(CurrentChallengingPlayerState) && CurrentChallengingPlayerState == BNPS)
+			ABNPlayerController* BNPC = Cast<ABNPlayerController>(OverlappingMonoCharacter->GetController());
+			if (IsValid(BNPC))
 			{
-				ABNPlayerController* BNPC = Cast<ABNPlayerController>(OverlappingPawn->GetController());
-				if (BNPC)
+				UVerticalTimingGaugeComponent* VerticalGauge = FindComponentByClass<UVerticalTimingGaugeComponent>();
+				if (IsValid(VerticalGauge))
 				{
-					ABNGameState* BNGS = GetWorld()->GetGameState<ABNGameState>();
-					if (BNGS && IsValid(TimingGaugeComponent))
-					{
-						BNGS->Server_EndSpecificGaugeChallenge(TimingGaugeComponent->GaugeID, BNPC);
-					} 
-					if (IsValid(TimingGaugeComponent))
-					{
-						TimingGaugeComponent->Client_EndGaugeUI(EVerticalGaugeResult::EVGR_Fail);
-					}
-					UE_LOG(LogTemp, Log, TEXT("Server: Player %s left overlap, challenge for Gauge ID %s forcefully ended."), *CurrentChallengingPlayerState->GetPlayerName(), *TimingGaugeComponent->GaugeID.ToString());
-					CurrentChallengingPlayerState = nullptr;
+					//충돌한 캐릭터의 컨트롤러를 넘김으로 미션 시작 요청
+					VerticalGauge->RequestStartGauge(BNPC);
 				}
 			}
 		}

@@ -84,6 +84,7 @@ public:
 	bool Server_TryStartSpecificGaugeChallenge(FGuid GaugeID, const ABNPlayerController* PlayerController);
 
 	//서버 : 특정 게이지 미션 도전 종료
+	UFUNCTION(Server, Reliable)
 	void Server_EndSpecificGaugeChallenge(FGuid GaugeID, ABNPlayerController* PlayerController);
 
 

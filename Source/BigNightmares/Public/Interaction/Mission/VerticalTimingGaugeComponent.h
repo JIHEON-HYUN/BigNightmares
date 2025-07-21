@@ -30,10 +30,6 @@ protected:
 
 	// 복제 속성 등록
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
-	// UI 활성화는 Client RPC로 직접 제어하는 것이 더 정확
-	UPROPERTY() // bIsGaugeActive는 복제 불필요. 클라이언트 로컬 상태로 관리
-	bool bIsGaugeActiveLocal; // 클라이언트 로컬에서만 사용될 게이지 활성화 상태 변수 (옵션)
 
 public:	
 	// Called every frame
@@ -48,7 +44,7 @@ public:
 	float GaugeSpeed;
 	
 	// 게이지 커서의 현재 값 (0.0 ~ 1.0) - 아래쪽이 0.0, 위쪽이 1.0
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Timing Gauge | State")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Timing Gauge | State")
 	float CurrentGaugeValue;
 
 	// 게이지 커서의 움직임 방향
@@ -74,6 +70,10 @@ public:
 	/** 게이지 결과를 외부에 알리는 이벤트 (블루프린트에서 리슨 가능) */
 	UPROPERTY(BlueprintAssignable, Category = "Timing Gauge | Events")
 	FOnVerticalGaugeFinishedSignature OnGaugeFinished;
+
+	// 게이지 컴포넌트의 게임 로직이 활성화되어 있는지 여부
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Timing Gauge | State")
+	bool bIsLogicActive;
 	
 protected:
 	//GreenZone위치 복제시 클라이언트에서 호출되는 함수

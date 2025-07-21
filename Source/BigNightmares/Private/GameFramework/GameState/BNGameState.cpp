@@ -3,11 +3,15 @@
 
 #include "GameFramework/GameState/BNGameState.h"
 
+#include "EngineUtils.h"
+#include "Net/UnrealNetwork.h"
+
 #include "GameFramework/GameMode/BNLobbyGameMode.h"
 #include "GameFramework/PlayerController/BNPlayerController.h"
 #include "GameFramework/PlayerState/BNPlayerState.h"
 #include "GameFramework/GameMode/BNInGameGameMode.h"
-#include "Net/UnrealNetwork.h"
+#include "Interaction/Mission/MissionTimingGauge.h"
+#include "Interaction/Mission/VerticalTimingGaugeComponent.h"
 
 
 void ABNGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -91,54 +95,29 @@ void ABNGameState::SetPlayerType(uint8 Index, EPlayerType NewType)
 {
 	InGamePlayerDataList[Index].PlayerType = NewType;
 }
-#pragma region Mission1
 
+#pragma region Mission1
 bool ABNGameState::Server_TryStartSpecificGaugeChallenge(FGuid GaugeID, const ABNPlayerController* PlayerController)
 {
 	if (!HasAuthority()) return false;
-	if (!PlayerController || !PlayerController->PlayerState) return false;
-
+	if (!GaugeID.IsValid()) return false;
 	if (!IsValid(PlayerController))
 	{
-		UE_LOG(LogTemp, Error, TEXT("GameState : Server_RequestStartGaugeInternal: Requesting BNPlayerController is null."));
+		UE_LOG(LogTemp, Error, TEXT("GameState : Server_TryStartSpecificGaugeChallenge: Requesting BNPlayerController is null."));
 		return false; 
 	}
 
-	FGaugeChallengeInfo* FoundInfo = Rep_ActiveGaugeChallenges.FindByPredicate([&] (const FGaugeChallengeInfo& Info)
-	{
-		return Info.GaugeID == GaugeID;
-	});
-
-	if (FoundInfo && FoundInfo->bIsActive)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Server: Gauge ID '%s' is already active."), *GaugeID.ToString());
-		return false;
-	}
-
-	//다른 플레이어가 도전 중인지 확인
 	for (const FGaugeChallengeInfo& Info : Rep_ActiveGaugeChallenges)
 	{
-		if (Info.bIsActive && Info.ChallengingPlayerState == PlayerController->PlayerState)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Server: Player %s is already challenging another gauge (ID: %s)."), *PlayerController->PlayerState->GetPlayerName(), *Info.GaugeID.ToString());
-			return false;			
-		}
+		if (Info.GaugeID == GaugeID && Info.bIsActive)
+			return false;
 	}
-
-	// 업데이트
-	if (FoundInfo)
-	{
-		FoundInfo->ChallengingPlayerState = Cast<ABNPlayerState>(PlayerController->PlayerState);
-		FoundInfo->bIsActive = true;
-	}
-	else
-	{
-		FGaugeChallengeInfo NewChallengeInfo;
-		NewChallengeInfo.GaugeID = GaugeID;
-		NewChallengeInfo.ChallengingPlayerState = Cast<ABNPlayerState>(PlayerController->PlayerState);
-		NewChallengeInfo.bIsActive = true;
-		Rep_ActiveGaugeChallenges.Add(NewChallengeInfo);		
-	}
+	
+	FGaugeChallengeInfo NewChallengeInfo;
+	NewChallengeInfo.GaugeID = GaugeID;
+	NewChallengeInfo.ChallengingPlayerState = PlayerController->GetPlayerState<ABNPlayerState>();
+	NewChallengeInfo.bIsActive = true;
+	Rep_ActiveGaugeChallenges.Add(NewChallengeInfo);		
 
 	// 배열이 변경되었음을 강제로 복제 시스템에 알림 (RepNotify를 트리거)
 	// 이 방식은 배열의 원소가 변경될 때 복제를 강제합니다. (ReplicatedUsing과 함께 사용)
@@ -148,27 +127,38 @@ bool ABNGameState::Server_TryStartSpecificGaugeChallenge(FGuid GaugeID, const AB
 	return true;	
 }
 
-void ABNGameState::Server_EndSpecificGaugeChallenge(FGuid GaugeID, ABNPlayerController* PlayerController)
+void ABNGameState::Server_EndSpecificGaugeChallenge_Implementation(FGuid GaugeID, ABNPlayerController* PlayerController)
 {
 	if (!HasAuthority()) return;
+	if (!GaugeID.IsValid()) return;
 
-	FGaugeChallengeInfo* FoundInfo = Rep_ActiveGaugeChallenges.FindByPredicate([&](const FGaugeChallengeInfo& Info)
+	// -1로 초기화.   INDEX_NONE == -1;
+	int32 FoundIndex = INDEX_NONE;
+	for (int32 i = 0; i < Rep_ActiveGaugeChallenges.Num(); i++)
 	{
-		return Info.GaugeID == GaugeID;
-	});
-
-	if (FoundInfo && FoundInfo->bIsActive)
-	{
-		FoundInfo->bIsActive = false;
-		FoundInfo->ChallengingPlayerState = nullptr; //도전 종료시 플레이어 초기화
-
-		//복제 시스템 변경 알림
-		MARK_PROPERTY_DIRTY_FROM_NAME(ABNGameState, Rep_ActiveGaugeChallenges, this);
-		UE_LOG(LogTemp, Log, TEXT("Server: Gauge ID '%s' challenge ended."), *GaugeID.ToString());
+		if (Rep_ActiveGaugeChallenges[i].GaugeID == GaugeID)
+		{
+			FoundIndex = i;
+			break;
+		}
 	}
-	else
+
+	if (FoundIndex != INDEX_NONE)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Server: Attempted to end inactive or non-existent gauge ID '%s'."), *GaugeID.ToString());
+		Rep_ActiveGaugeChallenges[FoundIndex].bIsActive = false;
+		//TActorIterator 월드 내에 존재하는 특정 타입의 모든 액터들을 순회할 수 있게 함
+		for (TActorIterator<AMissionTimingGauge> It(GetWorld()); It; ++It)
+		{
+			AMissionTimingGauge* MissionGaugeActor = *It;
+			UVerticalTimingGaugeComponent* GaugeComponent = MissionGaugeActor->FindComponentByClass<UVerticalTimingGaugeComponent>();
+			if (IsValid(GaugeComponent) && GaugeComponent->GaugeID == GaugeID)
+			{
+				//서버에서 Mission1 로직 비활성화
+				GaugeComponent->bIsLogicActive = false;
+			}
+		}
+
+		MARK_PROPERTY_DIRTY_FROM_NAME(ABNGameState, Rep_ActiveGaugeChallenges, this);
 	}
 }
 
