@@ -12,6 +12,7 @@ class UBNMonoCharacterDataAsset;
 UENUM(BlueprintType)
 enum class EPlayerType : uint8
 {
+	None,
 	Prey,
 	Resident
 };
@@ -46,11 +47,13 @@ public:
 
 	void PlayerDead(EPlayerType DeadPlayerType);
 	
+	UFUNCTION(BlueprintCallable)
+	void ReturnToLobby();
+	
 	UBNMonoCharacterDataAsset* GetBNMonoCharacterDataAsset() const;
 	
 private:
 	uint8 PlayerCount = 0;
-	uint8 PreyPlayerCount = 0;
 	
 	// 캐릭터 기본 베이스 데이터에셋
 	UPROPERTY(EditDefaultsOnly, Category="Custom Values|Class Defaults")

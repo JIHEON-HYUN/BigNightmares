@@ -34,9 +34,7 @@ void ABNInGameGameMode::PostLogin(APlayerController* NewPlayer)
 	if (PlayerCount == GI->MaxPlayerCount)
 	{
 		GS->SetPlayerType(FMath::RandRange(0, PlayerCount - 1), EPlayerType::Resident);
-		UE_LOG(LogTemp, Error, TEXT("Resident Player is setted"));
-
-		PreyPlayerCount = PlayerCount - 1;
+		UE_LOG(LogTemp, Error, TEXT("Resident Player is set"));
 	}
 }
 
@@ -52,8 +50,10 @@ void ABNInGameGameMode::Logout(AController* Exiting)
 	
 	auto GS = GetGameState<ABNGameState>();
 	if (GS == nullptr) return;
-	
-	// PostLogout이 되면 GameState의 InGamePlayerDataList에서 해당 플레이어 삭제
+
+	// Logout을 한 플레이어가 제물 플레이어일 경우, PreyPlayerCount를 감소시켜야 게임 로직에 문제 안 생김
+	PlayerDead(GS->GetPlayerType(PS));
+	// Logout이 되면 GameState의 InGamePlayerDataList에서 해당 플레이어 삭제
 	GS->RemoveLobbyPlayer(PS);
 }
 
@@ -61,18 +61,17 @@ void ABNInGameGameMode::PlayerDead(EPlayerType DeadPlayerType)
 {
 	if (DeadPlayerType == EPlayerType::Prey)
 	{
-		--PreyPlayerCount;
+		// d
 	}
+}
 
-	// 제물 플레이어가 0명이 되면 제물 플레이어 패배, 로비로 이동
-	if (PreyPlayerCount == 0)
-	{
-		UWorld* World = GetWorld();
-		if (World == nullptr) return;
+void ABNInGameGameMode::ReturnToLobby()
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
 	
-		bUseSeamlessTravel = true;
-		World->ServerTravel("/Game/Levels/L_Lobby?listen");
-	}
+	bUseSeamlessTravel = true;
+	World->ServerTravel("/Game/Levels/L_Lobby?listen");
 }
 
 UBNMonoCharacterDataAsset* ABNInGameGameMode::GetBNMonoCharacterDataAsset() const

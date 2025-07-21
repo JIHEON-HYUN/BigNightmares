@@ -71,6 +71,7 @@ public:
 	void AddInGamePlayer(const FInGamePlayerData& NewPlayer);
 	void RemoveInGamePlayer(ABNPlayerState* ExitPlayerState);
 	const TArray<FInGamePlayerData>& GetInGamePlayers() const;
+	const EPlayerType GetPlayerType(ABNPlayerState* PlayerState) const;
 	void SetPlayerType(uint8 Index, EPlayerType NewType);
 	void SetPlayerStatusAlive(const FString& PlayerName);
 
@@ -83,6 +84,13 @@ protected:
 
 	UFUNCTION()
 	void OnRep_InGamePlayerDataList();
+
+private:
+	UPROPERTY(Replicated)
+	uint8 PlayerCount = 0;
+	
+	UPROPERTY(Replicated)
+	uint8 PreyPlayerCount = 0;
 
 #pragma endregion InGame
 	

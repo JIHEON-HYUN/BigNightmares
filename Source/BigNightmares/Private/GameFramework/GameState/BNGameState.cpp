@@ -73,6 +73,7 @@ void ABNGameState::OnRep_LobbyPlayerDataList()
 void ABNGameState::AddInGamePlayer(const FInGamePlayerData& NewPlayer)
 {
 	InGamePlayerDataList.Add(NewPlayer);
+	++PlayerCount;
 }
 
 void ABNGameState::RemoveInGamePlayer(class ABNPlayerState* ExitPlayerState)
@@ -81,6 +82,13 @@ void ABNGameState::RemoveInGamePlayer(class ABNPlayerState* ExitPlayerState)
 		{
 			return RemovePlayerData.PlayerName == ExitPlayerState->GetPlayerName();
 		});
+	
+	if (GetPlayerType(ExitPlayerState) == EPlayerType::Prey)
+	{
+		-- PreyPlayerCount;
+	}
+
+	--PlayerCount;
 }
 
 const TArray<FInGamePlayerData>& ABNGameState::GetInGamePlayers() const
@@ -88,9 +96,26 @@ const TArray<FInGamePlayerData>& ABNGameState::GetInGamePlayers() const
 	return InGamePlayerDataList;
 }
 
+const EPlayerType ABNGameState::GetPlayerType(ABNPlayerState* PlayerState) const
+{
+	for (auto PlayerData : InGamePlayerDataList)
+	{
+		if (PlayerData.PlayerName == PlayerState->GetPlayerName())
+		{
+			return PlayerData.PlayerType;
+		}
+	}
+
+	return EPlayerType::None;
+}
+
 void ABNGameState::SetPlayerType(uint8 Index, EPlayerType NewType)
 {
 	InGamePlayerDataList[Index].PlayerType = NewType;
+	if (NewType == EPlayerType::Resident)
+	{
+		PreyPlayerCount = PlayerCount - 1;
+	}
 }
 
 void ABNGameState::SetPlayerStatusAlive(const FString& PlayerName)
