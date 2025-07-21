@@ -14,12 +14,19 @@ class BIGNIGHTMARES_API ABNCoopMissionGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
+public:
+	// 생성자를 추가하여 Tick을 활성화합니다.
+	ABNCoopMissionGameMode();
+
 protected:
-	// 새로운 플레이어가 게임에 로그인(접속)할 때마다 호출되는 함수입니다.
+	// 매 프레임마다 호출될 Tick 함수를 오버라이드합니다.
+	virtual void Tick(float DeltaTime) override;
+	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 private:
-	// [수정] 접속한 플레이어 컨트롤러들을 저장하기 위한 배열입니다.
 	UPROPERTY()
 	TArray<APlayerController*> LoggedInPlayers;
+
+	// [해결책] 더 이상 필요 없는 boolean 플래그를 제거했습니다.
 };

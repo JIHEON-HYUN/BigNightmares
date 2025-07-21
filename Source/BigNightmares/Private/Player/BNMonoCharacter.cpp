@@ -23,8 +23,17 @@
 #include "Player/InventoryComponent.h"
 #include "Net/UnrealNetwork.h"
 
+// [손전등 기능 추가] 시작: 필요한 헤더 파일들을 포함합니다.
+#include "Components/SpotLightComponent.h"
+#include "Interfaces/LightSensitive.h"
+#include "Kismet/KismetSystemLibrary.h"
+// [손전등 기능 추가] 끝
+
 ABNMonoCharacter::ABNMonoCharacter()
 {
+	// [손전등 기능 추가] Tick 함수를 사용하기 위해 true로 설정합니다.
+	PrimaryActorTick.bCanEverTick = true;
+	
 	SetReplicates(true);
 	GetCapsuleComponent()->InitCapsuleSize(10.f, 25.f);
 
@@ -71,6 +80,14 @@ ABNMonoCharacter::ABNMonoCharacter()
 
 	//InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 
+	// 추가 ~
+	// [손전등 기능 수정] 캐릭터에 스포트라이트 컴포넌트를 생성하고, 카메라가 아닌 캐릭터의 '메시'에 부착합니다.
+	FlashlightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("FlashlightComponent"));
+	FlashlightComponent->SetupAttachment(GetMesh(), TEXT("skinned_l_innerHand_bnSocket")); 
+
+	// [핵심 수정] 게임 시작 시에는 기본적으로 손전등을 꺼둡니다.
+	FlashlightComponent->SetVisibility(false);
+	// ~ 추가
 }
 
 void ABNMonoCharacter::BeginPlay()
@@ -91,6 +108,92 @@ void ABNMonoCharacter::BeginPlay()
 		}
 	}
 }
+
+// [손전등 기능 추가] 시작: 매 프레임마다 손전등 로직을 처리하는 Tick 함수입니다.
+// [디버깅 추가 시작] 매 프레임마다 손전등 로직을 처리하는 Tick 함수 전체를 추가했습니다.
+void ABNMonoCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// 손전등 컴포넌트가 없으면 아무것도 하지 않습니다.
+	if (!FlashlightComponent) 
+	{
+		return;
+	}
+
+	// 자신의 역할이 'FlashlightHolder'가 아닐 경우
+	if (PlayerRole != EPlayerRole::FlashlightHolder)
+	{
+		// [핵심 수정] 손전등이 켜져 있다면 확실하게 끕니다.
+		if (FlashlightComponent->IsVisible())
+		{
+			FlashlightComponent->SetVisibility(false);
+		}
+
+		// 이전에 비추던 대상이 있었다면 빛이 꺼졌다고 알려줍니다.
+		if (LastLitActor.IsValid() && LastLitActor->Implements<ULightSensitive>())
+		{
+			ILightSensitive::Execute_OnHitByLight(LastLitActor.Get(), false);
+			LastLitActor = nullptr;
+		}
+		return;
+	}
+
+	// --- 아래부터는 FlashlightHolder일 때만 실행되는 로직 ---
+
+	// [핵심 수정] 손전등이 꺼져 있다면 켭니다.
+	if (!FlashlightComponent->IsVisible())
+	{
+		FlashlightComponent->SetVisibility(true);
+	}
+	
+	// 캐릭터가 바라보는 방향으로 조준하는 로직
+	const FVector TraceStart = FlashlightComponent->GetComponentLocation();
+	const FVector FinalTraceDirection = GetActorForwardVector();
+	const float TraceDistance = 5000.0f;
+	const FVector TraceEnd = TraceStart + (FinalTraceDirection * TraceDistance);
+
+	const FRotator FlashlightRotation = FinalTraceDirection.Rotation();
+	FlashlightComponent->SetWorldRotation(FlashlightRotation);
+
+	FHitResult HitResult;
+	TEnumAsByte<ETraceTypeQuery> TraceChannel = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel1);
+	
+	bool bHit = UKismetSystemLibrary::LineTraceSingle(
+		this,
+		TraceStart,
+		TraceEnd,
+		TraceChannel, 
+		false,
+		TArray<AActor*>(),
+		EDrawDebugTrace::ForDuration, // 디버깅용 선 그리기
+		HitResult,
+		true
+	);
+
+	AActor* CurrentHitActor = bHit ? HitResult.GetActor() : nullptr;
+
+	if(bHit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Line Trace HIT! Actor: %s"), *CurrentHitActor->GetName());
+	}
+
+	if (LastLitActor.Get() != CurrentHitActor)
+	{
+		if (LastLitActor.IsValid() && LastLitActor->Implements<ULightSensitive>())
+		{
+			ILightSensitive::Execute_OnHitByLight(LastLitActor.Get(), false);
+		}
+	}
+
+	if (CurrentHitActor && CurrentHitActor->Implements<ULightSensitive>())
+	{
+		ILightSensitive::Execute_OnHitByLight(CurrentHitActor, true);
+	}
+	
+	LastLitActor = CurrentHitActor;
+}
+// [손전등 기능 추가] 끝
 
 void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
