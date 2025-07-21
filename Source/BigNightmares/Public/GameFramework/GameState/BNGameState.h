@@ -84,6 +84,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FInGamePlayerUpdated OnInGamePlayerUpdated;
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "GameResult")
+	void GameEnd(bool bIsPreyWin);
+
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_InGamePlayerDataList)
 	TArray<FInGamePlayerData> InGamePlayerDataList;

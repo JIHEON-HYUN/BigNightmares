@@ -125,23 +125,24 @@ void ABNGameState::SetPlayerType(uint8 Index, EPlayerType NewType)
 		PreyPlayerCount = GetInGamePlayerCount() - 1;
 	}
 
-	for (const auto& PlayerData : InGamePlayerDataList)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Prey Count : %d"), GetPreyPlayerCount());
-		UE_LOG(LogTemp, Error, TEXT("Player Name : %s"), *PlayerData.PlayerName);
-		if (PlayerData.PlayerType == EPlayerType::Resident)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Player Type : Resident"));
-		}
-		else if (PlayerData.PlayerType == EPlayerType::Prey)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Player Type : Prey"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Player Type : None"));
-		}
-	}
+	// for (const auto& PlayerData : InGamePlayerDataList)
+	// {
+	// 	UE_LOG(LogTemp, Error, TEXT("Prey Count : %d"), GetPreyPlayerCount());
+	// 	UE_LOG(LogTemp, Error, TEXT("Player Name : %s"), *PlayerData.PlayerName);
+	//
+	// 	if (PlayerData.PlayerType == EPlayerType::Resident)
+	// 	{
+	// 		UE_LOG(LogTemp, Error, TEXT("Player Type : Resident"));
+	// 	}
+	// 	else if (PlayerData.PlayerType == EPlayerType::Prey)
+	// 	{
+	// 		UE_LOG(LogTemp, Error, TEXT("Player Type : Prey"));
+	// 	}
+	// 	else
+	// 	{
+	// 		UE_LOG(LogTemp, Error, TEXT("Player Type : None"));
+	// 	}
+	// }
 }
 
 void ABNGameState::SetPlayerStatusAlive(const FString& PlayerName)

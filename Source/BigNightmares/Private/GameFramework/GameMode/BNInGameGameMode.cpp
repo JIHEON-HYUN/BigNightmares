@@ -68,9 +68,10 @@ void ABNInGameGameMode::PlayerDead()
 {
 	auto GS = GetGameState<ABNGameState>();
 	if (GS == nullptr) return;
-	UE_LOG(LogTemp, Error, TEXT("PreyPlayerCount : %d"), GS->GetPreyPlayerCount());
+	
 	if (GS->GetPreyPlayerCount() == 0)
 	{
+		GS->GameEnd(false);
 		ReturnToLobby();
 	}
 }
