@@ -7,6 +7,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Monster/BNBaseAIController.h"
 #include "Animation/AnimInstance.h"
+#include "Monster/BNHunterAIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Player/BNMonoCharacter.h"
 
 // 생성자
 ABNHunterCharacter::ABNHunterCharacter()
@@ -76,6 +79,7 @@ void ABNHunterCharacter::BeginPlay()
 			{
 				// 지정된 소켓에 무기 부착
 				EquippedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+				EquippedWeapon->SetOwner(this);
 			}
 		}
 	}
@@ -127,5 +131,65 @@ void ABNHunterCharacter::EnterAttackingState()
 			// 몽타주 재생
 			AnimInstance->Montage_Play(AttackMontage);
 		}
+	}
+}
+
+void ABNHunterCharacter::AnimNotify_ImmobilizeTarget()
+{
+	// [디버그 로그 추가] 1. 함수가 호출되었는지 확인합니다.
+	UE_LOG(LogTemp, Warning, TEXT("AnimNotify_ImmobilizeTarget CALLED."));
+
+	ABNHunterAIController* AIController = Cast<ABNHunterAIController>(GetController());
+	if (!AIController)
+	{
+		// [디버그 로그 추가] 2. AI 컨트롤러가 유효하지 않은 경우
+		UE_LOG(LogTemp, Error, TEXT("Immobilize FAILED: AIController is not valid."));
+		return;
+	}
+
+	UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
+	if (!BlackboardComp)
+	{
+		// [디버그 로그 추가] 3. 블랙보드 컴포넌트가 유효하지 않은 경우
+		UE_LOG(LogTemp, Error, TEXT("Immobilize FAILED: BlackboardComponent is not valid."));
+		return;
+	}
+
+	// 블랙보드에서 "Target" 키에 저장된 액터를 가져옵니다.
+	UObject* TargetObject = BlackboardComp->GetValueAsObject(TEXT("Target"));
+	if (!TargetObject)
+	{
+		// [디버그 로그 추가] 4. 블랙보드에 "Target" 키가 없거나, 값이 비어있는 경우
+		UE_LOG(LogTemp, Error, TEXT("Immobilize FAILED: 'Target' key in Blackboard is NULL."));
+		return;
+	}
+
+	ABNMonoCharacter* TargetPlayer = Cast<ABNMonoCharacter>(TargetObject);
+	if (!TargetPlayer)
+	{
+		// [디버그 로그 추가] 5. "Target"은 존재하지만, 플레이어 캐릭터가 아닌 경우
+		UE_LOG(LogTemp, Error, TEXT("Immobilize FAILED: Target '%s' is not a BNMonoCharacter."), *TargetObject->GetName());
+		return;
+	}
+
+	// 모든 검사를 통과한 경우, 이동 불가 함수를 호출합니다.
+	// [디버그 로그 추가] 6. 성공적으로 이동 불가 함수를 호출한 경우
+	UE_LOG(LogTemp, Error, TEXT("SUCCESS! Immobilizing player '%s'."), *TargetPlayer->GetName());
+	TargetPlayer->ImmobilizeForDuration(ImmobilizeDuration);
+}
+
+void ABNHunterCharacter::AnimNotify_ActivateMeleeCollision()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->ActivateMeleeCollision();
+	}
+}
+
+void ABNHunterCharacter::AnimNotify_DeactivateMeleeCollision()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->DeactivateMeleeCollision();
 	}
 }

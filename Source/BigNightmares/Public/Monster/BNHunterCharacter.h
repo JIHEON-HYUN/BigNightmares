@@ -35,6 +35,11 @@ public:
 	// 공격 상태 진입 (오버라이드)
 	virtual void EnterAttackingState() override;
 
+	// [에러 수정] 상호작용을 위한 함수 선언부입니다. 중복되지 않도록 정리했습니다.
+	void AnimNotify_ImmobilizeTarget();
+	void AnimNotify_ActivateMeleeCollision();
+	void AnimNotify_DeactivateMeleeCollision();
+	
 protected:
 	// 게임 시작 또는 스폰 시 호출
 	virtual void BeginPlay() override;
@@ -74,4 +79,8 @@ protected:
 	// 랜턴 부착 소켓 이름
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	FName LanternAttachSocketName = TEXT("l_hand_ikinema_0_bneSocket");
+
+	/** 플레이어를 멈추게 할 시간(초)입니다. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float ImmobilizeDuration = 0.7f;
 };

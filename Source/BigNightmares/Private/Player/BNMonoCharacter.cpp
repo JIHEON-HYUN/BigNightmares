@@ -90,6 +90,56 @@ ABNMonoCharacter::ABNMonoCharacter()
 	// ~ 추가
 }
 
+// [사망 상호작용 추가] 시작
+void ABNMonoCharacter::HandleLethalHit()
+{
+	// 이미 사망한 상태라면 중복 실행을 방지합니다.
+	if (bIsDead)
+	{
+		return;
+	}
+	bIsDead = true;
+
+	UE_LOG(LogTemp, Warning, TEXT("'%s' has been hit by a lethal attack!"), *GetName());
+
+	// 1. 플레이어의 입력을 비활성화합니다.
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		PC->DisableInput(PC);
+	}
+
+	// 2. 캐릭터의 움직임을 즉시 멈추고, 이동 컴포넌트를 비활성화합니다.
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+
+	// 3. 다른 액터가 캐릭터를 통과할 수 있도록 콜리전 설정을 변경합니다.
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 4. 메시를 물리 시뮬레이션(랙돌) 상태로 전환하여 쓰러지는 효과를 줍니다.
+	GetMesh()->SetSimulatePhysics(true);
+}
+// [사망 상호작용 추가] 끝
+
+void ABNMonoCharacter::ImmobilizeForDuration(float Duration)
+{
+	if (bIsImmobilized) return;
+
+	bIsImmobilized = true;
+	GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+	UE_LOG(LogTemp, Warning, TEXT("Player has been immobilized for %f seconds!"), Duration);
+
+	GetWorldTimerManager().SetTimer(ImmobilizeTimerHandle, this, &ABNMonoCharacter::EndImmobilization, Duration, false);
+}
+
+void ABNMonoCharacter::EndImmobilization()
+{
+	bIsImmobilized = false;
+	GetCharacterMovement()->MaxWalkSpeed = OriginalMaxWalkSpeed;
+	UE_LOG(LogTemp, Log, TEXT("Player is no longer immobilized."));
+	GetWorldTimerManager().ClearTimer(ImmobilizeTimerHandle);
+}
+
 void ABNMonoCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -106,6 +156,12 @@ void ABNMonoCharacter::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ASC has AttributeSet: %s (%p)"), *Set->GetName(), Set);
 		}
+	}
+
+	// 게임 시작 시, 원래의 최대 걷기 속도를 저장합니다.
+	if (GetCharacterMovement())
+	{
+		OriginalMaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	}
 }
 
@@ -215,6 +271,12 @@ void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void ABNMonoCharacter::Input_Move(const FInputActionValue& InputActionValue)
 {
+	// 이동 불가 상태일 때는 이동 입력을 무시합니다.
+	if (bIsImmobilized)
+	{
+		return;
+	}
+	
 	const FVector2D MovementVector = InputActionValue.Get<FVector2D>();
 	const FRotator MovementRotation(0.f,-180.f, 0.f);
 

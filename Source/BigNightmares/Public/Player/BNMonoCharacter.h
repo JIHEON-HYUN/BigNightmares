@@ -31,10 +31,34 @@ class BIGNIGHTMARES_API ABNMonoCharacter : public ABNBaseCharacter
 public:
 	// [손전등 기능 추가] Tick 함수를 오버라이드하여 매 프레임 로직을 처리합니다.
 	virtual void Tick(float DeltaTime) override;
+
+	// [상호작용 추가] 몬스터의 치명적인 공격에 맞았을 때 호출되는 함수입니다.
+	UFUNCTION(BlueprintCallable, Category = "Character|Combat")
+	void HandleLethalHit();
+
+	/** 지정된 시간 동안 캐릭터의 움직임을 멈춥니다. */
+	void ImmobilizeForDuration(float Duration);
 	// ~ 추가
 	
 protected:
 	virtual void BeginPlay() override;
+
+	/** 캐릭터가 사망했는지 여부를 저장하는 변수입니다. 중복 사망 처리를 방지합니다. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	bool bIsDead = false;
+
+	/** 캐릭터가 움직일 수 없는 상태인지 나타냅니다. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	bool bIsImmobilized = false;
+
+	/** 이동 불가 상태를 해제하는 함수입니다. */
+	void EndImmobilization();
+
+	/** 이동 불가 타이머를 위한 핸들입니다. */
+	FTimerHandle ImmobilizeTimerHandle;
+	
+	/** 원래 이동 속도를 저장하기 위한 변수입니다. */
+	float OriginalMaxWalkSpeed;
 	
 #pragma region Camera
 private:
