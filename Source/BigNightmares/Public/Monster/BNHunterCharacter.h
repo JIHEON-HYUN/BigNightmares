@@ -35,9 +35,14 @@ public:
 	// 공격 상태 진입 (오버라이드)
 	virtual void EnterAttackingState() override;
 
-	// [에러 수정] 상호작용을 위한 함수 선언부입니다. 중복되지 않도록 정리했습니다.
-	void AnimNotify_ImmobilizeTarget();
+	// [수정] 함수의 역할을 명확히 하기 위해 이름을 변경하고, 새로운 함수를 선언합니다.
+	UFUNCTION()
+	void AnimNotify_ExecuteGuaranteedHit();
+
+	UFUNCTION()
 	void AnimNotify_ActivateMeleeCollision();
+
+	UFUNCTION()
 	void AnimNotify_DeactivateMeleeCollision();
 	
 protected:

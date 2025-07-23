@@ -15,6 +15,7 @@ class UDataAsset_InputConfig_Player;
 class USpringArmComponent;
 class UCameraComponent;
 class USpotLightComponent; // 추가
+class UAnimMontage; // [추가] UAnimMontage 클래스 전방 선언
 
 struct FInputActionValue;
 /**
@@ -32,6 +33,10 @@ public:
 	// [손전등 기능 추가] Tick 함수를 오버라이드하여 매 프레임 로직을 처리합니다.
 	virtual void Tick(float DeltaTime) override;
 
+	// [수정] 몬스터의 공격에 의해 사망 연출을 시작하는 함수입니다.
+	UFUNCTION(BlueprintCallable, Category = "Character|Combat")
+	void TriggerGuaranteedDeath();
+	
 	// [상호작용 추가] 몬스터의 치명적인 공격에 맞았을 때 호출되는 함수입니다.
 	UFUNCTION(BlueprintCallable, Category = "Character|Combat")
 	void HandleLethalHit();
@@ -42,6 +47,10 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+
+	// [추가] 플레이어가 피격 당했을 때 재생할 몽타주입니다.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	TObjectPtr<UAnimMontage> DeathMontage;
 
 	/** 캐릭터가 사망했는지 여부를 저장하는 변수입니다. 중복 사망 처리를 방지합니다. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
@@ -59,6 +68,10 @@ protected:
 	
 	/** 원래 이동 속도를 저장하기 위한 변수입니다. */
 	float OriginalMaxWalkSpeed;
+
+	// [추가] 사망 몽타주가 끝났을 때 호출될 콜백 함수입니다.
+	UFUNCTION()
+	void OnDeathMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	
 #pragma region Camera
 private:

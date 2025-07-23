@@ -29,6 +29,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 // [손전등 기능 추가] 끝
 
+#include "Animation/AnimInstance.h" // [추가] AnimInstance 헤더
+
 ABNMonoCharacter::ABNMonoCharacter()
 {
 	// [손전등 기능 추가] Tick 함수를 사용하기 위해 true로 설정합니다.
@@ -90,6 +92,47 @@ ABNMonoCharacter::ABNMonoCharacter()
 	// ~ 추가
 }
 
+// [추가] 사망 연출을 처리하는 함수의 구현부입니다.
+void ABNMonoCharacter::TriggerGuaranteedDeath()
+{
+	// 이미 사망했다면 중복 실행 방지
+	if (bIsDead)
+	{
+		return;
+	}
+
+	// 1. 즉시 움직임을 멈추고 이동 컴포넌트를 비활성화합니다.
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+	
+	// 2. 사망 몽타주가 지정되어 있는지 확인하고 재생합니다.
+	if (DeathMontage)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			const float MontagePlayRate = 1.0f;
+			AnimInstance->Montage_Play(DeathMontage, MontagePlayRate);
+
+			// [수정] 몽타주 종료 델리게이트에 올바른 시그니처를 가진 함수를 바인딩합니다.
+			FOnMontageEnded MontageEndedDelegate;
+			MontageEndedDelegate.BindUObject(this, &ABNMonoCharacter::OnDeathMontageEnded);
+			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, DeathMontage);
+		}
+		else
+		{
+			// AnimInstance가 없는 예외적인 경우, 바로 사망 처리
+			HandleLethalHit();
+		}
+	}
+	else
+	{
+		// 4. DeathMontage가 설정되지 않았다면, 경고 로그를 출력하고 바로 사망 처리합니다.
+		UE_LOG(LogTemp, Warning, TEXT("'%s'에 DeathMontage가 지정되지 않았습니다. 즉시 사망 처리합니다."), *GetName());
+		HandleLethalHit();
+	}
+}
+
 // [사망 상호작용 추가] 시작
 void ABNMonoCharacter::HandleLethalHit()
 {
@@ -100,7 +143,7 @@ void ABNMonoCharacter::HandleLethalHit()
 	}
 	bIsDead = true;
 
-	UE_LOG(LogTemp, Warning, TEXT("'%s' has been hit by a lethal attack!"), *GetName());
+	UE_LOG(LogTemp, Warning, TEXT("'%s' has been killed."), *GetName());
 
 	// 1. 플레이어의 입력을 비활성화합니다.
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -108,7 +151,7 @@ void ABNMonoCharacter::HandleLethalHit()
 		PC->DisableInput(PC);
 	}
 
-	// 2. 캐릭터의 움직임을 즉시 멈추고, 이동 컴포넌트를 비활성화합니다.
+	// 2. 캐릭터의 움직임을 즉시 멈추고, 이동 컴포넌트를 비활성화합니다. (TriggerGuaranteedDeath에서 이미 호출했지만 안전장치로 유지)
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->DisableMovement();
 
@@ -121,11 +164,19 @@ void ABNMonoCharacter::HandleLethalHit()
 }
 // [사망 상호작용 추가] 끝
 
+// [추가] 사망 몽타주가 끝났을 때 호출되는 콜백 함수의 구현부입니다.
+void ABNMonoCharacter::OnDeathMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+    // 몽타주 중단 여부와 관계없이 항상 사망 처리를 진행합니다.
+    HandleLethalHit();
+}
+
 void ABNMonoCharacter::ImmobilizeForDuration(float Duration)
 {
 	if (bIsImmobilized) return;
 
 	bIsImmobilized = true;
+	OriginalMaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed; // 현재 속도 저장
 	GetCharacterMovement()->MaxWalkSpeed = 0.0f;
 	UE_LOG(LogTemp, Warning, TEXT("Player has been immobilized for %f seconds!"), Duration);
 
@@ -165,7 +216,6 @@ void ABNMonoCharacter::BeginPlay()
 	}
 }
 
-// [손전등 기능 추가] 시작: 매 프레임마다 손전등 로직을 처리하는 Tick 함수입니다.
 // [디버깅 추가 시작] 매 프레임마다 손전등 로직을 처리하는 Tick 함수 전체를 추가했습니다.
 void ABNMonoCharacter::Tick(float DeltaTime)
 {
@@ -249,7 +299,6 @@ void ABNMonoCharacter::Tick(float DeltaTime)
 	
 	LastLitActor = CurrentHitActor;
 }
-// [손전등 기능 추가] 끝
 
 void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -272,7 +321,7 @@ void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void ABNMonoCharacter::Input_Move(const FInputActionValue& InputActionValue)
 {
 	// 이동 불가 상태일 때는 이동 입력을 무시합니다.
-	if (bIsImmobilized)
+	if (bIsImmobilized || bIsDead) // [수정] 사망 시에도 이동 불가
 	{
 		return;
 	}
