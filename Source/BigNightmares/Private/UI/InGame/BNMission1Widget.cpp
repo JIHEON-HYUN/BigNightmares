@@ -31,7 +31,7 @@ void UBNMission1Widget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	//CurrentMissionLifeCount = MaxMissionLife;
+	UE_LOG(LogTemp, Log, TEXT("BNMission1Widget::NativeConstruct called. Checking BindWidget properties."));
 	
 	// UPROPERTY(meta = (BindWidget))을 사용했으므로 여기서 GetWidgetFromName은 필요없음
 	// 변수들이 올바르게 바인딩되었는지 유효성 검사만 수행.
@@ -51,18 +51,18 @@ void UBNMission1Widget::NativeConstruct()
 		UE_LOG(LogTemp, Warning, TEXT("BNMission1Widget: Pointer height is zero or negative (%.2f). UI may not display correctly."), CachedPointerHeight);
 	}
 
-	BNPC = Cast<ABNPlayerController>(GetOwningPlayer());
-	if (IsValid(BNPC))
-	{
-		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(this->TakeWidget());
-
-		BNPC->SetInputMode(InputMode);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("BN Mission1Widget NativeConstruct: Failed to get PlayerController. Could not set input mode."));
-	}
+	// BNPC = Cast<ABNPlayerController>(GetOwningPlayer());
+	// if (IsValid(BNPC))
+	// {
+	// 	FInputModeUIOnly InputMode;
+	// 	InputMode.SetWidgetToFocus(this->TakeWidget());
+	//
+	// 	BNPC->SetInputMode(InputMode);
+	// }
+	// else
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("BN Mission1Widget NativeConstruct: Failed to get PlayerController. Could not set input mode."));
+	// }
 }
 
 void UBNMission1Widget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -151,32 +151,20 @@ FReply UBNMission1Widget::NativeOnKeyDown(const FGeometry& InGeometry, const FKe
 }
 
 void UBNMission1Widget::HandleSpaceBarPressed()
-{	
+{
+	UE_LOG(LogTemp, Log, TEXT("BNMission1Widget::HandleSpaceBarPressed called.")); // 이 로그가 호출되는지 확인
+
 	if (OwningGaugeComponent.IsValid())
 	{
-		//현재 포인터의 위치 값
-		/*float CurrentPointerYPosition = SmoothedGaugeValue;
-
-		float GreenZoneStartValue = OwningGaugeComponent->GreenZoneStart;
-		float GreenZoneEndValue = OwningGaugeComponent->GreenZoneStart + OwningGaugeComponent->GreenZoneLength;
-
-		if (CurrentPointerYPosition >= GreenZoneStartValue && CurrentPointerYPosition <= GreenZoneEndValue)
-		{
-			BNPC->Server_ReportGaugeInput(OwningGaugeComponent->GaugeID, CurrentPointerYPosition);
-
-			UE_LOG(LogTemp, Warning, TEXT("SUCCESS!"));
-			UE_LOG(LogTemp, Warning, TEXT("CurrentPointerYPosition : %f , %f ~ %f "), CurrentPointerYPosition, GreenZoneStartValue, GreenZoneEndValue);
-		}
-		else
-		{
-			BNPC->Server_ReportGaugeInput(OwningGaugeComponent->GaugeID, CurrentPointerYPosition);
-			UE_LOG(LogTemp, Warning, TEXT("Failed!"));
-			UE_LOG(LogTemp, Warning, TEXT("CurrentPointerYPosition : %f , %f ~ %f "), CurrentPointerYPosition, GreenZoneStartValue, GreenZoneEndValue);
-		}*/
+		UE_LOG(LogTemp, Log, TEXT("BNMission1Widget::HandleSpaceBarPressed: OwningGaugeComponent is valid. Attempting to call Server_ProcessGaugeInput()."));
 		if (IsValid(BNPC))
 		{
 			BNPC->Server_ReportGaugeInput(OwningGaugeComponent->GaugeID, SmoothedGaugeValue);
 		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BNMission1Widget::HandleSpaceBarPressed: OwningGaugeComponent is INVALID. Cannot process input.")); // 이 로그가 찍힌다면 문제
 	}
 }
 
@@ -264,7 +252,7 @@ void UBNMission1Widget::SetMissionGoals(int32 InMaxLife, int32 InRequiredSuccess
 
 void UBNMission1Widget::UpdateLifeUI(int32 NewLifeCount)
 {
-	if (LifeCountText)
+ 	if (LifeCountText)
 	{
 		FText FormattedText = FText::Format(
 			NSLOCTEXT("MissionUI", "LifeCountFormat", "라이프: {0} / {1}"),

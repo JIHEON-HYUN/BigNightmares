@@ -243,11 +243,13 @@ void AMissionTimingGauge::Server_PerformGaugeCheck_Implementation(FGuid InGaugeI
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SUCCESS!"));
 		UE_LOG(LogTemp, Warning, TEXT("CurrentPointerYPosition : %f , %f ~ %f "), ClientGaugeValue, ServerGreenZoneStartValue, ServerGreenZoneEndValue);
+		HandleMissionSuccess();
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed!"));
 		UE_LOG(LogTemp, Warning, TEXT("CurrentPointerYPosition : %f , %f ~ %f "), ClientGaugeValue, ServerGreenZoneStartValue, ServerGreenZoneEndValue);
+		HandleMissionFailure();
 	}
 }
 
@@ -285,10 +287,26 @@ void AMissionTimingGauge::CheckMissionCompletion()
 
 void AMissionTimingGauge::HandleMissionSuccess()
 {
+	++CurrentSuccessCount;
+
+	CurrentPlayerController->Mission1WidgetInstance->UpdateSuccessUI(CurrentSuccessCount);
+
+	if (CurrentSuccessCount >= RequiredSuccessCount)
+	{
+		EndMission(EMissionResult::Success);
+	}
 }
 
 void AMissionTimingGauge::HandleMissionFailure()
 {
+	--CurrentMissionLifeCount;
+
+	CurrentPlayerController->Mission1WidgetInstance->UpdateLifeUI(CurrentMissionLifeCount);
+
+	if (CurrentMissionLifeCount <= 0)
+	{
+		EndMission(EMissionResult::Failure);
+	}
 }
 
 void AMissionTimingGauge::StartMission(ABNPlayerController* InPlayerController)
@@ -329,9 +347,12 @@ void AMissionTimingGauge::EndMission(EMissionResult Result)
 		GetWorld()->GetTimerManager().ClearTimer(OverallMissionTimerHandle);
 	}
 
-	if (IsValid(TimingGaugeComponent))
+	if (Result == EMissionResult::Success)
 	{
-		// TimingGaugeComponent->RequestStopGauge();
-		// CurrentPlayerController->
+		//성공했을 때 로직
+	}
+	else if (Result == EMissionResult::Failure)
+	{
+		//실패했을 때 로직
 	}
 }

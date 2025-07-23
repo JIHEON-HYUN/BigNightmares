@@ -119,6 +119,8 @@ void UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Implementat
 	GreenZoneStart = FMath::FRandRange(0.0f, 1.0f - GreenZoneLength);
 	//해당 변수는 값이 바뀌는 순간 ReplicatedUsing에 의해 클라에 복제
 
+	BNPlayerController->ActiveGaugeComponent = this;
+
 	AMissionTimingGauge* OwningMissionGauge = Cast<AMissionTimingGauge>(GetOwner());
 	if (IsValid(OwningMissionGauge))
 	{

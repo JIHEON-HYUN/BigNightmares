@@ -186,16 +186,17 @@ void ABNPlayerController::Server_ReportGaugeInput_Implementation(FGuid InGaugeID
 	{
 		return;
 	}
-
-	UE_LOG(LogTemp, Error, TEXT("BNPlayerController In Here1"));
 	
-	if (ActiveGaugeComponent.IsValid() && ActiveGaugeComponent->GaugeID == InGaugeID)
+	if (ActiveGaugeComponent.IsValid())
 	{
-		AMissionTimingGauge* OwningMissionGauge = Cast<AMissionTimingGauge>(ActiveGaugeComponent->GetOwner());
-
-		if (IsValid(OwningMissionGauge))
+		if (ActiveGaugeComponent->GaugeID == InGaugeID)
 		{
-			OwningMissionGauge->Server_PerformGaugeCheck(InGaugeID, SmoothedGaugeValue);
+			AMissionTimingGauge* OwningMissionGauge = Cast<AMissionTimingGauge>(ActiveGaugeComponent->GetOwner());
+
+			if (IsValid(OwningMissionGauge))
+			{
+				OwningMissionGauge->Server_PerformGaugeCheck(InGaugeID, SmoothedGaugeValue);
+			}			
 		}
 	}
 }
@@ -266,6 +267,18 @@ void ABNPlayerController::Client_ShowMission1GaugeUI_Implementation(UVerticalTim
 	ActiveGaugeComponent = InGaugeComponent;
 
 	Mission1WidgetInstance->SetMissionGoals(MaxLife, RequiredSuccess);
+
+	if (IsValid(Mission1WidgetInstance))
+	{
+		// 사용 사례에 따라 FInputModeUIOnly 또는 FInputModeGameAndUI 중 선택합니다.
+		// FInputModeGameAndUI: 게임 입력과 UI 입력을 모두 받습니다. (권장)
+		// FInputModeUIOnly: UI 입력만 받으며 게임 입력은 막힙니다.
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(Mission1WidgetInstance->TakeWidget());
+		SetInputMode(InputMode);
+
+		Mission1WidgetInstance->SetKeyboardFocus(); // 위젯에 명시적으로 키보드 포커스 부여
+	}
 	
 	UE_LOG(LogTemp, Log, TEXT("Client (PlayerController): Gauge UI fully initialized and started for Player %s."), *GetName());
 }
