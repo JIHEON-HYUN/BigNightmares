@@ -11,7 +11,10 @@
       <change beforePath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/.name" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/workspace.xml" afterDir="false" />
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> parent of c7a02a2 (PointBar 상하 왔다갔다 잘하는 버전)
       <change beforePath="$PROJECT_DIR$/Content/GameFramework/PlayerController/BP_PlayerController.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GameFramework/PlayerController/BP_PlayerController.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/GameState/BNGameState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/GameState/BNGameState.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/PlayerController/BNPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/PlayerController/BNPlayerController.cpp" afterDir="false" />
@@ -233,7 +236,10 @@
       <workItem from="1753055501055" duration="9128000" />
       <workItem from="1753065052371" duration="3890000" />
 <<<<<<< HEAD
+<<<<<<< HEAD
       <workItem from="1753232352897" duration="48000" />
+=======
+>>>>>>> parent of c7a02a2 (PointBar 상하 왔다갔다 잘하는 버전)
 =======
 >>>>>>> parent of c7a02a2 (PointBar 상하 왔다갔다 잘하는 버전)
     </task>
