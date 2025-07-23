@@ -102,6 +102,7 @@ void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	UBNBaseEnhancedInputComponent* BaseEnhancedInputComponent = CastChecked<UBNBaseEnhancedInputComponent>(PlayerInputComponent);
 	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Move,ETriggerEvent::Triggered, this,&ABNMonoCharacter::Input_Move);
 	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_UseItem, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_UseItem);
+	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Jump, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Jump);
 	//TODO(NOTE): Look의 동작이 정해진다면 활성화
 	//BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Look, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Look);
 }
@@ -128,6 +129,18 @@ void ABNMonoCharacter::Input_Move(const FInputActionValue& InputActionValue)
 void ABNMonoCharacter::Input_Look(const FInputActionValue& InputActionValue)
 {
 	
+}
+
+void ABNMonoCharacter::Input_Jump(const FInputActionValue& InputActionValue)
+{
+	if (InputActionValue.Get<bool>())
+	{
+		Jump();
+	}
+	else
+	{
+		StopJumping();
+	}
 }
 
 void ABNMonoCharacter::Input_UseItem(const FInputActionValue& InputActionValue)

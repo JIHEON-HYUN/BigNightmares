@@ -71,8 +71,8 @@ void ABNInGameGameMode::PlayerDead()
 	
 	if (GS->GetPreyPlayerCount() == 0)
 	{
-		GS->GameEnd(false);
 		ReturnToLobby();
+		GS->GameEnd(false);
 	}
 }
 

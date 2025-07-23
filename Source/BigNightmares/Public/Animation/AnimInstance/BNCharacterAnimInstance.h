@@ -34,5 +34,8 @@ protected:
 	bool bHasAcceleration;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Locomotion")
+	bool bIsFalling;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Locomotion")
 	float Direction;
 };

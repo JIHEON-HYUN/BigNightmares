@@ -27,6 +27,8 @@ void UBNCharacterAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSecond
 
 	bHasAcceleration = OwningMovementComponent->GetCurrentAcceleration().SizeSquared2D() > 0.f;
 
+	bIsFalling = OwningMovementComponent->IsFalling();
+
 	if (GroundSpeed > 2.f)
 	{
 		FRotator ActorRot = OwningCharacter->GetActorRotation();

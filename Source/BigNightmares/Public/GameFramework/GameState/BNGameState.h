@@ -79,6 +79,8 @@ public:
 	uint8 GetPreyPlayerCount() const;
 	
 	void SetPlayerType(uint8 Index, EPlayerType NewType);
+
+	UFUNCTION(BlueprintCallable)
 	void SetPlayerStatusAlive(const FString& PlayerName);
 
 	UPROPERTY(BlueprintAssignable)
