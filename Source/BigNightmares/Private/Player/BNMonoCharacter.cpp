@@ -30,6 +30,7 @@
 // [손전등 기능 추가] 끝
 
 #include "Animation/AnimInstance.h" // [추가] AnimInstance 헤더
+#include "Kismet/KismetMathLibrary.h"
 
 ABNMonoCharacter::ABNMonoCharacter()
 {
@@ -92,95 +93,122 @@ ABNMonoCharacter::ABNMonoCharacter()
 	// ~ 추가
 }
 
-// [추가] 사망 연출을 처리하는 함수의 구현부입니다.
+// [추가] 플레이어를 영구적으로 멈추게 하는 함수입니다.
+void ABNMonoCharacter::FreezePlayer(AActor* LookAtTarget)
+{
+    if (bIsImmobilized || bIsDead)
+    {
+        return;
+    }
+    bIsImmobilized = true;
+    GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+    UE_LOG(LogTemp, Warning, TEXT("Player '%s' has been frozen."), *GetName());
+
+    if (LookAtTarget)
+    {
+        // 헌터를 바라보도록 플레이어의 회전 값을 변경합니다.
+        FVector StartLocation = GetActorLocation();
+        FVector TargetLocation = LookAtTarget->GetActorLocation();
+        
+        FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(StartLocation, TargetLocation);
+        LookAtRotation.Pitch = 0.f; // 고개는 숙이지 않도록
+        LookAtRotation.Roll = 0.f;  // 몸은 기울이지 않도록
+
+        SetActorRotation(LookAtRotation);
+    }
+}
+
+// [추가] 즉시 래그돌로 전환하고 충격량을 적용하는 새로운 함수입니다.
+void ABNMonoCharacter::HandleImmediateDeath(AActor* DamageCauser)
+{
+    if (bIsDead)
+	{
+		return;
+	}
+	bIsDead = true;
+
+	UE_LOG(LogTemp, Warning, TEXT("'%s' has been killed instantly by ragdoll."), *GetName());
+
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		PC->DisableInput(PC);
+	}
+
+	// 캐릭터의 모든 움직임과 애니메이션 제어를 중단합니다.
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+    GetMesh()->SetAnimInstanceClass(nullptr); 
+
+	// 캡슐 콜리전을 완전히 끕니다.
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+	// 래그돌을 위한 물리 설정을 적용합니다.
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetSimulatePhysics(true);
+
+    // 공격자로부터의 방향으로 충격량을 계산하고 적용합니다.
+    if (DamageCauser)
+    {
+        FVector ImpulseDirection = GetActorLocation() - DamageCauser->GetActorLocation();
+        ImpulseDirection.Z = 0.5f; // 살짝 위로 뜨도록 Z값을 보정합니다.
+        ImpulseDirection.Normalize();
+
+        float ImpulseStrength = 1000.0f; // 충격량의 세기 (조절 가능)
+        GetMesh()->AddImpulse(ImpulseDirection * ImpulseStrength, NAME_None, true);
+    }
+}
+
+
+// --- 아래 함수들은 이제 이 공격 시퀀스에서 직접 사용되지 않습니다. ---
+
 void ABNMonoCharacter::TriggerGuaranteedDeath()
 {
-	// 이미 사망했다면 중복 실행 방지
+	// 이 함수는 이제 HandleImmediateDeath로 대체되었습니다.
+	// 만약의 경우를 대비해 남겨두거나, 다른 종류의 죽음에 사용할 수 있습니다.
 	if (bIsDead)
 	{
 		return;
 	}
-
-	// 1. 즉시 움직임을 멈추고 이동 컴포넌트를 비활성화합니다.
-	GetCharacterMovement()->StopMovementImmediately();
-	GetCharacterMovement()->DisableMovement();
 	
-	// 2. 사망 몽타주가 지정되어 있는지 확인하고 재생합니다.
 	if (DeathMontage)
 	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance)
+		if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 		{
-			const float MontagePlayRate = 1.0f;
-			AnimInstance->Montage_Play(DeathMontage, MontagePlayRate);
-
-			// [수정] 몽타주 종료 델리게이트에 올바른 시그니처를 가진 함수를 바인딩합니다.
+			AnimInstance->Montage_Play(DeathMontage);
 			FOnMontageEnded MontageEndedDelegate;
 			MontageEndedDelegate.BindUObject(this, &ABNMonoCharacter::OnDeathMontageEnded);
 			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, DeathMontage);
 		}
 		else
 		{
-			// AnimInstance가 없는 예외적인 경우, 바로 사망 처리
 			HandleLethalHit();
 		}
 	}
 	else
 	{
-		// 4. DeathMontage가 설정되지 않았다면, 경고 로그를 출력하고 바로 사망 처리합니다.
-		UE_LOG(LogTemp, Warning, TEXT("'%s'에 DeathMontage가 지정되지 않았습니다. 즉시 사망 처리합니다."), *GetName());
 		HandleLethalHit();
 	}
 }
 
-// [사망 상호작용 추가] 시작
 void ABNMonoCharacter::HandleLethalHit()
 {
-	// 이미 사망한 상태라면 중복 실행을 방지합니다.
+	// 이 함수는 이제 HandleImmediateDeath로 대체되었습니다.
 	if (bIsDead)
 	{
 		return;
 	}
 	bIsDead = true;
-
-	UE_LOG(LogTemp, Warning, TEXT("'%s' has been killed."), *GetName());
-
-	// 1. 플레이어의 입력을 비활성화합니다.
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		PC->DisableInput(PC);
-	}
-
-	// 2. 캐릭터의 움직임을 즉시 멈추고, 이동 컴포넌트를 비활성화합니다. (TriggerGuaranteedDeath에서 이미 호출했지만 안전장치로 유지)
-	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->DisableMovement();
-
-	// 3. 다른 액터가 캐릭터를 통과할 수 있도록 콜리전 설정을 변경합니다.
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	// 4. 메시를 물리 시뮬레이션(랙돌) 상태로 전환하여 쓰러지는 효과를 줍니다.
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 	GetMesh()->SetSimulatePhysics(true);
 }
-// [사망 상호작용 추가] 끝
 
-// [추가] 사망 몽타주가 끝났을 때 호출되는 콜백 함수의 구현부입니다.
 void ABNMonoCharacter::OnDeathMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-    // 몽타주 중단 여부와 관계없이 항상 사망 처리를 진행합니다.
     HandleLethalHit();
-}
-
-void ABNMonoCharacter::ImmobilizeForDuration(float Duration)
-{
-	if (bIsImmobilized) return;
-
-	bIsImmobilized = true;
-	OriginalMaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed; // 현재 속도 저장
-	GetCharacterMovement()->MaxWalkSpeed = 0.0f;
-	UE_LOG(LogTemp, Warning, TEXT("Player has been immobilized for %f seconds!"), Duration);
-
-	GetWorldTimerManager().SetTimer(ImmobilizeTimerHandle, this, &ABNMonoCharacter::EndImmobilization, Duration, false);
 }
 
 void ABNMonoCharacter::EndImmobilization()

@@ -33,17 +33,17 @@ public:
 	// [손전등 기능 추가] Tick 함수를 오버라이드하여 매 프레임 로직을 처리합니다.
 	virtual void Tick(float DeltaTime) override;
 
-	// [수정] 몬스터의 공격에 의해 사망 연출을 시작하는 함수입니다.
+	// 플레이어의 움직임을 멈추고, 지정된 대상을 바라보게 합니다.
 	UFUNCTION(BlueprintCallable, Category = "Character|Combat")
-	void TriggerGuaranteedDeath();
-	
-	// [상호작용 추가] 몬스터의 치명적인 공격에 맞았을 때 호출되는 함수입니다.
-	UFUNCTION(BlueprintCallable, Category = "Character|Combat")
-	void HandleLethalHit();
+	void FreezePlayer(AActor* LookAtTarget);
 
-	/** 지정된 시간 동안 캐릭터의 움직임을 멈춥니다. */
-	void ImmobilizeForDuration(float Duration);
-	// ~ 추가
+	// [추가] 몽타주 없이 즉시 래그돌 상태로 전환하고, 피격 방향으로 힘을 받습니다.
+	UFUNCTION(BlueprintCallable, Category = "Character|Combat")
+	void HandleImmediateDeath(AActor* DamageCauser);
+
+	// [참고] 아래 함수들은 이제 이 특정 공격에서는 사용되지 않습니다.
+	void TriggerGuaranteedDeath();
+	void HandleLethalHit();
 	
 protected:
 	virtual void BeginPlay() override;
