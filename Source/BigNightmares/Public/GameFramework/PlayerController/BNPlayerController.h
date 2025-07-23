@@ -117,9 +117,13 @@ public:
 	float CachedGaugeHeight;	//게이지 바 전체 높이 캐시
 	float CachedPointerHeight;	//커서 높이 캐시
 
+	//클라이언트가 게이지 결과를 서버에 보고하는 RPC (원래는 서버가 결과도 검사하고 다시 클라에 보내야하지만 구현하다가 터짐..)
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_ReportGaugeInput(FGuid InGaugeID, float SmoothedGaugeValue);
+	
 	//클라이언트에서 게이지 실제로 시작
 	UFUNCTION(Client, Reliable)
-	void Client_StartGaugeUI(UVerticalTimingGaugeComponent* InGaugeComponent);
+	void Client_ShowMission1GaugeUI(UVerticalTimingGaugeComponent* InGaugeComponent, int32 MaxLife, int32 RequiredSuccess);
 	
 	// 클라이언트에서 게이지 UI를 실제 종료 (서버로 부터 호출)
 	UFUNCTION(Client, Reliable)
@@ -127,6 +131,6 @@ public:
 
 	UFUNCTION(Server, Reliable, WithValidation) // WithValidation 데이터 유효화 검사
 	void Server_NotifyGaugeFinished(FGuid InGaugeID, EVerticalGaugeResult Result);
-	
+
 #pragma endregion
 };

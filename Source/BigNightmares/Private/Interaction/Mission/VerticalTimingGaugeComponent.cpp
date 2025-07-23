@@ -9,6 +9,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/GameState/BNGameState.h"
 #include "GameFramework/PlayerController/BNPlayerController.h"
+#include "Interaction/Mission/MissionTimingGauge.h"
 #include "UI/InGame/BNMission1Widget.h"
 
 // Sets default values for this component's properties
@@ -46,6 +47,8 @@ void UVerticalTimingGaugeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeP
 	//녹색 영역의 시작 위치와 길이를 모든 클라에 복제
 	DOREPLIFETIME(UVerticalTimingGaugeComponent, GreenZoneStart);
 	DOREPLIFETIME(UVerticalTimingGaugeComponent, GreenZoneLength);
+	DOREPLIFETIME(UVerticalTimingGaugeComponent, GaugeID);
+	DOREPLIFETIME(UVerticalTimingGaugeComponent, GaugeSpeed);
 	
 	DOREPLIFETIME(UVerticalTimingGaugeComponent, CurrentGaugeValue);
 	DOREPLIFETIME(UVerticalTimingGaugeComponent, bIsLogicActive);
@@ -54,23 +57,23 @@ void UVerticalTimingGaugeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeP
 
 void UVerticalTimingGaugeComponent::RequestStartGauge(ABNPlayerController* BNPlayerController)
 {
-	if (!GetWorld()) return;
-
-	if (!GaugeID.IsValid())
+	if (GetOwner()->HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GaugeID is not set for this UVerticalTimingGaugeComponent. Cannot request start."));
-		return;
+		// 클라이언트든 서버든 (리스닝 서버의 호스트 클라이언트 부분 포함),
+		// 게이지 시작 요청은 항상 서버 RPC를 통해 이루어집니다.
+		Server_RequestStartGaugeInternal(GaugeID, BNPlayerController);		
 	}
+}
 
-	if (bIsLogicActive)
+void UVerticalTimingGaugeComponent::RequestStopGauge()
+{
+	if (GetOwner()->HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GaugeID '%s' is already active"), *GaugeID.ToString());
-		return;
+		if (bIsLogicActive)
+		{
+			bIsLogicActive = false;
+		}
 	}
-	
-	// 클라이언트든 서버든 (리스닝 서버의 호스트 클라이언트 부분 포함),
-	// 게이지 시작 요청은 항상 서버 RPC를 통해 이루어집니다.
-	Server_RequestStartGaugeInternal(GaugeID, BNPlayerController);
 }
 
 // Server_RequestStartGaugeInternal RPC 유효성 검사
@@ -116,76 +119,16 @@ void UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Implementat
 	GreenZoneStart = FMath::FRandRange(0.0f, 1.0f - GreenZoneLength);
 	//해당 변수는 값이 바뀌는 순간 ReplicatedUsing에 의해 클라에 복제
 
-	BNPlayerController->Client_StartGaugeUI(this);
+	AMissionTimingGauge* OwningMissionGauge = Cast<AMissionTimingGauge>(GetOwner());
+	if (IsValid(OwningMissionGauge))
+	{
+		BNPlayerController->Client_ShowMission1GaugeUI(this, OwningMissionGauge->MaxMissionLife, OwningMissionGauge->RequiredSuccessCount);			
+	}
 
 	bIsLogicActive = true;
 
 	UE_LOG(LogTemp, Log, TEXT("Server: Gauge ID '%s' UI/logic initiated for Player %s (targeting specific client)."), 
 		*GaugeID.ToString(), *BNPlayerController->GetName());
-}
-
-void UVerticalTimingGaugeComponent::HandleGaugeInput()
-{
-	APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	ABNPlayerController* LocalBNPC = Cast<ABNPlayerController>(LocalPC);
-
-	if (!IsValid(LocalBNPC) || LocalBNPC->ActiveGaugeComponent.Get() != this) return;
-	
-	EVerticalGaugeResult Result = EVerticalGaugeResult::EVGR_Fail;
-
-	if (CurrentGaugeValue >= GreenZoneStart && CurrentGaugeValue <= (GreenZoneStart + GreenZoneLength))
-	{
-		Result = EVerticalGaugeResult::EVGR_Success;
-	}
-	else
-	{
-		Result = EVerticalGaugeResult::EVGR_Fail;
-	}
-
-	if (LocalBNPC->IsLocalController())
-	{
-		LocalBNPC->Server_NotifyGaugeFinished(GaugeID, Result);
-	}
-}
-
-bool UVerticalTimingGaugeComponent::Server_RequestEndGaugeInternal_Validate(FGuid InGaugeID,
-	EVerticalGaugeResult Result)
-{
-	//1. 게이지 ID의 유효성 검사
-	//GameState의 유효성
-	ABNGameState* GS = GetWorld()->GetGameState<ABNGameState>();
-	if (!IsValid(GS))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Validate: Invalid GameState. Rejecting RPC for GaugeID: %s"), *InGaugeID.ToString());
-		return false;
-	}
-
-	if (InGaugeID.IsValid()) return false;
-	
-	//서버가 해당 GaugeID에 대한 정보를 가지고 있는지 확인
-	if (this->GaugeID !=  InGaugeID)  // 이 컴포넌트의 실제 GaugeID와 RPC로 받은 InGaugeID가 일치하는지
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Validate: Mismatched GaugeID. RPC GaugeID: %s, Component ID: %s"), *InGaugeID.ToString(), *this->GaugeID.ToString());
-		return false;
-	}
-	
-	return true;
-}
-
-void UVerticalTimingGaugeComponent::Server_RequestEndGaugeInternal_Implementation(FGuid InGaugeID,
-	EVerticalGaugeResult Result)
-{
-
-	if (!IsValid(GetOwner()) || !GetOwner()->HasAuthority()) return;
-
-	if (GaugeID != InGaugeID) return;
-	if (!bIsLogicActive) return;
-
-	bIsLogicActive = false; //서버 게이지 로직 비활성화
-	CurrentGaugeValue = 0.0f; //초기화
-	GaugeDirection = 1.0f; //초기화
-	
-	OnGaugeFinished.Broadcast(Result);
 }
 
 void UVerticalTimingGaugeComponent::OnRep_GreenZoneLocation()

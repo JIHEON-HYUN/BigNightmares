@@ -16,6 +16,7 @@
 #include "Components/Image.h"
 #include "GameFramework/GameState/BNGameState.h"
 #include "GameFramework/PlayerState/BNPlayerState.h"
+#include "Interaction/Mission/MissionTimingGauge.h"
 #include "Interaction/Mission/VerticalTimingGaugeComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "UI/InGame/BNInventoryWidgetController.h"
@@ -163,6 +164,43 @@ void ABNPlayerController::TryInitializeRpcReadiness()
 	}
 }
 
+bool ABNPlayerController::Server_ReportGaugeInput_Validate(FGuid InGaugeID, float SmoothedGaugeValue)
+{
+	if (!InGaugeID.IsValid())
+	{
+		return false;
+	}
+
+	//KINDA_SMALL_NUMBER : float의 값을 0과 비교할 때 미세한 오차 범위 내에 있는지 판단필요, 언리얼 엔진에 무시 가능한 오차를 측정할 때 사용하도록 만든 매크로
+	if (SmoothedGaugeValue < -KINDA_SMALL_NUMBER || SmoothedGaugeValue > KINDA_SMALL_NUMBER + 1.0f)
+	{
+		return false;
+	}
+	
+	return true;
+}
+
+void ABNPlayerController::Server_ReportGaugeInput_Implementation(FGuid InGaugeID, float SmoothedGaugeValue)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("BNPlayerController In Here1"));
+	
+	if (ActiveGaugeComponent.IsValid() && ActiveGaugeComponent->GaugeID == InGaugeID)
+	{
+		AMissionTimingGauge* OwningMissionGauge = Cast<AMissionTimingGauge>(ActiveGaugeComponent->GetOwner());
+
+		if (IsValid(OwningMissionGauge))
+		{
+			OwningMissionGauge->Server_PerformGaugeCheck(InGaugeID, SmoothedGaugeValue);
+		}
+	}
+}
+
+
 UBNInventoryWidgetController* ABNPlayerController::GetBNInventoryWidgetController()
 {
 	if (!IsValid(InventoryWidgetController))
@@ -196,24 +234,24 @@ UAbilitySystemComponent* ABNPlayerController::GetAbilitySystemComponent() const
 #pragma region Missions1
 
 // Client_StartGaugeUI RPC 구현
-void ABNPlayerController::Client_StartGaugeUI_Implementation(UVerticalTimingGaugeComponent* InGaugeComponent)
+void ABNPlayerController::Client_ShowMission1GaugeUI_Implementation(UVerticalTimingGaugeComponent* InGaugeComponent, int32 MaxLife, int32 RequiredSuccess)
 {
 	if (!IsValid(this) || !IsValid(Mission1WidgetClass) || !IsValid(InGaugeComponent)) 
 	{
 		UE_LOG(LogTemp, Error, TEXT("Client_StartGaugeUI: PlayerController, Widget Class, or GaugeComponent invalid. Cannot create widget."));
 		return;
 	}
-
+	
 	//활성화된 위젯이 있다면 제거 (중복생성방지)
 	if (IsValid(Mission1WidgetInstance))
 	{
 		Mission1WidgetInstance->RemoveFromParent();
 		Mission1WidgetInstance = nullptr;
 	}
-
+	
 	//위젯 생성 시 OwningObject를 this(현재 로컬 플레이어 컨트롤러)로 설정해 생성
 	Mission1WidgetInstance = CreateWidget<UBNMission1Widget>(this, Mission1WidgetClass);
-
+	
 	//위젯 생성 검사
 	if (!IsValid(Mission1WidgetInstance))
 	{
@@ -223,10 +261,12 @@ void ABNPlayerController::Client_StartGaugeUI_Implementation(UVerticalTimingGaug
 	
 	Mission1WidgetInstance->AddToViewport();
 	Mission1WidgetInstance->SetGaugeComponent(InGaugeComponent);
-
+	
 	//현재 활성화된 게이지 컴포넌트 참조 저장
 	ActiveGaugeComponent = InGaugeComponent;
 
+	Mission1WidgetInstance->SetMissionGoals(MaxLife, RequiredSuccess);
+	
 	UE_LOG(LogTemp, Log, TEXT("Client (PlayerController): Gauge UI fully initialized and started for Player %s."), *GetName());
 }
 
@@ -237,12 +277,7 @@ void ABNPlayerController::Client_EndGaugeUI_Implementation(EVerticalGaugeResult 
 	{
 		Mission1WidgetInstance->RemoveFromParent();
 		Mission1WidgetInstance = nullptr;
-
-		//브로드 캐스트를 2개 만들어서 일반적인 창 닫기와 퀘스트 성공시 창 닫는걸 분리할 예정
-		if (ActiveGaugeComponent.IsValid())
-		{
-			ActiveGaugeComponent->OnGaugeFinished.Broadcast(Result);
-		}
+		
 		ActiveGaugeComponent = nullptr; //참조 해제
 	}
 }

@@ -7,8 +7,10 @@
 #include "MissionTimingGauge.generated.h"
 
 enum class EVerticalGaugeResult : uint8;
+enum class EMissionResult : uint8;
 class ABNPlayerState;
 class UVerticalTimingGaugeComponent;
+class ABNPlayerController;
 
 /**
  * 
@@ -24,14 +26,19 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Timing Gauge")
 	TObjectPtr<UVerticalTimingGaugeComponent> TimingGaugeComponent;
 	
 protected:
-	//현재 이 미니게임에 도전 중인 플레이어 (서버에서만 유효)
-	UPROPERTY()
+	//현재 이 미니게임에 도전 중인 플레이어 (서버에서만 유효)  State에서 Controller로 바꿀 예정
+	UPROPERTY(Replicated)
 	TObjectPtr<ABNPlayerState> CurrentChallengingPlayerState;
+
+	UPROPERTY(Replicated)
+	TObjectPtr<ABNPlayerController> CurrentPlayerController;
 	
 	virtual void OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 
@@ -42,5 +49,52 @@ protected:
 	// TimingGaugeComponent의 OnGaugeFinished 델리게이트에 바인딩됩니다.
 	UFUNCTION()
 	void OnGaugeFinished(EVerticalGaugeResult Result);
+
+#pragma region Mission1 State Variables
+public:
+	UPROPERTY(EditDefaultsOnly,Replicated, Category = "Mission1 | Life")
+	int32 MaxMissionLife = 3;
+	
+	UPROPERTY(ReplicatedUsing=OnRep_CurrentMissionLifeCount, VisibleAnywhere, BlueprintReadOnly, Category = "Mission1 | Life")
+	int32 CurrentMissionLifeCount;
+
+	UFUNCTION()
+	void OnRep_CurrentMissionLifeCount();
+
+	UPROPERTY(EditDefaultsOnly,Replicated, Category = "Mission1 | Success")
+	int32 RequiredSuccessCount = 4;
+	
+	UPROPERTY(ReplicatedUsing=OnRep_CurrentSuccessCount, VisibleAnywhere, BlueprintReadOnly, Category = "Mission1 | Success")
+	int32 CurrentSuccessCount = 0;
+
+	UFUNCTION()
+	void OnRep_CurrentSuccessCount();
+
+	UPROPERTY(EditAnywhere, Category = "Mission|Duration", meta=(Units="Seconds"))
+	float OverallMissionDuration = 120.0f; // 미션 전체의 총 제한 시간 (예: 2분 = 120초)
+
+	FTimerHandle OverallMissionTimerHandle;
+	
+	//전체시간 만료시 호출
+	void HandleOverallMissionTimeOut();
+#pragma endregion
+
+public:
+	// --- 미션 진행/종료 로직 (서버에서만 실행) ---
+	// 클라이언트의 게이지 입력에 대한 판정을 수행합니다.
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Mission")
+	void Server_PerformGaugeCheck(FGuid InGaugeID, float ClientGaugeValue);
+	
+protected:
+	// 미션 완료/실패 여부를 판단합니다.
+	void CheckMissionCompletion();
+	// 미션 성공 시 처리 로직
+	void HandleMissionSuccess();
+	// 미션 실패 시 처리 로직
+	void HandleMissionFailure();
+
+	// 미션 시작/종료 시 호출될 서버 로직
+	void StartMission(ABNPlayerController* InPlayerController);
+	void EndMission(EMissionResult Result);
 
 };

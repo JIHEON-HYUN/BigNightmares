@@ -3,10 +3,13 @@
 
 #include "UI/InGame/BNMission1Widget.h"
 
+#include "Landscape.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/Border.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
+#include "Components/TextBlock.h"
+#include "GameFramework/PlayerController/BNPlayerController.h"
 
 #include "Interaction/Mission/VerticalTimingGaugeComponent.h"
 
@@ -28,6 +31,8 @@ void UBNMission1Widget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	//CurrentMissionLifeCount = MaxMissionLife;
+	
 	// UPROPERTY(meta = (BindWidget))을 사용했으므로 여기서 GetWidgetFromName은 필요없음
 	// 변수들이 올바르게 바인딩되었는지 유효성 검사만 수행.
 	if (!IsValid(Border_GaugeBackground) || !IsValid(Image_Pointer) || !IsValid(Image_Green))
@@ -37,11 +42,6 @@ void UBNMission1Widget::NativeConstruct()
 		return;
 	}
 
-	// UI 요소들의 높이 캐시 (주로 NativeConstruct에서 한 번만 계산)
-	// GetDesiredSize()는 위젯의 "이상적인" 크기를 반환합니다. **내부 콘텐츠를 기반으로 계산한 '최소 필요 크기'**
-	//CachedGaugeBackgroundHeight = Border_GaugeBackground->GetDesiredSize().Y;
-	//CachedPointerHeight = Image_Pointer->GetDesiredSize().Y;
-
 	if (CachedGaugeBackgroundHeight <= 0.f)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("BNMission1Widget: Gauge background height is zero or negative (%.2f). UI may not display correctly."), CachedGaugeBackgroundHeight);
@@ -50,7 +50,19 @@ void UBNMission1Widget::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("BNMission1Widget: Pointer height is zero or negative (%.2f). UI may not display correctly."), CachedPointerHeight);
 	}
-	
+
+	BNPC = Cast<ABNPlayerController>(GetOwningPlayer());
+	if (IsValid(BNPC))
+	{
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(this->TakeWidget());
+
+		BNPC->SetInputMode(InputMode);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BN Mission1Widget NativeConstruct: Failed to get PlayerController. Could not set input mode."));
+	}
 }
 
 void UBNMission1Widget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -69,7 +81,7 @@ void UBNMission1Widget::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
 			{
 				// 게이지 배경의 실제 Canvas Panel 상 Y 위치를 캐시합니다.
 				CachedGaugeBackgroundPosY = BackgroundSlot->GetPosition().Y;
-				UE_LOG(LogTemp, Log, TEXT("NativeTick - CachedGaugeBackgroundPosY: %.2f"), CachedGaugeBackgroundPosY);
+				//UE_LOG(LogTemp, Log, TEXT("NativeTick - CachedGaugeBackgroundPosY: %.2f"), CachedGaugeBackgroundPosY);
 			}
 			
 			// 높이가 0이 아닌 유효한 값으로 업데이트되면 녹색 영역 UI를 다시 초기화합니다.
@@ -116,6 +128,63 @@ void UBNMission1Widget::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
 	}
 }
 
+FReply UBNMission1Widget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	UE_LOG(LogTemp, Warning, TEXT("NativeOnKeyDown!"));
+	if (InKeyEvent.GetKey() == EKeys::SpaceBar)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NativeOnKeyDown! SpaceBar"));
+		HandleSpaceBarPressed();
+		
+		return FReply::Handled();
+	}
+
+	if (InKeyEvent.GetKey() == EKeys::Escape)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NativeOnKeyDown! Escape"));
+		HandleEscapePressed();
+		
+		return FReply::Handled();
+	}
+	
+	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+}
+
+void UBNMission1Widget::HandleSpaceBarPressed()
+{	
+	if (OwningGaugeComponent.IsValid())
+	{
+		//현재 포인터의 위치 값
+		/*float CurrentPointerYPosition = SmoothedGaugeValue;
+
+		float GreenZoneStartValue = OwningGaugeComponent->GreenZoneStart;
+		float GreenZoneEndValue = OwningGaugeComponent->GreenZoneStart + OwningGaugeComponent->GreenZoneLength;
+
+		if (CurrentPointerYPosition >= GreenZoneStartValue && CurrentPointerYPosition <= GreenZoneEndValue)
+		{
+			BNPC->Server_ReportGaugeInput(OwningGaugeComponent->GaugeID, CurrentPointerYPosition);
+
+			UE_LOG(LogTemp, Warning, TEXT("SUCCESS!"));
+			UE_LOG(LogTemp, Warning, TEXT("CurrentPointerYPosition : %f , %f ~ %f "), CurrentPointerYPosition, GreenZoneStartValue, GreenZoneEndValue);
+		}
+		else
+		{
+			BNPC->Server_ReportGaugeInput(OwningGaugeComponent->GaugeID, CurrentPointerYPosition);
+			UE_LOG(LogTemp, Warning, TEXT("Failed!"));
+			UE_LOG(LogTemp, Warning, TEXT("CurrentPointerYPosition : %f , %f ~ %f "), CurrentPointerYPosition, GreenZoneStartValue, GreenZoneEndValue);
+		}*/
+		if (IsValid(BNPC))
+		{
+			BNPC->Server_ReportGaugeInput(OwningGaugeComponent->GaugeID, SmoothedGaugeValue);
+		}
+	}
+}
+
+void UBNMission1Widget::HandleEscapePressed()
+{
+	
+}
+
 void UBNMission1Widget::UpdateGreenZoneUI(float GreenZoneStart, float GreenZoneLength)
 {
 	if (!IsValid(Image_Green) || CachedGaugeBackgroundHeight <= 0.f)
@@ -124,8 +193,11 @@ void UBNMission1Widget::UpdateGreenZoneUI(float GreenZoneStart, float GreenZoneL
 		return;
 	}
 
-	float GreenZonePosY = CachedGaugeBackgroundHeight * (1.0f -  (GreenZoneStart + GreenZoneLength));
 	float GreenZoneHeight = CachedGaugeBackgroundHeight * GreenZoneLength;
+	
+	float GreenZonePosY = CachedGaugeBackgroundHeight * (1.0f -  (GreenZoneStart + GreenZoneLength));
+
+	float GreenZoneFinalPosY = CachedGaugeBackgroundPosY + GreenZonePosY;
 
 	// Image_Green 위젯의 슬롯을 CanvasPanelSlot으로 캐스팅하여 위치와 크기를 변경합니다.
 	// SlotAsCanvasSlot : 특정 위젯이 UCanvasPanel에 배치되어 있는지 확인 후, 그 위젯의 슬롯에 대해 UCanvasPanel만의 고유한 위치, 크기, 정렬 등의 레이아웃 속성을 설정하고 싶을 때 사용
@@ -133,7 +205,7 @@ void UBNMission1Widget::UpdateGreenZoneUI(float GreenZoneStart, float GreenZoneL
 	if (GreenSlot)
 	{
 		// Y위치만 업데이트
-		GreenSlot->SetPosition(FVector2D(GreenSlot->GetPosition().X, GreenZonePosY));
+		GreenSlot->SetPosition(FVector2D(GreenSlot->GetPosition().X, GreenZoneFinalPosY));
 		GreenSlot->SetSize(FVector2D(GreenSlot->GetSize().X, GreenZoneHeight));
 	}
 	else
@@ -152,10 +224,8 @@ void UBNMission1Widget::UpdatePointerUI(float CurrentGaugeValue)
 	}
 	
 	float PointerPosY = CachedGaugeBackgroundHeight * (1.0f - CurrentGaugeValue);
-	UE_LOG(LogTemp, Warning, TEXT("PointerPosY : %f"), PointerPosY);
-
-	//PointerPosY -= (CachedPointerHeight/ 30.f);
-
+	//UE_LOG(LogTemp, Warning, TEXT("PointerPosY : %f"), PointerPosY);
+	
 	UCanvasPanelSlot* PointerSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(Image_Pointer);
 
 	float MinPointerY = CachedGaugeBackgroundPosY;
@@ -170,5 +240,50 @@ void UBNMission1Widget::UpdatePointerUI(float CurrentGaugeValue)
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("BNMission1Widget::UpdatePointerUI: Failed to cast Image_Pointer to UCanvasPanelSlot."));
+	}
+}
+
+void UBNMission1Widget::SetMissionGoals(int32 InMaxLife, int32 InRequiredSuccess)
+{
+	CachedMaxLife = InMaxLife;
+	CachedRequiredSuccess = InRequiredSuccess;
+
+	if (MaxLifeText)
+	{
+		MaxLifeText->SetText(FText::AsNumber(InMaxLife));
+	}
+	if (RequiredSuccessText)
+	{
+		RequiredSuccessText->SetText(FText::AsNumber(InRequiredSuccess));
+	}
+
+	//초기 라이프와 성공횟수 업데이트
+	UpdateLifeUI(InMaxLife);
+	UpdateSuccessUI(0);
+}
+
+void UBNMission1Widget::UpdateLifeUI(int32 NewLifeCount)
+{
+	if (LifeCountText)
+	{
+		FText FormattedText = FText::Format(
+			NSLOCTEXT("MissionUI", "LifeCountFormat", "라이프: {0} / {1}"),
+			FText::AsNumber(NewLifeCount),
+			FText::AsNumber(CachedMaxLife)
+		);
+		LifeCountText->SetText(FormattedText);
+	}
+}
+
+void UBNMission1Widget::UpdateSuccessUI(int32 NewSuccessCount)
+{
+	if (SuccessCountText)
+	{
+		FText FormattedText = FText::Format(
+			NSLOCTEXT("MissionUI", "SuccessCountFormat", "성공: {0} / {1}"),
+			FText::AsNumber(NewSuccessCount),
+			FText::AsNumber(CachedRequiredSuccess) // SetMissionGoals에서 설정된 필요 성공 횟수 사용
+		);
+		SuccessCountText->SetText(FormattedText);
 	}
 }
