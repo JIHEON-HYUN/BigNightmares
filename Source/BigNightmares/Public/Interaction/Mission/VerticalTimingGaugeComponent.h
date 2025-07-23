@@ -48,7 +48,7 @@ public:
 	float CurrentGaugeValue;
 
 	// 게이지 커서의 움직임 방향
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "TIming Gauge | State")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TIming Gauge | State")
 	float GaugeDirection;
 
 	// 녹색(성공 영역)의 시작 지점 - 서버에서 랜덤 결정 및 복제
