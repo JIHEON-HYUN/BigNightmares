@@ -8,7 +8,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="761905b1-3250-4b5a-8c5b-d5e4f837e1aa" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/.name" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/workspace.xml" afterDir="false" />
+<<<<<<< HEAD
+=======
+      <change beforePath="$PROJECT_DIR$/Content/GameFramework/PlayerController/BP_PlayerController.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GameFramework/PlayerController/BP_PlayerController.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/GameState/BNGameState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/GameState/BNGameState.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/PlayerController/BNPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/PlayerController/BNPlayerController.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/MissionTimingGauge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/MissionTimingGauge.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/VerticalTimingGaugeComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/VerticalTimingGaugeComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Public/GameFramework/GameState/BNGameState.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Public/GameFramework/GameState/BNGameState.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Public/GameFramework/PlayerController/BNPlayerController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Public/GameFramework/PlayerController/BNPlayerController.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Public/Interaction/Mission/VerticalTimingGaugeComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Public/Interaction/Mission/VerticalTimingGaugeComponent.h" afterDir="false" />
+>>>>>>> parent of c7a02a2 (PointBar 상하 왔다갔다 잘하는 버전)
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,6 +103,7 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
+<<<<<<< HEAD
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
@@ -106,6 +119,23 @@
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+=======
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Uproject.BigNightmares.executor": "Debug",
+    "git-widget-placeholder": "feature/Mission1",
+    "ignore.virus.scanning.warn.message": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
+>>>>>>> parent of c7a02a2 (PointBar 상하 왔다갔다 잘하는 버전)
   }
 }</component>
   <component name="RunManager">
@@ -202,7 +232,10 @@
       <workItem from="1753008827356" duration="4443000" />
       <workItem from="1753055501055" duration="9128000" />
       <workItem from="1753065052371" duration="3890000" />
+<<<<<<< HEAD
       <workItem from="1753232352897" duration="48000" />
+=======
+>>>>>>> parent of c7a02a2 (PointBar 상하 왔다갔다 잘하는 버전)
     </task>
     <servers />
   </component>
