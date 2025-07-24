@@ -122,8 +122,7 @@ bool ABNGameState::Server_TryStartSpecificGaugeChallenge(FGuid GaugeID, const AB
 	// 배열이 변경되었음을 강제로 복제 시스템에 알림 (RepNotify를 트리거)
 	// 이 방식은 배열의 원소가 변경될 때 복제를 강제합니다. (ReplicatedUsing과 함께 사용)
 	MARK_PROPERTY_DIRTY_FROM_NAME(ABNGameState, Rep_ActiveGaugeChallenges, this);
-
-	UE_LOG(LogTemp, Log, TEXT("Server: Gauge ID '%s' challenge started by Player %s."), *GaugeID.ToString(), *PlayerController->PlayerState->GetPlayerName());
+	
 	return true;	
 }
 
@@ -145,7 +144,8 @@ void ABNGameState::Server_EndSpecificGaugeChallenge_Implementation(FGuid GaugeID
 
 	if (FoundIndex != INDEX_NONE)
 	{
-		Rep_ActiveGaugeChallenges[FoundIndex].bIsActive = false;
+		//Rep_ActiveGaugeChallenges[FoundIndex].bIsActive = false;
+		Rep_ActiveGaugeChallenges.RemoveAt(FoundIndex);
 		//TActorIterator 월드 내에 존재하는 특정 타입의 모든 액터들을 순회할 수 있게 함
 		for (TActorIterator<AMissionTimingGauge> It(GetWorld()); It; ++It)
 		{
@@ -155,6 +155,7 @@ void ABNGameState::Server_EndSpecificGaugeChallenge_Implementation(FGuid GaugeID
 			{
 				//서버에서 Mission1 로직 비활성화
 				GaugeComponent->bIsLogicActive = false;
+				GaugeComponent->ResetGaugeComponent();
 			}
 		}
 
@@ -169,53 +170,17 @@ void ABNGameState::OnRep_ActiveGaugeChallenges()
 	{
 		if (IsValid(Info.ChallengingPlayerState))
 		{
-			Client_ActiveGaugeChallengesMap.Add(Info.GaugeID, Info); //맵에 추가
-
-			// 누가 도전 중인지 확인
-			UE_LOG(LogTemp, Log, TEXT("Client: Gauge %s is active, challenged by Player: %s"),
-				*Info.GaugeID.ToString(), *Info.ChallengingPlayerState->GetPlayerName());
+			if (Info.bIsActive) 
+			{
+				Client_ActiveGaugeChallengesMap.Add(Info.GaugeID, Info);
+			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Client: Gauge %s has an invalid ChallengingPlayerState."), *Info.GaugeID.ToString());
+			UE_LOG(LogTemp, Error, TEXT("Client: Gauge %s has an invalid ChallengingPlayerState."), *Info.GaugeID.ToString());
 		}
 	}
 
 	// 클라에서 필요한 추가 로직 수행가능 ex) UI업데이트, 게이지 상태 시각화등
-	UE_LOG(LogTemp, Log, TEXT("ActiveGaugeChallengesArray replicated. Client Map updated with %d entries."), Client_ActiveGaugeChallengesMap.Num());
-}
-
-bool ABNGameState::IsGaugeChallengeActive(FGuid GaugeID) const
-{
-	if (GetLocalRole() == ROLE_Authority) // 서버라면 직접 배열에서 확인
-	{
-		const FGaugeChallengeInfo* FoundInfo = Rep_ActiveGaugeChallenges.FindByPredicate([&] (const FGaugeChallengeInfo& Info)
-		{
-			return Info.GaugeID == GaugeID;
-		});
-		return FoundInfo && FoundInfo->bIsActive;
-	}
-	else //클라이언트라면 복제된 맵에서 확인
-	{
-		const FGaugeChallengeInfo* FoundInfo = Client_ActiveGaugeChallengesMap.Find(GaugeID);
-		return FoundInfo && FoundInfo->bIsActive;
-	}
-}
-
-ABNPlayerState* ABNGameState::GetChallengingPlayerStateForGauge(FGuid GaugeID) const
-{
-	if (GetLocalRole() == ROLE_Authority) //서버라면 직접 가져가기
-	{
-		const FGaugeChallengeInfo* FoundInfo = Rep_ActiveGaugeChallenges.FindByPredicate([&](const FGaugeChallengeInfo& Info)
-		{
-			return Info.GaugeID == GaugeID;
-		});
-		return FoundInfo ? FoundInfo->ChallengingPlayerState : nullptr;
-	}
-	else //클라면 복제된 맵에서
-	{
-		const FGaugeChallengeInfo* FoundInfo = Client_ActiveGaugeChallengesMap.Find(GaugeID);
-		return FoundInfo ? FoundInfo->ChallengingPlayerState : nullptr;
-	}
 }
 #pragma endregion

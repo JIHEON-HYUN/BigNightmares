@@ -5,14 +5,12 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Border.h"
 #include "Net/VoiceConfig.h"
 #include "TimerManager.h"
 #include "VoiceModule.h"
 #include "Interfaces/VoiceCapture.h"
 
 #include "Abilities/BNBaseAbilitySystemComponent.h"
-#include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
 #include "GameFramework/GameState/BNGameState.h"
 #include "GameFramework/PlayerState/BNPlayerState.h"
@@ -21,7 +19,6 @@
 #include "Net/UnrealNetwork.h"
 #include "UI/InGame/BNInventoryWidgetController.h"
 #include "UI/InGame/BNSystemWidget.h"
-#include "UI/InGame/BNInGameWidget.h"
 #include "UI/InGame/BNMission1Widget.h"
 #include "UI/Lobby/BNLobbyWidget.h"
 
@@ -67,6 +64,23 @@ void ABNPlayerController::BeginPlay()
 	}
 
 	// 로컬 플레이어 UI 위젯 클래스 미리 로드 예정
+
+
+	//UI오픈상태에서 알트탭했을 때 위젯이 포커스를 잃어버리는 현상 수정을 위한 델리게이트
+	if (FSlateApplication::IsInitialized())
+	{
+		FSlateApplication::Get().OnApplicationActivationStateChanged().AddUObject(this, &ABNPlayerController::OnApplicationStateChanged);
+	}
+}
+
+void ABNPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	if (FSlateApplication::IsInitialized())
+	{
+		FSlateApplication::Get().OnApplicationActivationStateChanged().RemoveAll(this);
+	}
 }
 
 void ABNPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -164,6 +178,38 @@ void ABNPlayerController::TryInitializeRpcReadiness()
 	}
 }
 
+UBNInventoryWidgetController* ABNPlayerController::GetBNInventoryWidgetController()
+{
+	if (!IsValid(InventoryWidgetController))
+	{
+		InventoryWidgetController = NewObject<UBNInventoryWidgetController>(this, BNInventoryWidgetControllerClass);
+		InventoryWidgetController->SetOwningActor(GetPlayerState<ABNPlayerState>());
+		InventoryWidgetController->BindCallbacksToDependencies();
+	}
+
+	return InventoryWidgetController;
+}
+
+void ABNPlayerController::CreateInventoryWidget()
+{
+	if (UUserWidget* Widget = CreateWidget<UBNSystemWidget>(this, InventoryWidgetClass))
+	{
+		InventoryWidget = Cast<UBNSystemWidget>(Widget);
+		InventoryWidget->SetWidgetController(GetBNInventoryWidgetController());
+		InventoryWidgetController->BroadcastInitialValues();
+		InventoryWidget->AddToViewport();
+	}
+}
+
+UAbilitySystemComponent* ABNPlayerController::GetAbilitySystemComponent() const
+{
+	return Cast<UBNBaseAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn()));
+}
+
+#pragma endregion Inventory
+
+#pragma region Missions1
+
 bool ABNPlayerController::Server_ReportGaugeInput_Validate(FGuid InGaugeID, float SmoothedGaugeValue)
 {
 	if (!InGaugeID.IsValid())
@@ -202,44 +248,12 @@ void ABNPlayerController::Server_ReportGaugeInput_Implementation(FGuid InGaugeID
 }
 
 
-UBNInventoryWidgetController* ABNPlayerController::GetBNInventoryWidgetController()
-{
-	if (!IsValid(InventoryWidgetController))
-	{
-		InventoryWidgetController = NewObject<UBNInventoryWidgetController>(this, BNInventoryWidgetControllerClass);
-		InventoryWidgetController->SetOwningActor(GetPlayerState<ABNPlayerState>());
-		InventoryWidgetController->BindCallbacksToDependencies();
-	}
-
-	return InventoryWidgetController;
-}
-
-void ABNPlayerController::CreateInventoryWidget()
-{
-	if (UUserWidget* Widget = CreateWidget<UBNSystemWidget>(this, InventoryWidgetClass))
-	{
-		InventoryWidget = Cast<UBNSystemWidget>(Widget);
-		InventoryWidget->SetWidgetController(GetBNInventoryWidgetController());
-		InventoryWidgetController->BroadcastInitialValues();
-		InventoryWidget->AddToViewport();
-	}
-}
-
-UAbilitySystemComponent* ABNPlayerController::GetAbilitySystemComponent() const
-{
-	return Cast<UBNBaseAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn()));
-}
-
-#pragma endregion Inventory
-
-#pragma region Missions1
-
 // Client_StartGaugeUI RPC 구현
 void ABNPlayerController::Client_ShowMission1GaugeUI_Implementation(UVerticalTimingGaugeComponent* InGaugeComponent, int32 MaxLife, int32 RequiredSuccess)
 {
 	if (!IsValid(this) || !IsValid(Mission1WidgetClass) || !IsValid(InGaugeComponent)) 
 	{
-		UE_LOG(LogTemp, Error, TEXT("Client_StartGaugeUI: PlayerController, Widget Class, or GaugeComponent invalid. Cannot create widget."));
+		UE_LOG(LogTemp, Error, TEXT("ABNPlayerController::Client_StartGaugeUI: PlayerController, Widget Class, or GaugeComponent invalid. Cannot create widget."));
 		return;
 	}
 	
@@ -256,7 +270,7 @@ void ABNPlayerController::Client_ShowMission1GaugeUI_Implementation(UVerticalTim
 	//위젯 생성 검사
 	if (!IsValid(Mission1WidgetInstance))
 	{
-		UE_LOG(LogTemp, Error, TEXT("Not Create VerticalGaugeWidgetInstance"));
+		UE_LOG(LogTemp, Error, TEXT("ABNPlayerController::Client_StartGaugeUI: Not Create VerticalGaugeWidgetInstance"));
 		return;		
 	}
 	
@@ -270,17 +284,14 @@ void ABNPlayerController::Client_ShowMission1GaugeUI_Implementation(UVerticalTim
 
 	if (IsValid(Mission1WidgetInstance))
 	{
-		// 사용 사례에 따라 FInputModeUIOnly 또는 FInputModeGameAndUI 중 선택합니다.
-		// FInputModeGameAndUI: 게임 입력과 UI 입력을 모두 받습니다. (권장)
 		// FInputModeUIOnly: UI 입력만 받으며 게임 입력은 막힙니다.
 		FInputModeUIOnly InputMode;
 		InputMode.SetWidgetToFocus(Mission1WidgetInstance->TakeWidget());
+		SetShowMouseCursor(true);
 		SetInputMode(InputMode);
 
 		Mission1WidgetInstance->SetKeyboardFocus(); // 위젯에 명시적으로 키보드 포커스 부여
 	}
-	
-	UE_LOG(LogTemp, Log, TEXT("Client (PlayerController): Gauge UI fully initialized and started for Player %s."), *GetName());
 }
 
 //Client_EndGaugeUI RPC 구현 
@@ -295,23 +306,21 @@ void ABNPlayerController::Client_EndGaugeUI_Implementation(EVerticalGaugeResult 
 	}
 }
 
-bool ABNPlayerController::Server_NotifyGaugeFinished_Validate(FGuid InGaugeID, EVerticalGaugeResult Result)
-{
-	return true;
-}
-
-void ABNPlayerController::Server_NotifyGaugeFinished_Implementation(FGuid InGaugeID, EVerticalGaugeResult Result)
-{
-	if (!HasAuthority()) return;
-
-	ABNGameState* GS = GetWorld()->GetGameState<ABNGameState>();
-	if (GS)
-	{
-		GS->Server_EndSpecificGaugeChallenge(InGaugeID, this);
-	}
-
-	Client_EndGaugeUI(Result);
-
-	UE_LOG(LogTemp, Display, TEXT("Server EndGauge"));
-}
 #pragma endregion Missions1
+
+//Alt + Tab으로 인해 인게임에서 focus를 잃어버렸을 때 다시 가지게 하는 함수
+void ABNPlayerController::OnApplicationStateChanged(bool bIsActive)
+{
+	if (bIsActive)
+	{
+		if (IsValid(Mission1WidgetInstance) && Mission1WidgetInstance->IsInViewport())
+		{
+			FInputModeUIOnly InputMode;
+			InputMode.SetWidgetToFocus(Mission1WidgetInstance->TakeWidget());
+			SetShowMouseCursor(true);
+			SetInputMode(InputMode);
+
+			Mission1WidgetInstance->SetKeyboardFocus();
+		}
+	}
+}

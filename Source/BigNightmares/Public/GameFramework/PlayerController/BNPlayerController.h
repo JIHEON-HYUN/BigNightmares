@@ -31,6 +31,7 @@ class BIGNIGHTMARES_API ABNPlayerController : public APlayerController, public I
 public:
 	ABNPlayerController();
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 #pragma region Lobby
 	
@@ -129,8 +130,10 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_EndGaugeUI(EVerticalGaugeResult Result);
 
-	UFUNCTION(Server, Reliable, WithValidation) // WithValidation 데이터 유효화 검사
-	void Server_NotifyGaugeFinished(FGuid InGaugeID, EVerticalGaugeResult Result);
+#pragma endregion
 
+#pragma region GameFocusSetting
+	UFUNCTION()
+	void OnApplicationStateChanged(bool bIsActive);
 #pragma endregion
 };

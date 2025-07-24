@@ -79,22 +79,29 @@ public:
 	void HandleOverallMissionTimeOut();
 #pragma endregion
 
+
+#pragma region Server
 public:
 	// --- 미션 진행/종료 로직 (서버에서만 실행) ---
 	// 클라이언트의 게이지 입력에 대한 판정을 수행합니다.
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Mission")
 	void Server_PerformGaugeCheck(FGuid InGaugeID, float ClientGaugeValue);
-	
-protected:
-	// 미션 완료/실패 여부를 판단합니다.
-	void CheckMissionCompletion();
-	// 미션 성공 시 처리 로직
-	void HandleMissionSuccess();
-	// 미션 실패 시 처리 로직
-	void HandleMissionFailure();
 
 	// 미션 시작/종료 시 호출될 서버 로직
 	void StartMission(ABNPlayerController* InPlayerController);
 	void EndMission(EMissionResult Result);
 
+	// **서버 전용 로직: 미션 상태 변경 및 완료 조건 확인**
+	void Server_HandleMissionSuccess();
+	void Server_HandleMissionFailure();
+	void Server_CheckMissionCompletion(); // 미션 완료 여부 검사 (서버 전용)
+#pragma endregion
+
+#pragma region Client
+public:
+
+	UFUNCTION(Client, Reliable)
+	void Client_EndMission(EMissionResult Result);
+	
+#pragma endregion
 };

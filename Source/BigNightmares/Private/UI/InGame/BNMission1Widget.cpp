@@ -3,7 +3,6 @@
 
 #include "UI/InGame/BNMission1Widget.h"
 
-#include "Landscape.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/Border.h"
 #include "Components/CanvasPanelSlot.h"
@@ -23,7 +22,7 @@ void UBNMission1Widget::SetGaugeComponent(UVerticalTimingGaugeComponent* InCompo
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Gauge component is null"));
+		UE_LOG(LogTemp, Error, TEXT("UBNMission1Widget::SetGaugeComponent : Gauge component is null"));
 	}
 }
 
@@ -44,25 +43,19 @@ void UBNMission1Widget::NativeConstruct()
 
 	if (CachedGaugeBackgroundHeight <= 0.f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BNMission1Widget: Gauge background height is zero or negative (%.2f). UI may not display correctly."), CachedGaugeBackgroundHeight);
+		UE_LOG(LogTemp, Warning, TEXT("BNMission1Widget::NativeConstruct : Gauge background height is zero or negative (%.2f). UI may not display correctly."), CachedGaugeBackgroundHeight);
 	}
 	if (CachedPointerHeight <= 0.f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BNMission1Widget: Pointer height is zero or negative (%.2f). UI may not display correctly."), CachedPointerHeight);
+		UE_LOG(LogTemp, Warning, TEXT("BNMission1Widget::NativeConstruct : Pointer height is zero or negative (%.2f). UI may not display correctly."), CachedPointerHeight);
 	}
 
-	// BNPC = Cast<ABNPlayerController>(GetOwningPlayer());
-	// if (IsValid(BNPC))
-	// {
-	// 	FInputModeUIOnly InputMode;
-	// 	InputMode.SetWidgetToFocus(this->TakeWidget());
-	//
-	// 	BNPC->SetInputMode(InputMode);
-	// }
-	// else
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("BN Mission1Widget NativeConstruct: Failed to get PlayerController. Could not set input mode."));
-	// }
+	BNPC = Cast<ABNPlayerController>(GetOwningPlayer());
+	if (!IsValid(BNPC))
+	{
+		RemoveFromParent();
+		return;
+	}
 }
 
 void UBNMission1Widget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -130,10 +123,8 @@ void UBNMission1Widget::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
 
 FReply UBNMission1Widget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
-	UE_LOG(LogTemp, Warning, TEXT("NativeOnKeyDown!"));
 	if (InKeyEvent.GetKey() == EKeys::SpaceBar)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("NativeOnKeyDown! SpaceBar"));
 		HandleSpaceBarPressed();
 		
 		return FReply::Handled();
@@ -141,7 +132,6 @@ FReply UBNMission1Widget::NativeOnKeyDown(const FGeometry& InGeometry, const FKe
 
 	if (InKeyEvent.GetKey() == EKeys::Escape)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("NativeOnKeyDown! Escape"));
 		HandleEscapePressed();
 		
 		return FReply::Handled();
@@ -152,19 +142,23 @@ FReply UBNMission1Widget::NativeOnKeyDown(const FGeometry& InGeometry, const FKe
 
 void UBNMission1Widget::HandleSpaceBarPressed()
 {
-	UE_LOG(LogTemp, Log, TEXT("BNMission1Widget::HandleSpaceBarPressed called.")); // 이 로그가 호출되는지 확인
+	//UE_LOG(LogTemp, Log, TEXT("BNMission1Widget::HandleSpaceBarPressed called.")); // 이 로그가 호출되는지 확인
 
 	if (OwningGaugeComponent.IsValid())
 	{
-		UE_LOG(LogTemp, Log, TEXT("BNMission1Widget::HandleSpaceBarPressed: OwningGaugeComponent is valid. Attempting to call Server_ProcessGaugeInput()."));
+		//UE_LOG(LogTemp, Log, TEXT("BNMission1Widget::HandleSpaceBarPressed: OwningGaugeComponent is valid. Attempting to call Server_ProcessGaugeInput()."));
 		if (IsValid(BNPC))
 		{
 			BNPC->Server_ReportGaugeInput(OwningGaugeComponent->GaugeID, SmoothedGaugeValue);
 		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("UBNMission1Widget::HandleSpaceBarPressed : Not IsValid BNPC"));
+		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BNMission1Widget::HandleSpaceBarPressed: OwningGaugeComponent is INVALID. Cannot process input.")); // 이 로그가 찍힌다면 문제
+		UE_LOG(LogTemp, Error, TEXT("BNMission1Widget::HandleSpaceBarPressed: OwningGaugeComponent is INVALID. Cannot process input.")); // 이 로그가 찍힌다면 문제
 	}
 }
 
@@ -210,9 +204,6 @@ void UBNMission1Widget::UpdatePointerUI(float CurrentGaugeValue)
 			CachedGaugeBackgroundHeight, CachedPointerHeight);
 		return;
 	}
-	
-	float PointerPosY = CachedGaugeBackgroundHeight * (1.0f - CurrentGaugeValue);
-	//UE_LOG(LogTemp, Warning, TEXT("PointerPosY : %f"), PointerPosY);
 	
 	UCanvasPanelSlot* PointerSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(Image_Pointer);
 
@@ -265,7 +256,7 @@ void UBNMission1Widget::UpdateLifeUI(int32 NewLifeCount)
 
 void UBNMission1Widget::UpdateSuccessUI(int32 NewSuccessCount)
 {
-	if (SuccessCountText)
+  	if (SuccessCountText)
 	{
 		FText FormattedText = FText::Format(
 			NSLOCTEXT("MissionUI", "SuccessCountFormat", "성공: {0} / {1}"),

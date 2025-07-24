@@ -5,8 +5,6 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 
-#include "BaseType/BaseEnumType.h"
-
 #include "VerticalTimingGaugeComponent.generated.h"
 
 class UBNInGameWidget;
@@ -58,13 +56,35 @@ public:
 
 	UFUNCTION()
 	void OnRep_GreenZoneLocation();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tinimg Gauge | Difficulty Settings")
+	float InitialGaugeSpeed;
+	
+	//성공 시 속도 증가량
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tinimg Gauge | Difficulty Settings")
+	float SpeedIncreasePerSuccess;
+
+	//성공시 GreenZone 길이 감소량
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tinimg Gauge | Difficulty Settings")
+	float GreenZoneShrinkPerSuccess;
+
+	//GreenZone의 초기 길이
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tinimg Gauge | Difficulty Settings")
+	float InitialGreenZoneLength;
+
+	//GreenZone 최소길이
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tinimg Gauge | Difficulty Settings")
+	float MinGreenZoneLength;
+
+	UFUNCTION(BlueprintCallable, Category = "Timing Gauge | Control")
+	void UpdateDifficultySettings(int32 CurrentSuccessCount);
 	
 	//서버에 게이지 시작을 요청
 	UFUNCTION(BlueprintCallable, Category="Timing Gauge | Control")
 	void RequestStartGauge(ABNPlayerController* BNPlayerController);
 
 	UFUNCTION(BlueprintCallable, Category="Timing Gauge | Control")
-	void RequestStopGauge();
+	void ResetGaugeComponent();
 
 	// 게이지 컴포넌트의 게임 로직이 활성화되어 있는지 여부
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Timing Gauge | State")

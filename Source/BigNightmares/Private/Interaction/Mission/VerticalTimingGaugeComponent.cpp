@@ -6,7 +6,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
-#include "Blueprint/UserWidget.h"
 #include "GameFramework/GameState/BNGameState.h"
 #include "GameFramework/PlayerController/BNPlayerController.h"
 #include "Interaction/Mission/MissionTimingGauge.h"
@@ -26,11 +25,17 @@ UVerticalTimingGaugeComponent::UVerticalTimingGaugeComponent()
 	//bAlwaysRelevant = true; //멀리 있어도 항상 복제 되도록 설정 (AActor 자료형에서 가능)
 
 	GaugeSpeed = 0.5f; //커서 움직임 속도 (초당 0.5f로 이동) / 한번 성공할 때 마다 값이 커지게
-	CurrentGaugeValue  = 0.0f; //0아래, 1위
+	CurrentGaugeValue  = 0.5f; //0아래, 1위
 	GaugeDirection = 1.0f; //초기에 아래에서 위로 움직이면서 시작,
 
 	GreenZoneStart = 0.25f; //0.25은 기본값, 적용될 값은 서버에서 랜덤으로 결정할 것
 	GreenZoneLength = 0.25f; //블루프린트에서 설정될 값
+
+	InitialGreenZoneLength = 0.25f;
+	SpeedIncreasePerSuccess = 0.15f; //성공 시 속도 증가량
+	InitialGaugeSpeed = 0.5f;
+	GreenZoneShrinkPerSuccess = 0.05; //성공시 GreenZone 길이 감소량
+	MinGreenZoneLength = 0.1f; //GreenZone 최소길이
 }
 
 
@@ -55,6 +60,31 @@ void UVerticalTimingGaugeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeP
 	DOREPLIFETIME(UVerticalTimingGaugeComponent, GaugeDirection);
 }
 
+#pragma region Server
+void UVerticalTimingGaugeComponent::UpdateDifficultySettings(int32 CurrentSuccessCount)
+{
+	if (!GetOwner()->HasAuthority()) return;
+
+	GaugeSpeed = FMath::Min(InitialGaugeSpeed + (SpeedIncreasePerSuccess * CurrentSuccessCount), 4.0f);
+
+	GreenZoneLength = FMath::Max(InitialGreenZoneLength - (GreenZoneShrinkPerSuccess * CurrentSuccessCount), MinGreenZoneLength);
+
+	GreenZoneStart = FMath::FRandRange(0.f + GreenZoneLength, 1.0f - GreenZoneLength);
+
+	if (GetWorld() && GetWorld()->IsNetMode(NM_ListenServer))
+	{
+		ABNPlayerController* LocalPC = Cast<ABNPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+		if (IsValid(LocalPC) && LocalPC->ActiveGaugeComponent.Get() == this)
+		{
+			if (IsValid(LocalPC->Mission1WidgetInstance))
+			{
+				// GreenZoneStart와 GreenZoneLength가 이미 서버에서 업데이트되었으므로 바로 전달
+				LocalPC->Mission1WidgetInstance->UpdateGreenZoneUI(GreenZoneStart, GreenZoneLength);
+			}
+		}
+	}
+}
+
 void UVerticalTimingGaugeComponent::RequestStartGauge(ABNPlayerController* BNPlayerController)
 {
 	if (GetOwner()->HasAuthority())
@@ -65,17 +95,6 @@ void UVerticalTimingGaugeComponent::RequestStartGauge(ABNPlayerController* BNPla
 	}
 }
 
-void UVerticalTimingGaugeComponent::RequestStopGauge()
-{
-	if (GetOwner()->HasAuthority())
-	{
-		if (bIsLogicActive)
-		{
-			bIsLogicActive = false;
-		}
-	}
-}
-
 // Server_RequestStartGaugeInternal RPC 유효성 검사
 bool UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Validate(FGuid InGaugeID, ABNPlayerController* BNPlayerController)
 {
@@ -83,21 +102,21 @@ bool UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Validate(FG
 	ABNGameState* GS = GetWorld()->GetGameState<ABNGameState>();
 	if (!IsValid(GS))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Validate: Invalid GameState. Rejecting RPC for GaugeID: %s"), *InGaugeID.ToString());
+		UE_LOG(LogTemp, Error, TEXT("Validate: Invalid GameState. Rejecting RPC for GaugeID: %s"), *InGaugeID.ToString());
 		return false;
 	}
 
 	//서버가 해당 GaugeID에 대한 정보를 가지고 있는지 확인
 	if (this->GaugeID !=  InGaugeID)  // 이 컴포넌트의 실제 GaugeID와 RPC로 받은 InGaugeID가 일치하는지
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Validate: Mismatched GaugeID. RPC GaugeID: %s, Component ID: %s"), *InGaugeID.ToString(), *this->GaugeID.ToString());
+		UE_LOG(LogTemp, Error, TEXT("Validate: Mismatched GaugeID. RPC GaugeID: %s, Component ID: %s"), *InGaugeID.ToString(), *this->GaugeID.ToString());
 		return false;
 	}
 
 	//BNPlayerController의 유효성
 	if (!IsValid(BNPlayerController))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Validate: Not Invalid BNPlayerController : %s"), *BNPlayerController->GetName());
+		UE_LOG(LogTemp, Error, TEXT("Validate: Not Invalid BNPlayerController : %s"), *BNPlayerController->GetName());
 		return false;
 	}
 	
@@ -133,6 +152,26 @@ void UVerticalTimingGaugeComponent::Server_RequestStartGaugeInternal_Implementat
 		*GaugeID.ToString(), *BNPlayerController->GetName());
 }
 
+#pragma endregion
+
+
+#pragma region Client
+
+void UVerticalTimingGaugeComponent::ResetGaugeComponent()
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+	}
+
+	GaugeSpeed = InitialGaugeSpeed; //커서 움직임 속도 (초당 0.5f로 이동) / 한번 성공할 때 마다 값이 커지게
+	CurrentGaugeValue  = 0.5f; //0아래, 1위
+	GaugeDirection = 1.0f; //초기에 아래에서 위로 움직이면서 시작,
+	
+	GreenZoneLength = InitialGreenZoneLength; //블루프린트에서 설정될 값
+	bIsLogicActive = false;
+}
+
 void UVerticalTimingGaugeComponent::OnRep_GreenZoneLocation()
 {
 	APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
@@ -155,17 +194,22 @@ void UVerticalTimingGaugeComponent::TickComponent(float DeltaTime, ELevelTick Ti
 		{
 			CurrentGaugeValue += GaugeDirection * GaugeSpeed * DeltaTime;
 
-			if (CurrentGaugeValue >= 1.0f)
+			if (CurrentGaugeValue >= 0.95f)
 			{
-				CurrentGaugeValue = 1.0f;
+				CurrentGaugeValue = 0.95f;
 				GaugeDirection = -1.0f;
 			}
-			else if (CurrentGaugeValue <= 0.0f)
+			else if (CurrentGaugeValue <= 0.05f)
 			{
-				CurrentGaugeValue = 0.0f;
+				CurrentGaugeValue = 0.05f;
 				GaugeDirection = 1.0f;
 			}
 		}
 	}
 }
+
+#pragma endregion
+
+
+
 

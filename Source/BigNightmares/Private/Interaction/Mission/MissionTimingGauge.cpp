@@ -3,7 +3,7 @@
 
 #include "Interaction/Mission/MissionTimingGauge.h"
 
-#include "AbilitySystemBlueprintLibrary.h"
+#include "BaseType/BaseEnumType.h"
 #include "Components/ActorComponent.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/GameState/BNGameState.h"
@@ -56,7 +56,6 @@ void AMissionTimingGauge::BeginPlay()
 	{
 		if (!TimingGaugeComponent->GaugeID.IsValid())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AMissionTimingGauge '%s': TimingGaugeComponent's GaugeID is not set! Please set a unique ID in the editor."), *GetName());
 			TimingGaugeComponent->GaugeID = FGuid::NewGuid();
 		}
 	}
@@ -81,7 +80,7 @@ void AMissionTimingGauge::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedCompo
 		ABNPlayerController* BNPC = Cast<ABNPlayerController>(OverlappingPawn->GetController());
 		if (!IsValid(BNPC))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Server: Overlapping Pawn's Controller is Not a valid ABNPlayerController. OtherActor: %s"), *OtherActor->GetName());
+			UE_LOG(LogTemp, Error, TEXT("Server: Overlapping Pawn's Controller is Not a valid ABNPlayerController. OtherActor: %s"), *OtherActor->GetName());
 			return;
 		}
 		
@@ -101,11 +100,10 @@ void AMissionTimingGauge::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedCompo
 		if (BNGS->Server_TryStartSpecificGaugeChallenge(TimingGaugeComponent->GaugeID, BNPC))
 		{
 			StartMission(BNPC);
-			UE_LOG(LogTemp, Warning, TEXT("시도함"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("MissionTimingGauge >> Server: Gauge ID %s is already active or cannot be started (by %s)."), *TimingGaugeComponent->GaugeID.ToString(), *BNPS->GetPlayerName());
+			UE_LOG(LogTemp, Error, TEXT("MissionTimingGauge >> Server: Gauge ID %s is already active or cannot be started (by %s)."), *TimingGaugeComponent->GaugeID.ToString(), *BNPS->GetPlayerName());
 		}
 	}
 }
@@ -119,103 +117,17 @@ void AMissionTimingGauge::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AAct
 		ABNMonoCharacter* OverlappingMonoCharacter = Cast<ABNMonoCharacter>(OtherActor);
 		if (IsValid(OverlappingMonoCharacter))
 		{
+			if (IsValid(CurrentChallengingPlayerState)&& OverlappingMonoCharacter->GetPlayerState() == CurrentChallengingPlayerState)
 			//미션 실패 or 성공 후 종료처리
 			EndMission(EMissionResult::Failure);
 		}
 	}
 }
 
-void AMissionTimingGauge::OnGaugeFinished(EVerticalGaugeResult Result)
-{
-	if (HasAuthority())
-	{
-		UE_LOG(LogTemp, Log, TEXT("Server: Gauge ID '%s' finished with Result: %s"), 
-			*TimingGaugeComponent->GaugeID.ToString(), 
-			Result == EVerticalGaugeResult::EVGR_Success ? TEXT("Success") : TEXT("Fail")
-		);
-
-		if (Result == EVerticalGaugeResult::EVGR_Fail)
-		{
-			if (CurrentMissionLifeCount > 0 && CurrentSuccessCount < RequiredSuccessCount)
-			{
-				--CurrentMissionLifeCount; // 라이프 감소
-			}			
-		}
-
-		CheckMissionCompletion();
-
-		// 다음 게이지 주기를 시작할지 또는 미션이 완료되었는지 확인합니다.
-		if (IsValid(CurrentPlayerController) && CurrentMissionLifeCount > 0 && CurrentSuccessCount < RequiredSuccessCount)
-		{
-			TimingGaugeComponent->RequestStartGauge(CurrentPlayerController);
-			UE_LOG(LogTemp, Log, TEXT("Server: Starting next gauge cycle for %s."), *CurrentPlayerController->GetName());
-		}
-		
-		// if (IsValid(CurrentChallengingPlayerState))
-		// {
-		// 	ABNPlayerController* BNPC = Cast<ABNPlayerController>(CurrentChallengingPlayerState->GetPlayerController());
-		// 	if (BNPC)
-		// 	{
-		// 		ABNGameState* BNGS = GetWorld()->GetGameState<ABNGameState>();
-		// 		if (BNGS && IsValid(TimingGaugeComponent))
-		// 		{
-		// 			BNGS->Server_EndSpecificGaugeChallenge(TimingGaugeComponent->GaugeID, BNPC);
-		// 		}
-		// 	}
-		//
-		// 	// if (Result == EVerticalGaugeResult::EVGR_Success)
-		// 	// {
-		// 	// 	if (GetOverlapEffect() && IsValid(CurrentChallengingPlayerState) &&  IsValid(CurrentChallengingPlayerState->GetPawn()))
-		// 	// 	{
-		// 	// 		if (UAbilitySystemComponent* OtherASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(CurrentChallengingPlayerState->GetPawn()))
-		// 	// 		{
-		// 	// 			const FGameplayEffectContextHandle ContextHandle = OtherASC->MakeEffectContext();
-		// 	// 			const FGameplayEffectSpecHandle SpecHandle = OtherASC->MakeOutgoingSpec(GetOverlapEffect(), 1.f, ContextHandle);
-		// 	// 			OtherASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
-		// 	// 			UE_LOG(LogTemp, Log, TEXT("Server: Applied GameplayEffect for success to player %s."), *CurrentChallengingPlayerState->GetPlayerName());
-		// 	// 		}
-		// 	// 		else
-		// 	// 		{
-		// 	// 			UE_LOG(LogTemp, Warning, TEXT("Server: Failed to get AbilitySystemComponent for player %s."), *CurrentChallengingPlayerState->GetPlayerName());
-		// 	// 		}
-		// 	// 	}
-		// 	// 	else
-		// 	// 	{
-		// 	// 		UE_LOG(LogTemp, Warning, TEXT("Server: OverlapEffect is not set or ChallengingPlayerState/Pawn is invalid for success."));
-		// 	// 	}
-		// 	// 	HandleMissionSuccess();
-		// 	// 	
-		// 	// 	Destroy()
-		// }
-	}
-}
-
-
-void AMissionTimingGauge::OnRep_CurrentMissionLifeCount()
-{
-	ABNPlayerController* LocalPC = Cast<ABNPlayerController>(GetOwner());
-	if (IsValid(LocalPC) && LocalPC->IsLocalPlayerController())
-	{
-		if (LocalPC->Mission1WidgetInstance)
-		{
-			LocalPC->Mission1WidgetInstance->UpdateLifeUI(CurrentMissionLifeCount);
-		}
-	}
-}
-
-void AMissionTimingGauge::OnRep_CurrentSuccessCount()
-{
-	ABNPlayerController* LocalPC = Cast<ABNPlayerController>(GetOwner());
-	if (IsValid(LocalPC) && LocalPC->IsLocalPlayerController())
-	{
-		// BNMission1Widget의 UI 업데이트 함수를 호출합니다.
-		if (LocalPC->Mission1WidgetInstance) // 위젯 인스턴스가 있다면
-		{
-			LocalPC->Mission1WidgetInstance->UpdateSuccessUI(CurrentSuccessCount);
-		}
-	}
-}
-
+/**
+ *
+ **/
+#pragma region Server
 void AMissionTimingGauge::HandleOverallMissionTimeOut()
 {
 	if (HasAuthority())
@@ -224,32 +136,25 @@ void AMissionTimingGauge::HandleOverallMissionTimeOut()
 	}
 }
 
-void AMissionTimingGauge::Server_PerformGaugeCheck_Implementation(FGuid InGaugeID, float ClientGaugeValue)
+void AMissionTimingGauge::OnGaugeFinished(EVerticalGaugeResult Result)
 {
-	if (!HasAuthority())
+	if (!HasAuthority()) return;
+
+	if (Result == EVerticalGaugeResult::EVGR_Success)
 	{
-		return;
+		Server_HandleMissionSuccess();
+	}
+	else if (Result == EVerticalGaugeResult::EVGR_Fail)
+	{
+		Server_HandleMissionFailure();
 	}
 	
-	if (!IsValid(TimingGaugeComponent) || TimingGaugeComponent->GaugeID != InGaugeID)
-	{
-		return;
-	}
+	Server_CheckMissionCompletion();
 
-	float ServerGreenZoneStartValue = TimingGaugeComponent->GreenZoneStart;
-	float ServerGreenZoneEndValue = TimingGaugeComponent->GreenZoneStart + TimingGaugeComponent->GreenZoneLength;
-
-	if (ClientGaugeValue >= ServerGreenZoneStartValue && ClientGaugeValue <= ServerGreenZoneEndValue)
+	// 다음 게이지 주기를 시작할지 또는 미션이 완료되었는지 확인합니다.
+	if (IsValid(CurrentPlayerController) && CurrentMissionLifeCount > 0 && CurrentSuccessCount < RequiredSuccessCount)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("SUCCESS!"));
-		UE_LOG(LogTemp, Warning, TEXT("CurrentPointerYPosition : %f , %f ~ %f "), ClientGaugeValue, ServerGreenZoneStartValue, ServerGreenZoneEndValue);
-		HandleMissionSuccess();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed!"));
-		UE_LOG(LogTemp, Warning, TEXT("CurrentPointerYPosition : %f , %f ~ %f "), ClientGaugeValue, ServerGreenZoneStartValue, ServerGreenZoneEndValue);
-		HandleMissionFailure();
+		TimingGaugeComponent->RequestStartGauge(CurrentPlayerController);
 	}
 }
 
@@ -269,43 +174,80 @@ bool AMissionTimingGauge::Server_PerformGaugeCheck_Validate(FGuid InGaugeID, flo
 	return true;
 }
 
-void AMissionTimingGauge::CheckMissionCompletion()
+void AMissionTimingGauge::Server_PerformGaugeCheck_Implementation(FGuid InGaugeID, float ClientGaugeValue)
 {
-	if (HasAuthority())
+	if (!HasAuthority())
 	{
-		//미션 성공
-		if (CurrentSuccessCount >= RequiredSuccessCount)
-		{
-			EndMission(EMissionResult::Success);
-		}
-		else if (CurrentMissionLifeCount <= 0) //실패
-		{
-			EndMission(EMissionResult::Failure);
-		}
+		return;
+	}
+	
+	if (!IsValid(TimingGaugeComponent) || TimingGaugeComponent->GaugeID != InGaugeID)
+	{
+		return;
+	}
+
+	float ServerGreenZoneStartValue = TimingGaugeComponent->GreenZoneStart;
+	float ServerGreenZoneEndValue = TimingGaugeComponent->GreenZoneStart + TimingGaugeComponent->GreenZoneLength;
+	
+	if (ClientGaugeValue >= ServerGreenZoneStartValue && ClientGaugeValue <= ServerGreenZoneEndValue)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("SUCCESS!"));
+		OnGaugeFinished(EVerticalGaugeResult::EVGR_Success);
+		TimingGaugeComponent->UpdateDifficultySettings(CurrentSuccessCount);
+	}
+	else
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Failed!"));
+		OnGaugeFinished(EVerticalGaugeResult::EVGR_Fail);
 	}
 }
 
-void AMissionTimingGauge::HandleMissionSuccess()
+//서버 전용 로직들
+void AMissionTimingGauge::Server_HandleMissionSuccess()
 {
+	if (!HasAuthority()) return;
+
 	++CurrentSuccessCount;
 
-	CurrentPlayerController->Mission1WidgetInstance->UpdateSuccessUI(CurrentSuccessCount);
-
-	if (CurrentSuccessCount >= RequiredSuccessCount)
+	ABNPlayerController* LocalPC = Cast<ABNPlayerController>(GetOwner());
+	if (IsValid(LocalPC) && LocalPC->IsLocalPlayerController())
 	{
-		EndMission(EMissionResult::Success);
+		// BNMission1Widget의 UI 업데이트 함수를 호출합니다.
+		if (LocalPC->Mission1WidgetInstance) // 위젯 인스턴스가 있다면
+		{
+			LocalPC->Mission1WidgetInstance->UpdateSuccessUI(CurrentSuccessCount);
+		}
+	}
+	
+}
+
+void AMissionTimingGauge::Server_HandleMissionFailure()
+{
+	if (!HasAuthority()) return;
+
+	--CurrentMissionLifeCount;
+
+	ABNPlayerController* LocalPC = Cast<ABNPlayerController>(GetOwner());
+	if (IsValid(LocalPC) && LocalPC->IsLocalPlayerController())
+	{
+		if (LocalPC->Mission1WidgetInstance)
+		{
+			LocalPC->Mission1WidgetInstance->UpdateLifeUI(CurrentMissionLifeCount);
+		}
 	}
 }
 
-void AMissionTimingGauge::HandleMissionFailure()
+void AMissionTimingGauge::Server_CheckMissionCompletion()
 {
-	--CurrentMissionLifeCount;
-
-	CurrentPlayerController->Mission1WidgetInstance->UpdateLifeUI(CurrentMissionLifeCount);
+	if (!HasAuthority()) return;
 
 	if (CurrentMissionLifeCount <= 0)
 	{
 		EndMission(EMissionResult::Failure);
+	}
+	else if (CurrentSuccessCount >= RequiredSuccessCount)
+	{
+		EndMission(EMissionResult::Success);
 	}
 }
 
@@ -332,7 +274,11 @@ void AMissionTimingGauge::StartMission(ABNPlayerController* InPlayerController)
 		CurrentPlayerController->Client_ShowMission1GaugeUI( TimingGaugeComponent ,CurrentMissionLifeCount, CurrentSuccessCount);
 		TimingGaugeComponent->RequestStartGauge(CurrentPlayerController);
 	}
-	
+
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().SetTimer(OverallMissionTimerHandle, this, &AMissionTimingGauge::HandleOverallMissionTimeOut, OverallMissionDuration, false);
+	}
 }
 
 void AMissionTimingGauge::EndMission(EMissionResult Result)
@@ -347,12 +293,70 @@ void AMissionTimingGauge::EndMission(EMissionResult Result)
 		GetWorld()->GetTimerManager().ClearTimer(OverallMissionTimerHandle);
 	}
 
+	Client_EndMission(Result);
+
+	ABNGameState* BNGS = GetWorld()->GetGameState<ABNGameState>();
+	if (IsValid(BNGS) && IsValid(TimingGaugeComponent))
+	{
+		// GameState에 이 게이지 챌린지가 종료되었음을 알림
+		BNGS->Server_EndSpecificGaugeChallenge(TimingGaugeComponent->GaugeID, CurrentPlayerController);
+	}
+
+	CurrentPlayerController = nullptr;
+	CurrentChallengingPlayerState = nullptr;
+	SetOwner(nullptr);
+
 	if (Result == EMissionResult::Success)
 	{
-		//성공했을 때 로직
+		Destroy();
 	}
 	else if (Result == EMissionResult::Failure)
 	{
-		//실패했을 때 로직
+		//이펙트나 사운드등 여기에 작성하면 됨
 	}
 }
+#pragma endregion
+
+#pragma region Client
+
+void AMissionTimingGauge::OnRep_CurrentMissionLifeCount()
+{
+	ABNPlayerController* LocalPC = Cast<ABNPlayerController>(GetOwner());
+	if (IsValid(LocalPC) && LocalPC->IsLocalPlayerController())
+	{
+		if (LocalPC->Mission1WidgetInstance)
+		{
+			LocalPC->Mission1WidgetInstance->UpdateLifeUI(CurrentMissionLifeCount);
+		}
+	}
+}
+
+void AMissionTimingGauge::OnRep_CurrentSuccessCount()
+{
+	ABNPlayerController* LocalPC = Cast<ABNPlayerController>(GetOwner());
+	if (IsValid(LocalPC) && LocalPC->IsLocalPlayerController())
+	{
+		// BNMission1Widget의 UI 업데이트 함수를 호출합니다.
+		if (LocalPC->Mission1WidgetInstance) // 위젯 인스턴스가 있다면
+		{
+			LocalPC->Mission1WidgetInstance->UpdateSuccessUI(CurrentSuccessCount);
+		}
+	}
+}
+
+void AMissionTimingGauge::Client_EndMission_Implementation(EMissionResult Result)
+{
+	ABNPlayerController* LocalPC = Cast<ABNPlayerController>(GetOwner());
+	if (IsValid(LocalPC) && LocalPC->IsLocalPlayerController())
+	{
+		if (IsValid(LocalPC->Mission1WidgetInstance))
+		{
+			LocalPC->Mission1WidgetInstance->RemoveFromParent();
+		}
+
+		FInputModeGameOnly InputMode;
+		LocalPC->SetInputMode(InputMode);
+		LocalPC->SetShowMouseCursor(false);
+	}
+}
+#pragma endregion
