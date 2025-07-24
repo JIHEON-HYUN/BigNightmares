@@ -4,44 +4,50 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interaction/Mission/InteractionInterface.h"
 #include "ChestActor.generated.h"
 
 class UStaticMeshComponent;
 class UBoxComponent;
 
 UCLASS()
-class BIGNIGHTMARES_API AChestActor : public AActor
+class BIGNIGHTMARES_API AChestActor : public AActor, public IInteractionInterface 
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
+	// 생성자
 	AChestActor();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:
-	// Called every frame
+	// 매 프레임 호출
 	virtual void Tick(float DeltaTime) override;
 
-	// 상호작용을 처리할 함수
-	void Interact(AActor* InteractingActor);
+	// [수정] 인터페이스 함수를 오버라이드합니다.
+	virtual void Interact_Implementation(AActor* InteractingActor) override;
+
+	// [추가] 이 상자가 열쇠로 열리는 진짜 상자인지 여부
+	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, Category = "State")
+	bool bIsTheCorrectChest = false;
 
 protected:
-	// UPROPERTY를 통해 에디터에서 보이고 수정할 수 있도록 설정
+	// 게임 시작 시 호출
+	virtual void BeginPlay() override;
+
+	// [추가] 변수 복제를 위해 추가
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UStaticMeshComponent* ChestBase;
+	TObjectPtr<UStaticMeshComponent> ChestBase;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UStaticMeshComponent* ChestLid;
+	TObjectPtr<UStaticMeshComponent> ChestLid;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UBoxComponent* InteractionVolume;
+	TObjectPtr<UBoxComponent> InteractionVolume;
 
-	// 상자 상태 변수
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	// 상자 상태 변수 (네트워크 복제를 위해 Replicated 추가)
+	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, Category = "State")
 	bool bIsOpen;
 
 	// 뚜껑 열림 애니메이션 관련 변수

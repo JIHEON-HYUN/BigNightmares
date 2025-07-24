@@ -31,6 +31,7 @@
 
 #include "Animation/AnimInstance.h" // [추가] AnimInstance 헤더
 #include "Kismet/KismetMathLibrary.h"
+#include "Interaction/Mission/InteractionInterface.h" // [추가] 인터페이스 헤더를 포함합니다.
 
 ABNMonoCharacter::ABNMonoCharacter()
 {
@@ -249,6 +250,45 @@ void ABNMonoCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// [추가 시작] 로컬에서 조종하는 플레이어일 때만 실행합니다.
+	if (IsLocallyControlled())
+	{
+		FHitResult HitResult;
+		// 카메라 위치에서 카메라 정면 방향으로 라인 트레이스를 쏩니다.
+		FVector TraceStart = FollowCamera->GetComponentLocation();
+		FVector TraceEnd = TraceStart + (FollowCamera->GetForwardVector() * 800.f); // 8미터 앞까지 탐색
+
+		TArray<AActor*> ActorsToIgnore;
+		ActorsToIgnore.Add(this); // 자기 자신은 탐색에서 제외합니다.
+
+		bool bHit = UKismetSystemLibrary::LineTraceSingle(
+			this,
+			TraceStart,
+			TraceEnd,
+			UEngineTypes::ConvertToTraceType(ECC_Visibility),
+			false,
+			ActorsToIgnore,
+			EDrawDebugTrace::None, // 디버그 라인을 보려면 ForDuration으로 변경하세요.
+			HitResult,
+			true
+		);
+
+		AActor* HitActor = HitResult.GetActor();
+
+		// 부딪힌 액터가 있고, 그 액터가 InteractionInterface를 가지고 있다면
+		if (bHit && HitActor && HitActor->Implements<UInteractionInterface>())
+		{
+			FocusedActor = HitActor;
+			// 여기에 "E키로 상호작용" 같은 UI를 띄우거나, 액터의 외곽선을 그리는 로직을 추가하면 좋습니다.
+		}
+		else
+		{
+			FocusedActor = nullptr;
+			// UI를 숨기거나 외곽선을 끄는 로직을 추가할 수 있습니다.
+		}
+	}
+	// [추가 끝]
+	
 	// 손전등 컴포넌트가 없으면 아무것도 하지 않습니다.
 	if (!FlashlightComponent) 
 	{
@@ -344,6 +384,31 @@ void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_UseItem, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_UseItem);
 	//TODO(NOTE): Look의 동작이 정해진다면 활성화
 	//BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Look, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Look);
+
+	// [추가] 상호작용 입력('E'키 등)을 바인딩합니다.
+	// "InputTag.Interact"라는 이름의 Gameplay Tag를 에디터에서 미리 만들어야 합니다.
+	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, FGameplayTag::RequestGameplayTag(FName("InputTag.Interact")), ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Interact);
+}
+
+// [추가] 상호작용 키를 눌렀을 때 호출될 함수
+void ABNMonoCharacter::Input_Interact()
+{
+	// 바라보고 있는 액터(FocusedActor)가 유효하면 서버에 상호작용을 요청합니다.
+	if (FocusedActor.IsValid())
+	{
+		Server_Interact(FocusedActor.Get());
+	}
+}
+
+// [추가] 서버에서 실제 상호작용을 실행하는 함수
+void ABNMonoCharacter::Server_Interact_Implementation(AActor* TargetActor)
+{
+	// 서버에서도 다시 한번 유효성과 인터페이스를 확인하는 것이 안전합니다.
+	if (TargetActor && TargetActor->Implements<UInteractionInterface>())
+	{
+		// 인터페이스를 통해 대상 액터의 상호작용 함수를 안전하게 호출합니다.
+		IInteractionInterface::Execute_Interact(TargetActor, this);
+	}
 }
 
 void ABNMonoCharacter::Input_Move(const FInputActionValue& InputActionValue)

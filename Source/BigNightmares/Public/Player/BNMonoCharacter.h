@@ -16,6 +16,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class USpotLightComponent; // 추가
 class UAnimMontage; // [추가] UAnimMontage 클래스 전방 선언
+class IInteractionInterface; // [추가] 인터페이스 전방 선언
 
 struct FInputActionValue;
 /**
@@ -92,7 +93,15 @@ protected:
 
 	void Input_Move(const FInputActionValue& InputActionValue);
 	void Input_Look(const FInputActionValue& InputActionValue);	
-	void Input_UseItem(const FInputActionValue& InputActionValue);	
+	void Input_UseItem(const FInputActionValue& InputActionValue);
+
+	// [추가] 상호작용 입력을 처리할 함수입니다.
+	void Input_Interact();
+
+	// [추가] 서버에 상호작용 요청을 보내는 함수입니다. (RPC)
+	UFUNCTION(Server, Reliable)
+	void Server_Interact(AActor* TargetActor);
+	
 #pragma endregion
 
 private:
@@ -158,6 +167,11 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
 
+private:
+	// [추가] 캐릭터가 현재 바라보고 있는 상호작용 가능한 액터입니다.
+	UPROPERTY()
+	TWeakObjectPtr<AActor> FocusedActor;
+	
 public:
 	template<typename T>
 	T* GetAttributeSet() const
