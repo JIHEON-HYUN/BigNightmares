@@ -26,7 +26,7 @@ ABNPlayerController::ABNPlayerController()
 	}
 
 	// WBP_InGame를 찾아서 저장
-	ConstructorHelpers::FClassFinder<UUserWidget> InGameBPClass(TEXT("/Game/UI/InGame/WBP_InGame"));
+	ConstructorHelpers::FClassFinder<UUserWidget> InGameBPClass(TEXT("/Game/UI/InGame/Menu/WBP_InGame"));
 	if (InGameBPClass.Succeeded())
 	{
 		InGameClass = InGameBPClass.Class;

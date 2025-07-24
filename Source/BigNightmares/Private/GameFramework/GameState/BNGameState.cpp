@@ -152,7 +152,7 @@ void ABNGameState::SetPlayerStatusAlive(const FString& PlayerName)
 		if (PlayerData.PlayerName == PlayerName)
 		{
 			// 생존 상태를 바꾸고, InGamePlayerDataList 변경 알림
-			PlayerData.bStatusAlive = !PlayerData.bStatusAlive;
+			PlayerData.bStatusAlive = false;
 			OnInGamePlayerUpdated.Broadcast(InGamePlayerDataList);
 
 			ABNInGameGameMode* GM = GetWorld()->GetAuthGameMode<ABNInGameGameMode>();

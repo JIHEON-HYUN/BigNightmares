@@ -15,7 +15,7 @@ UBNInGameWidget::UBNInGameWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	// WBP_PlayerList를 찾아서 저장
-	ConstructorHelpers::FClassFinder<UUserWidget> InGamePlayerListBPClass(TEXT("/Game/UI/InGame/WBP_InGamePlayerList"));
+	ConstructorHelpers::FClassFinder<UUserWidget> InGamePlayerListBPClass(TEXT("/Game/UI/InGame/Menu/WBP_InGamePlayerList"));
 	if (InGamePlayerListBPClass.Succeeded())
 	{
 		InGamePlayerListClass = InGamePlayerListBPClass.Class;
