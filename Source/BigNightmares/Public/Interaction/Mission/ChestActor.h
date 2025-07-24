@@ -7,50 +7,55 @@
 #include "Interaction/Mission/InteractionInterface.h"
 #include "ChestActor.generated.h"
 
-class UStaticMeshComponent;
 class UBoxComponent;
+class UWidgetComponent;
+class UStaticMeshComponent; // [추가] UStaticMeshComponent의 존재를 알립니다.
 
 UCLASS()
-class BIGNIGHTMARES_API AChestActor : public AActor, public IInteractionInterface 
+class BIGNIGHTMARES_API AChestActor : public AActor, public IInteractionInterface
 {
 	GENERATED_BODY()
 
 public:
-	// 생성자
 	AChestActor();
 
-	// 매 프레임 호출
-	virtual void Tick(float DeltaTime) override;
-
-	// [수정] 인터페이스 함수를 오버라이드합니다.
+	// 인터페이스 함수
 	virtual void Interact_Implementation(AActor* InteractingActor) override;
 
-	// [추가] 이 상자가 열쇠로 열리는 진짜 상자인지 여부
+	// 블루프린트에서 호출 가능한 Overlap 이벤트 핸들러 함수
+	UFUNCTION(BlueprintCallable, Category="Interaction")
+	void OnInteractionVolumeOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION(BlueprintCallable, Category="Interaction")
+	void OnInteractionVolumeOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	// 상태 변수
 	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, Category = "State")
 	bool bIsTheCorrectChest = false;
 
 protected:
-	// 게임 시작 시 호출
+	// Actor 생명주기 함수
 	virtual void BeginPlay() override;
-
-	// [추가] 변수 복제를 위해 추가
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void Tick(float DeltaTime) override;
 
-protected:
+	// 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> ChestBase;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> ChestLid;
+	TObjectPtr<UWidgetComponent> PromptWidget;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UBoxComponent> InteractionVolume;
+	UStaticMeshComponent* ChestBase;
 
-	// 상자 상태 변수 (네트워크 복제를 위해 Replicated 추가)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UStaticMeshComponent* ChestLid;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UBoxComponent* InteractionVolume;
+	
+	// 내부 상태 변수
 	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, Category = "State")
 	bool bIsOpen;
 
-	// 뚜껑 열림 애니메이션 관련 변수
 	bool bIsOpening;
 	float TargetLidPitch;
 	FRotator InitialLidRotation;

@@ -17,6 +17,7 @@ class UCameraComponent;
 class USpotLightComponent; // 추가
 class UAnimMontage; // [추가] UAnimMontage 클래스 전방 선언
 class IInteractionInterface; // [추가] 인터페이스 전방 선언
+class UInputAction; // [수정] 이 줄을 추가하여 UInputAction 클래스를 전방 선언합니다.
 
 struct FInputActionValue;
 /**
@@ -42,9 +43,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Character|Combat")
 	void HandleImmediateDeath(AActor* DamageCauser);
 
+	// [추가] 상호작용 가능한 액터를 설정하는 함수입니다. ChestActor가 이 함수를 호출할 것입니다.
+	void SetInteractableActor(AActor* Actor);
+	
 	// [참고] 아래 함수들은 이제 이 특정 공격에서는 사용되지 않습니다.
 	void TriggerGuaranteedDeath();
 	void HandleLethalHit();
+
+	// ChestActor가 호출할 함수들입니다.
+	void SetOverlappedInteractable(AActor* Interactable);
+	void ClearOverlappedInteractable(AActor* Interactable);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -87,6 +95,10 @@ private:
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="CharacterData", meta=(AllowPrivateAccess = "true"))
 	TObjectPtr<UDataAsset_InputConfig_Player> InputConfigDataAsset;
+
+	// [추가] 상호작용 Input Action 에셋을 직접 담을 변수입니다.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CharacterData", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> InteractAction;
 
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
@@ -140,6 +152,7 @@ protected:
 	// 이 값을 블루프린트에서 조절하여 판정 크기를 바꿀 수 있습니다.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components|Flashlight")
 	float FlashlightBeamRadius = 100.0f;
+	
 
 private:
 	// 이전에 빛을 비췄던 액터를 기억하기 위한 변수입니다.
@@ -168,9 +181,10 @@ protected:
 	virtual void OnRep_PlayerState() override;
 
 private:
-	// [추가] 캐릭터가 현재 바라보고 있는 상호작용 가능한 액터입니다.
+	// [수정] FocusedActor를 새로운 변수명으로 변경하고 역할을 명확히 합니다.
+	// 이 변수는 현재 캐릭터가 겹쳐있는 상호작용 가능한 액터를 저장합니다.
 	UPROPERTY()
-	TWeakObjectPtr<AActor> FocusedActor;
+	TWeakObjectPtr<AActor> OverlappedInteractableActor;
 	
 public:
 	template<typename T>
