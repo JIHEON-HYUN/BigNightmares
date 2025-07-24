@@ -4,7 +4,8 @@
 #include "Interaction/Mission/ChestActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
-#include "Kismet/KismetMathLibrary.h" // Lerp 함수 사용을 위해 추가
+#include "Player/BNMonoCharacter.h" // 캐릭터 클래스를 참조하기 위해 추가합니다.
+#include "Player/BNPlayerRole.h"     // EPlayerRole 열거형을 사용하기 위해 추가합니다.
 
 // 생성자: 컴포넌트를 생성하고 초기화합니다.
 AChestActor::AChestActor()
@@ -35,6 +36,9 @@ AChestActor::AChestActor()
     bIsOpen = false;
     bIsOpening = false;
     TargetLidPitch = -90.0f; // 뚜껑을 -90도까지 열도록 설정
+
+    // 이 액터가 네트워크를 통해 복제되어야 함을 설정합니다.
+    bReplicates = true;
 }
 
 // 게임 시작 시 호출
@@ -74,16 +78,28 @@ void AChestActor::Tick(float DeltaTime)
 }
 
 // 상호작용 함수 구현
-void AChestActor::Interact()
+void AChestActor::Interact(AActor* InteractingActor) // <- 이렇게 수정합니다.
 {
-    // 상자가 닫혀 있을 때만 실행
-    if (!bIsOpen)
+    // 상자가 닫혀 있고, 상호작용을 시도한 액터가 유효할 때만 실행
+    if (!bIsOpen && InteractingActor)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Chest Interacted!"));
-        bIsOpen = true;
-        bIsOpening = true; // Tick에서 애니메이션을 시작하도록 플래그 설정
-
-        // 여기에 사운드 재생이나 파티클 생성 코드를 추가할 수 있습니다.
-        // UGameplayStatics::PlaySoundAtLocation(...);
+        // 상호작용을 시도한 액터를 ABNMonoCharacter로 형변환(Cast)합니다.
+        ABNMonoCharacter* Character = Cast<ABNMonoCharacter>(InteractingActor);
+        if (Character)
+        {
+            // 캐릭터의 PlayerRole이 KeyHolder인지 확인합니다.
+            if (Character->PlayerRole == EPlayerRole::KeyHolder)
+            {
+                // 역할이 일치하면 상자를 엽니다.
+                UE_LOG(LogTemp, Warning, TEXT("KeyHolder Interaction Success! Opening chest."));
+                bIsOpen = true;
+                bIsOpening = true; // Tick에서 애니메이션을 시작하도록 플래그 설정
+            }
+            else
+            {
+                // 역할이 다르면 실패 로그를 출력합니다.
+                UE_LOG(LogTemp, Warning, TEXT("Interaction Failed: Player role is not KeyHolder."));
+            }
+        }
     }
 }

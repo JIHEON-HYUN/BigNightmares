@@ -27,7 +27,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// 상호작용을 처리할 함수
-	void Interact();
+	void Interact(AActor* InteractingActor);
 
 protected:
 	// UPROPERTY를 통해 에디터에서 보이고 수정할 수 있도록 설정
