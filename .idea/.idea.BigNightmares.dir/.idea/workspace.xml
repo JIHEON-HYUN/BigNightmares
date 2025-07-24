@@ -9,18 +9,17 @@
   <component name="ChangeListManager">
     <list default="true" id="761905b1-3250-4b5a-8c5b-d5e4f837e1aa" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BigNightmares.uproject.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/BigNightmares.uproject.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Maps/HyunTestLevel.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/HyunTestLevel.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/MissionActor/BP_TestActor.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MissionActor/BP_TestActor.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/UI/InGame/Mission/Gemini_Generated_Image_oi2ltvoi2ltvoi2l-removebg-preview.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/UI/InGame/Mission/Gemini_Generated_Image_p0lon0p0lon0p0lo-removebg-preview.uasset" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/UI/InGame/Mission/WBP_Mission1.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/UI/InGame/Mission/WBP_Mission1.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/GameState/BNGameState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/GameState/BNGameState.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/PlayerController/BNPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/GameFramework/PlayerController/BNPlayerController.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/BaseMissionActor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/BaseMissionActor.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/MissionTimingGauge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/MissionTimingGauge.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/VerticalTimingGaugeComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/VerticalTimingGaugeComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/UI/InGame/BNMission1Widget.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/UI/InGame/BNMission1Widget.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Public/GameFramework/GameState/BNGameState.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Public/GameFramework/GameState/BNGameState.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Public/GameFramework/PlayerController/BNPlayerController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Public/GameFramework/PlayerController/BNPlayerController.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Public/BaseType/BaseEnumType.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Public/BaseType/BaseEnumType.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Public/Interaction/Mission/BaseMissionActor.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Public/Interaction/Mission/BaseMissionActor.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Public/Interaction/Mission/MissionTimingGauge.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Public/Interaction/Mission/MissionTimingGauge.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Public/Interaction/Mission/VerticalTimingGaugeComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Public/Interaction/Mission/VerticalTimingGaugeComponent.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,108 +33,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="cidr-memory-view://8" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Plugins/Animation/ControlRig/Source/ControlRigEditor/Private/Editor/ControlRigEditorEditMode.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Plugins/Developer/Concert/ConcertApp/MultiUserServer/Source/MultiUserServer/Private/Widgets/Clients/Browser/Models/ClientNetworkStatisticsModel.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Plugins/Developer/Concert/ConcertApp/MultiUserServer/Source/MultiUserServer/Private/Widgets/Clients/Browser/Models/ClientNetworkStatisticsModel.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Plugins/Developer/Concert/ConcertApp/MultiUserServer/Source/MultiUserServer/Private/Widgets/Clients/Browser/Models/IClientNetworkStatisticsModel.cpp" root0="SKIP_HIGHLIGHTING" />
@@ -188,6 +86,7 @@
     <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Classes/GameFramework/GameState.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Classes/GameFramework/GameStateBase.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Private/Components/CharacterMovementComponent.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Private/GameplayStatics.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Private/Net/NetPushModelHelpers.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Private/UnrealEngine.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Public/CharacterMovementComponentAsync.h" root0="FORCE_HIGHLIGHTING" />
@@ -222,7 +121,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Uproject.BigNightmares.executor": "Run",
-    "git-widget-placeholder": "Reverting in feature/Mission1",
+    "git-widget-placeholder": "Reverting in feature/AssignableMission",
     "ignore.virus.scanning.warn.message": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -331,6 +230,9 @@
       <workItem from="1753233608385" duration="24570000" />
       <workItem from="1753266727689" duration="3921000" />
       <workItem from="1753314616758" duration="14083000" />
+      <workItem from="1753338702280" duration="2000" />
+      <workItem from="1753338792266" duration="3000" />
+      <workItem from="1753338968756" duration="16775000" />
     </task>
     <servers />
   </component>

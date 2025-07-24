@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "BaseMissionActor.generated.h"
 
+class UCapsuleComponent;
 class UGameplayEffect;
 class UBoxComponent;
 
@@ -23,7 +24,11 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	virtual void OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	virtual void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	UFUNCTION()
+	virtual void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 private:
 	UPROPERTY(VisibleDefaultsOnly, meta =(AllowPrivateAccess = true))
 	TObjectPtr<UStaticMeshComponent> ActorMesh;
@@ -31,12 +36,18 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, meta =(AllowPrivateAccess = true))
 	TObjectPtr<UBoxComponent> OverlapBox;
 
+	UPROPERTY(VisibleDefaultsOnly, meta =(AllowPrivateAccess = true))
+	TObjectPtr<UCapsuleComponent> OverlapCapsule;
+
 	UPROPERTY(EditAnywhere, Category="Custom Values|Effects")
 	TSubclassOf<UGameplayEffect> OverlapEffect;
 
 protected:
 	UFUNCTION()
-	UBoxComponent* GetOverlapComponent() const;
+	UBoxComponent* GetBoxOverlapComponent() const;
+
+	UFUNCTION()
+	UCapsuleComponent* GetCapsuleOverlapComponent() const;
 
 	UFUNCTION()
 	UStaticMeshComponent* GetStaticMeshComponent() const;

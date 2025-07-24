@@ -7,6 +7,7 @@
 #include "AbilitySystemComponent.h"
 #include "NaniteSceneProxy.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ABaseMissionActor::ABaseMissionActor()
@@ -22,6 +23,9 @@ ABaseMissionActor::ABaseMissionActor()
 
 	OverlapBox = CreateDefaultSubobject<UBoxComponent>("OverlapBox");
 	OverlapBox->SetupAttachment(GetRootComponent());
+
+	OverlapCapsule = CreateDefaultSubobject<UCapsuleComponent>("OverlapCapsule");
+	OverlapCapsule->SetupAttachment(GetRootComponent());
 
 	// 해당 컴포넌트가 모든 충돌 채널에 대한 충돌 응답을 설정 **지금의 경우 무시**
 	OverlapBox->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -39,27 +43,37 @@ void ABaseMissionActor::BeginPlay()
 	if (HasAuthority())
 	{
 		//OverlapBox Component에 BeginOverlap이 발생하면 ABaseMissionActor에 정의된 OnBoxBeginOverlap 함수를 발동.
-		OverlapBox->OnComponentBeginOverlap.AddDynamic(this, &ABaseMissionActor::OnBoxBeginOverlap);
+		OverlapBox->OnComponentBeginOverlap.AddDynamic(this, &ABaseMissionActor::OnBeginOverlap);
 	}
 	
 }
 
-void ABaseMissionActor::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void ABaseMissionActor::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (UAbilitySystemComponent* OtherASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
-	{
-		const FGameplayEffectContextHandle ContextHandle = OtherASC->MakeEffectContext();
-		const FGameplayEffectSpecHandle SpecHandle = OtherASC->MakeOutgoingSpec(OverlapEffect, 1.f, ContextHandle);
-		OtherASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
-
-		Destroy();
-	}
+	// if (UAbilitySystemComponent* OtherASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
+	// {
+	// 	const FGameplayEffectContextHandle ContextHandle = OtherASC->MakeEffectContext();
+	// 	const FGameplayEffectSpecHandle SpecHandle = OtherASC->MakeOutgoingSpec(OverlapEffect, 1.f, ContextHandle);
+	// 	OtherASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+	//
+	// 	Destroy();
+	// }
 }
 
-UBoxComponent* ABaseMissionActor::GetOverlapComponent() const
+void ABaseMissionActor::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+}
+
+UBoxComponent* ABaseMissionActor::GetBoxOverlapComponent() const
 {
 	return OverlapBox;
+}
+
+UCapsuleComponent* ABaseMissionActor::GetCapsuleOverlapComponent() const
+{
+	return OverlapCapsule;
 }
 
 UStaticMeshComponent* ABaseMissionActor::GetStaticMeshComponent() const

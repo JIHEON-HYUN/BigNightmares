@@ -40,7 +40,7 @@ protected:
 	UPROPERTY(Replicated)
 	TObjectPtr<ABNPlayerController> CurrentPlayerController;
 	
-	virtual void OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
+	virtual void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 
 	// 이 함수는 BeginPlay에서 OverlapBox->OnComponentEndOverlap에 바인딩됩니다.
 	UFUNCTION()
@@ -78,7 +78,6 @@ public:
 	//전체시간 만료시 호출
 	void HandleOverallMissionTimeOut();
 #pragma endregion
-
 
 #pragma region Server
 public:

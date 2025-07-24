@@ -6,6 +6,7 @@
 #include "BaseType/BaseEnumType.h"
 #include "Components/ActorComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/GameState/BNGameState.h"
 #include "GameFramework/PlayerController/BNPlayerController.h"
 #include "GameFramework/PlayerState/BNPlayerState.h"
@@ -19,6 +20,9 @@ AMissionTimingGauge::AMissionTimingGauge()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+
+	GetCapsuleOverlapComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleOverlapComponent()->SetVisibility(false);
 	
 	TimingGaugeComponent = CreateDefaultSubobject<UVerticalTimingGaugeComponent>(TEXT("VerticalTimingGauge"));
 	AddOwnedComponent(TimingGaugeComponent);
@@ -47,9 +51,9 @@ void AMissionTimingGauge::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HasAuthority() && IsValid(GetOverlapComponent()))
+	if (HasAuthority() && IsValid(GetBoxOverlapComponent()))
 	{
-		GetOverlapComponent()->OnComponentEndOverlap.AddDynamic(this, &AMissionTimingGauge::OnOverlapEnd);
+		GetBoxOverlapComponent()->OnComponentEndOverlap.AddDynamic(this, &AMissionTimingGauge::OnOverlapEnd);
 	}
 
 	if (IsValid(TimingGaugeComponent))
@@ -66,7 +70,7 @@ void AMissionTimingGauge::BeginPlay()
 	}
 }
 
-void AMissionTimingGauge::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void AMissionTimingGauge::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (HasAuthority() && OtherActor)
