@@ -52,8 +52,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement | Gate")
 	TSubclassOf<AAssignableMission_EscapeGate> EscapeGateActorClass;
 	
-	// UPROPERTY()
-	// TArray<TObjectPtr<ATargetPoint>> AvailableSpawnPoints;
+	UPROPERTY()
+	TArray<TObjectPtr<ATargetPoint>> AvailableSpawnPoints;
 	
 	//미션 완료 시 탈출 게이트 스폰
 	void SpawnEscapeGate();

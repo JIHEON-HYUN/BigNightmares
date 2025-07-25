@@ -61,16 +61,16 @@ void AAssignableMissionActor::BeginPlay()
 		}
 
 		//TargetPointSetting
-		// TArray<AActor*> FoundActor;
-		// UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATargetPoint::StaticClass(), FoundActor);
-		//
-		// for (AActor* Actor : FoundActor)
-		// {
-		// 	if (ATargetPoint* TargetPoint = Cast<ATargetPoint>(Actor))
-		// 	{
-		// 		AvailableSpawnPoints.Add(TargetPoint);
-		// 	}
-		// }
+		TArray<AActor*> FoundActor;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATargetPoint::StaticClass(), FoundActor);
+		
+		for (AActor* Actor : FoundActor)
+		{
+			if (ATargetPoint* TargetPoint = Cast<ATargetPoint>(Actor))
+			{
+				AvailableSpawnPoints.Add(TargetPoint);
+			}
+		}
 
 		//MoveActorSpawn
 		FVector InitialSpawnLocationWorld = MovementSpline->GetLocationAtSplinePoint(0, ESplineCoordinateSpace::World);
@@ -172,34 +172,34 @@ void AAssignableMissionActor::SpawnEscapeGate()
 		return;
 	}
 
-	// if (AvailableSpawnPoints.Num() == 0)
-	// {
-	// 	UE_LOG(LogTemp, Error, TEXT("AAssignableMissionActor::SpawnEscapeGate : No available ATargetPoints to spawn the gate!"));
-	// 	return;
-	// }
-	//
-	// int32 RandomIndex = FMath::RandRange(0, AvailableSpawnPoints.Num() -1);
-	// ATargetPoint* ChosenSpawnPoint = AvailableSpawnPoints[RandomIndex];
-	//
-	// if (!IsValid(ChosenSpawnPoint))
-	// {
-	// 	UE_LOG(LogTemp, Error, TEXT("AAssignableMissionActor::SpawnEscapeGate : Chosen TargetPoint is invalid!"));
-	// 	return;
-	// }
+	if (AvailableSpawnPoints.Num() == 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AAssignableMissionActor::SpawnEscapeGate : No available ATargetPoints to spawn the gate!"));
+		return;
+	}
+	
+	int32 RandomIndex = FMath::RandRange(0, AvailableSpawnPoints.Num() -1);
+	ATargetPoint* ChosenSpawnPoint = AvailableSpawnPoints[RandomIndex];
+	
+	if (!IsValid(ChosenSpawnPoint))
+	{
+		UE_LOG(LogTemp, Error, TEXT("AAssignableMissionActor::SpawnEscapeGate : Chosen TargetPoint is invalid!"));
+		return;
+	}
 
-	// FVector SpawnLocation = ChosenSpawnPoint->GetActorLocation();
-	// FRotator SpawnRotation = ChosenSpawnPoint->GetActorRotation();
-	//
-	// SpawnLocation.Z = -25.f;
-	//
-	// FActorSpawnParameters SpawnParams;
-	// //새로운 액터를 생성할 때 기본적으로는 다른 오브젝트와 겹치지 않도록 적절한 위치를 찾아 스폰하려고 시도하지만, 만약 도저히 겹치지 않는 공간을 찾을 수 없더라도 어쨌든 액터는 생성되어야 할 때 사용
-	// SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	//
-	// AAssignableMission_EscapeGate* SpawnedGate = GetWorld()->SpawnActor<AAssignableMission_EscapeGate>(EscapeGateActorClass, SpawnLocation, SpawnRotation, SpawnParams);
-	//
-	// if (!IsValid(SpawnedGate))
-	// {
-	// 	UE_LOG(LogTemp, Error, TEXT("Failed to spawn Escape Gate from AssignableMissionActor!"));
-	// }    
+	FVector SpawnLocation = ChosenSpawnPoint->GetActorLocation();
+	FRotator SpawnRotation = ChosenSpawnPoint->GetActorRotation();
+	
+	SpawnLocation.Z = -25.f;
+	
+	FActorSpawnParameters SpawnParams;
+	//새로운 액터를 생성할 때 기본적으로는 다른 오브젝트와 겹치지 않도록 적절한 위치를 찾아 스폰하려고 시도하지만, 만약 도저히 겹치지 않는 공간을 찾을 수 없더라도 어쨌든 액터는 생성되어야 할 때 사용
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	
+	AAssignableMission_EscapeGate* SpawnedGate = GetWorld()->SpawnActor<AAssignableMission_EscapeGate>(EscapeGateActorClass, SpawnLocation, SpawnRotation, SpawnParams);
+	
+	if (!IsValid(SpawnedGate))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to spawn Escape Gate from AssignableMissionActor!"));
+	}    
 }

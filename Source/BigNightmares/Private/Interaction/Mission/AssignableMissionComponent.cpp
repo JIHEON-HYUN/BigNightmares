@@ -60,7 +60,7 @@ void UAssignableMissionComponent::BeginPlay()
 		AAssignableMission_MoveActor* MissionMoveActor = Cast<AAssignableMission_MoveActor>(ActorToMove);
 		if (IsValid(MissionMoveActor))
 		{
-			//MissionMoveActor->OnMissionActorDestroyed.AddDynamic(this, &UAssignableMissionComponent::OnMissionMoveActorDestroyed);
+			MissionMoveActor->OnMissionActorDestroyed.AddDynamic(this, &UAssignableMissionComponent::OnMissionMoveActorDestroyed);
 		}
 	}	
 }

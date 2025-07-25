@@ -10,7 +10,7 @@ class USphereComponent;
 class UNiagaraComponent;
 
 // 미션 액터가 파괴될 때 호출될 Delegate
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionActorDestroyed, AActor*, DestroyedActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionActorDestroyed, AActor*, DestroyedActor);
 
 UCLASS()
 class BIGNIGHTMARES_API AAssignableMission_MoveActor : public AActor
@@ -60,6 +60,6 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SetFinishNiagaraState(bool bNewFinishState);
 
-	// UPROPERTY(BlueprintAssignable, Category = "Mission")
-	// FOnMissionActorDestroyed OnMissionActorDestroyed;
+	UPROPERTY(BlueprintAssignable, Category = "Mission")
+	FOnMissionActorDestroyed OnMissionActorDestroyed;
 };
