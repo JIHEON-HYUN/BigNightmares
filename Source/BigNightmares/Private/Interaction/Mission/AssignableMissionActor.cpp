@@ -9,12 +9,11 @@
 #include "GameFramework/PlayerState/BNPlayerState.h"
 
 #include "Interaction/Mission/AssignableMissionComponent.h"
+#include "Interaction/Mission/AssignableMission_MoveActor.h"
 #include "Net/UnrealNetwork.h"
 
 AAssignableMissionActor::AAssignableMissionActor()
 {
-	bReplicates = true;
-	
 	GetBoxOverlapComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetBoxOverlapComponent()->SetVisibility(false);
 
@@ -37,7 +36,7 @@ void AAssignableMissionActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (GetCapsuleOverlapComponent()) // <-- 이 if 문 바로 아래 (43번째 줄)
+	if (GetCapsuleOverlapComponent())
 	{
 		GetCapsuleOverlapComponent()->OnComponentBeginOverlap.AddDynamic(this, &AAssignableMissionActor::OnAssignableMissionBeginOverlap);
 		GetCapsuleOverlapComponent()->OnComponentEndOverlap.AddDynamic(this, &AAssignableMissionActor::OnAssignableMissionEndOverlap);
@@ -64,7 +63,7 @@ void AAssignableMissionActor::BeginPlay()
 		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-		MovementActorInstance = GetWorld()->SpawnActor<AActor>(MovementActorClass, InitialSpawnLocationWorld, InitialSpawnRotationWorld, SpawnParameters);
+		MovementActorInstance = GetWorld()->SpawnActor<AAssignableMission_MoveActor>(MovementActorClass, InitialSpawnLocationWorld, InitialSpawnRotationWorld, SpawnParameters);
 		if (IsValid(MovementActorInstance))
 		{
 			if (IsValid(AssignableMissionComponent))
@@ -72,8 +71,15 @@ void AAssignableMissionActor::BeginPlay()
 				AssignableMissionComponent->MovementSpline = MovementSpline;
 				AssignableMissionComponent->ActorToMove = MovementActorInstance;
 			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("Not IsValid AssignableMissionComponent"));
+			}
 		}
-		
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Not IsValid MovementActorInstance"));
+		}
 	}
 }
 
@@ -83,8 +89,13 @@ void AAssignableMissionActor::OnAssignableMissionBeginOverlap(UPrimitiveComponen
 	//부모 오버랩에 아무것도 정의 안되어있음 (캐릭터인지 검사하는거 넣을 만 할듯)
 	//Super::OnBoxBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
-	if (HasAuthority() && IsValid(OtherActor))
+	if (HasAuthority())
 	{
+		if (!IsValid(OtherActor))
+		{
+			UE_LOG(LogTemp, Error, TEXT("!IsValid(OtherActor)"));
+			return;
+		}
 		// 오버랩한 액터가 플레이어 컨트롤러의 폰인지 확인
 		APawn* OverlappingPawn = Cast<APawn>(OtherActor);
 		if (IsValid(OverlappingPawn))
@@ -95,7 +106,6 @@ void AAssignableMissionActor::OnAssignableMissionBeginOverlap(UPrimitiveComponen
 				if (IsValid(AssignableMissionComponent))
 				{
 					AssignableMissionComponent->Server_AddPlayerOverlap(OverlappingPlayerState);
-					UE_LOG(LogTemp, Warning, TEXT("IsValid"));
 				}
 			}
 		}
@@ -106,7 +116,7 @@ void AAssignableMissionActor::OnAssignableMissionBeginOverlap(UPrimitiveComponen
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("!HasAuthority() && !IsValid(OtherActor)"));
+		UE_LOG(LogTemp, Error, TEXT("!HasAuthority()"));
 	}
 }
 

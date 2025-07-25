@@ -13,7 +13,7 @@
 ABaseMissionActor::ABaseMissionActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	//서버에 복제 허용
 	bReplicates = true;
@@ -51,19 +51,13 @@ void ABaseMissionActor::BeginPlay()
 void ABaseMissionActor::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// if (UAbilitySystemComponent* OtherASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
-	// {
-	// 	const FGameplayEffectContextHandle ContextHandle = OtherASC->MakeEffectContext();
-	// 	const FGameplayEffectSpecHandle SpecHandle = OtherASC->MakeOutgoingSpec(OverlapEffect, 1.f, ContextHandle);
-	// 	OtherASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
-	//
-	// 	Destroy();
-	// }
+	
 }
 
 void ABaseMissionActor::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	
 }
 
 UBoxComponent* ABaseMissionActor::GetBoxOverlapComponent() const

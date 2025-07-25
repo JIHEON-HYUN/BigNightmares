@@ -6,6 +6,7 @@
 #include "Interaction/Mission/BaseMissionActor.h"
 #include "AssignableMissionActor.generated.h"
 
+class AAssignableMission_MoveActor;
 class USplineComponent;
 class UAssignableMissionComponent;
 /**
@@ -34,13 +35,13 @@ public:
 	TObjectPtr<UAssignableMissionComponent>	AssignableMissionComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement | Path")
-	USplineComponent* MovementSpline;
+	TObjectPtr<USplineComponent> MovementSpline;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement | Path")
-	TSubclassOf<AActor> MovementActorClass;
+	TSubclassOf<AAssignableMission_MoveActor> MovementActorClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = "Movement | Path")
-	TObjectPtr<AActor> MovementActorInstance;
+	TObjectPtr<AAssignableMission_MoveActor> MovementActorInstance;
 private:
 
 #pragma endregion

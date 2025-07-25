@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "AssignableMissionComponent.generated.h"
 
+class AAssignableMission_MoveActor;
 enum class EAssignableMissionMovementDirection : uint8;
 class USplineComponent;
 
@@ -50,7 +51,7 @@ public:
 
 	// 이 컴포넌트가 움직일 액터 (스폰된 구체)
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Replicated, Category = "Spline Movement")
-	AActor* ActorToMove;
+	TObjectPtr<AAssignableMission_MoveActor> ActorToMove;
 
 	// 0~1 구간 플레이어 당 기본 이동 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement | Speed")

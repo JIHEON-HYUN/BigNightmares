@@ -6,6 +6,7 @@
 #include "BaseType/BaseEnumType.h"
 #include "Components/SplineComponent.h"
 #include "GameFramework/PlayerState.h"
+#include "Interaction/Mission/AssignableMission_MoveActor.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -16,9 +17,9 @@ UAssignableMissionComponent::UAssignableMissionComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	//기본값 설정
-	PlayerBaseSpeed = 50.f;
+	PlayerBaseSpeed = 25.f;
 	ReturnSpeed = 20.f;
-	FixedSpeed = 100.f;
+	FixedSpeed = 200.f;
 
 	CurrentSplineDistance = 0.0f;
 	CurrentActivePlayerCount = 0;
@@ -76,8 +77,15 @@ void UAssignableMissionComponent::OnRep_MovementDirection()
 
 void UAssignableMissionComponent::UpdateMovement(float DeltaTime)
 {
-	if (!IsValid(MovementSpline) || !IsValid(ActorToMove))
+	if (!IsValid(MovementSpline))
 	{
+		UE_LOG(LogTemp, Error, TEXT("UAssignableMissionComponent::UpdateMovement : !IsValid(MovementSpline)"));
+		return;
+	}
+	
+	if (!IsValid(ActorToMove))
+	{
+		UE_LOG(LogTemp, Error, TEXT("UAssignableMissionComponent::UpdateMovement : !IsValid(ActorToMove)"));
 		return;
 	}
 	
@@ -136,7 +144,12 @@ void UAssignableMissionComponent::UpdateMovement(float DeltaTime)
 	if (CurrentMovementDirection == EAssignableMissionMovementDirection::Forward && CurrentSplineDistance >= SplineLength)
 	{
 		// 2번 지점 (스플라인 끝)에 도달하면 멈춤
-		SetMovementDirection(EAssignableMissionMovementDirection::Stop);
+		SetMovementDirection(EAssignableMissionMovementDirection::Stop);		
+		if (IsValid(ActorToMove))
+		{
+			ActorToMove->SettingCollision();
+		}
+		SetComponentTickEnabled(false);
 	}
 	else if (CurrentMovementDirection == EAssignableMissionMovementDirection::Backward && CurrentSplineDistance <= 0.0f)
 	{
