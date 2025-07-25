@@ -3,15 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/TargetPoint.h"
 #include "Interaction/Mission/BaseMissionActor.h"
 #include "AssignableMissionActor.generated.h"
 
+class AAssignableMission_EscapeGate;
 class AAssignableMission_MoveActor;
 class USplineComponent;
 class UAssignableMissionComponent;
 /**
  * 
  */
+
 UCLASS()
 class BIGNIGHTMARES_API AAssignableMissionActor : public ABaseMissionActor
 {
@@ -42,8 +45,17 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = "Movement | Path")
 	TObjectPtr<AAssignableMission_MoveActor> MovementActorInstance;
-private:
-
 #pragma endregion
+
+#pragma region Escape Gate Spwan
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement | Gate")
+	TSubclassOf<AAssignableMission_EscapeGate> EscapeGateActorClass;
 	
+	// UPROPERTY()
+	// TArray<TObjectPtr<ATargetPoint>> AvailableSpawnPoints;
+	
+	//미션 완료 시 탈출 게이트 스폰
+	void SpawnEscapeGate();
+#pragma endregion
 };

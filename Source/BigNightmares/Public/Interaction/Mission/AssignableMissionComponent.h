@@ -89,5 +89,8 @@ public:
 
 	void SetMovementDirection(EAssignableMissionMovementDirection NewDirection);
 #pragma endregion
+
+	UFUNCTION()
+	void OnMissionMoveActorDestroyed(AActor* DestroyedActor);
 };
 

@@ -6,6 +6,7 @@
 #include "BaseType/BaseEnumType.h"
 #include "Components/SplineComponent.h"
 #include "GameFramework/PlayerState.h"
+#include "Interaction/Mission/AssignableMissionActor.h"
 #include "Interaction/Mission/AssignableMission_MoveActor.h"
 #include "Net/UnrealNetwork.h"
 
@@ -52,6 +53,16 @@ void UAssignableMissionComponent::BeginPlay()
 		CurrentSplineDistance = MovementSpline->GetDistanceAlongSplineAtSplinePoint(0);
 	}
 	
+	if (IsValid(ActorToMove))
+	{
+		// ActorToMove의 OnMissionActorDestroyedDelegate에 함수 바인딩
+		// ActorToMove가 AAssignableMission_MoveActor 타입이므로 캐스트 필요
+		AAssignableMission_MoveActor* MissionMoveActor = Cast<AAssignableMission_MoveActor>(ActorToMove);
+		if (IsValid(MissionMoveActor))
+		{
+			//MissionMoveActor->OnMissionActorDestroyed.AddDynamic(this, &UAssignableMissionComponent::OnMissionMoveActorDestroyed);
+		}
+	}	
 }
 
 void UAssignableMissionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -148,6 +159,7 @@ void UAssignableMissionComponent::UpdateMovement(float DeltaTime)
 		if (IsValid(ActorToMove))
 		{
 			ActorToMove->SettingCollision();
+			ActorToMove->ChangeNiagara();
 		}
 		SetComponentTickEnabled(false);
 	}
@@ -224,5 +236,14 @@ void UAssignableMissionComponent::SetMovementDirection(EAssignableMissionMovemen
 	if (GetOwnerRole() == ROLE_Authority)
 	{
 		CurrentMovementDirection = NewDirection;
+	}
+}
+
+void UAssignableMissionComponent::OnMissionMoveActorDestroyed(AActor* DestroyedActor)
+{
+	AAssignableMissionActor* OwningMissionActor = Cast<AAssignableMissionActor>(GetOwner());
+	if (IsValid(OwningMissionActor) && OwningMissionActor->HasAuthority())
+	{
+		OwningMissionActor->SpawnEscapeGate();
 	}
 }

@@ -8,10 +8,10 @@
 
 enum class EPlayerType : uint8;
 
-class ABNPlayerController;
-class ABNPlayerState;
 struct FLobbyPlayerData;
 struct FInGamePlayerData;
+class ABNPlayerController;
+class ABNPlayerState;
 
 USTRUCT()
 struct FGaugeChallengeInfo
