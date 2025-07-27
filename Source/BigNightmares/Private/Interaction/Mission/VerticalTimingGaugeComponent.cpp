@@ -32,7 +32,7 @@ UVerticalTimingGaugeComponent::UVerticalTimingGaugeComponent()
 	GreenZoneLength = 0.25f; //블루프린트에서 설정될 값
 
 	InitialGreenZoneLength = 0.25f;
-	SpeedIncreasePerSuccess = 0.15f; //성공 시 속도 증가량
+	SpeedIncreasePerSuccess = 0.4f; //성공 시 속도 증가량
 	InitialGaugeSpeed = 0.5f;
 	GreenZoneShrinkPerSuccess = 0.05; //성공시 GreenZone 길이 감소량
 	MinGreenZoneLength = 0.1f; //GreenZone 최소길이
@@ -69,7 +69,7 @@ void UVerticalTimingGaugeComponent::UpdateDifficultySettings(int32 CurrentSucces
 
 	GreenZoneLength = FMath::Max(InitialGreenZoneLength - (GreenZoneShrinkPerSuccess * CurrentSuccessCount), MinGreenZoneLength);
 
-	GreenZoneStart = FMath::FRandRange(0.f + GreenZoneLength, 1.0f - GreenZoneLength);
+	GreenZoneStart = FMath::FRandRange(0.f + GreenZoneLength, 1.0f - (0.15 +GreenZoneLength));
 
 	if (GetWorld() && GetWorld()->IsNetMode(NM_ListenServer))
 	{

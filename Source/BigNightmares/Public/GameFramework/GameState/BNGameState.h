@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "BigNightmares/Public/GameFramework/GameMode/BNInGameGameMode.h" //이거 없어서 생긴 오류였음
 #include "BNGameState.generated.h"
 
 enum class EPlayerType : uint8;
