@@ -84,8 +84,10 @@ void AAssignableMissionActor::BeginPlay()
 		{
 			if (IsValid(AssignableMissionComponent))
 			{
-				AssignableMissionComponent->MovementSpline = MovementSpline;
-				AssignableMissionComponent->ActorToMove = MovementActorInstance;
+				// AssignableMissionComponent->MovementSpline = MovementSpline;
+				// AssignableMissionComponent->ActorToMove = MovementActorInstance;
+				// AssignableMissionComponent->BindMoveActorDelegates();
+				AssignableMissionComponent->InitializeMissionComponent(MovementSpline, MovementActorInstance);
 			}
 			else
 			{

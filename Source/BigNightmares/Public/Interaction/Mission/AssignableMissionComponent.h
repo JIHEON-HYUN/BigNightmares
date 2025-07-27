@@ -92,5 +92,9 @@ public:
 
 	UFUNCTION()
 	void OnMissionMoveActorDestroyed(AActor* DestroyedActor);
+	
+	UFUNCTION()
+	void InitializeMissionComponent(USplineComponent* InSpline, AAssignableMission_MoveActor* InActorToMove);
+
 };
 
