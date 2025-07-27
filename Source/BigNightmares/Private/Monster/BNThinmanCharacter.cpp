@@ -10,8 +10,14 @@
 #include "Animation/AnimInstance.h"
 #include "TimerManager.h"
 
+// 게임 모드와 플레이어 캐릭터에 접근하기 위해 헤더를 포함합니다.
+#include "GameFramework/GameMode/BNCoopMissionGameMode.h"
+#include "Kismet/GameplayStatics.h"
+
 ABNThinmanCharacter::ABNThinmanCharacter()
 {
+	PrimaryActorTick.bCanEverTick = false; 
+
 	GetCapsuleComponent()->SetCapsuleHalfHeight(119.0f);
 	GetCapsuleComponent()->SetCapsuleRadius(25.0f);
 
@@ -23,25 +29,11 @@ ABNThinmanCharacter::ABNThinmanCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 270.f, 0.f);
 }
 
-// AI 컨트롤러가 빙의될 때 타이머를 설정하여 시작 상태 문제를 해결합니다.
-void ABNThinmanCharacter::PossessedBy(AController* NewController)
+void ABNThinmanCharacter::BeginPlay()
 {
-	Super::PossessedBy(NewController);
-
-	// 짧은 지연 후 SetInitialStateToIdle 함수를 호출하도록 타이머를 설정합니다.
-	GetWorld()->GetTimerManager().SetTimer(
-		InitialStateTimerHandle, 
-		this, 
-		&ABNThinmanCharacter::SetInitialStateToIdle, 
-		0.1f, 
-		false);
+	Super::BeginPlay();
 }
 
-// 타이머에 의해 호출되어 최종적으로 상태를 Idle로 설정합니다.
-void ABNThinmanCharacter::SetInitialStateToIdle()
-{
-	EnterIdleState();
-}
 
 void ABNThinmanCharacter::OnHitByLight_Implementation(bool bIsLit)
 {
@@ -80,12 +72,30 @@ void ABNThinmanCharacter::EnterAttackingState()
 {
 	Super::EnterAttackingState();
 
+	// 이 함수는 이제 공격 몽타주를 재생하는 역할만 합니다.
 	if (AttackMontage)
 	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance && !AnimInstance->Montage_IsPlaying(AttackMontage))
+		if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 		{
-			AnimInstance->Montage_Play(AttackMontage);
+			if (!AnimInstance->Montage_IsPlaying(AttackMontage))
+			{
+				AnimInstance->Montage_Play(AttackMontage);
+			}
+		}
+	}
+}
+
+// [핵심] 애니메이션 노티파이가 이 함수를 호출하여 플레이어를 사망시킵니다.
+void ABNThinmanCharacter::AnimNotify_KillAllPlayers()
+{
+	// 서버에서만 사망 로직을 실행하도록 보장합니다.
+	if (HasAuthority())
+	{
+		// 현재 월드의 게임 모드를 가져옵니다.
+		if (ABNCoopMissionGameMode* GameMode = Cast<ABNCoopMissionGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+		{
+			// 게임 모드의 모든 플레이어 사망 함수를 호출합니다.
+			GameMode->AllPlayersKilledByThinman(this);
 		}
 	}
 }

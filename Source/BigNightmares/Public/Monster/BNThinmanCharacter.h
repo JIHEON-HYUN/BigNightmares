@@ -22,26 +22,26 @@ public:
 	ABNThinmanCharacter();
 
 	virtual void OnHitByLight_Implementation(bool bIsLit) override;
+
+	// 상태 진입 함수들
 	virtual void EnterIdleState() override;
 	virtual void EnterChasingState() override;
 	virtual void EnterAttackingState() override;
 
 protected:
-	// [해결책] AI 컨트롤러가 빙의될 때 호출되는 함수를 오버라이드합니다.
-	virtual void PossessedBy(AController* NewController) override;
+	virtual void BeginPlay() override;
 
-	// [해결책] 타이머가 호출할 함수입니다.
-	void SetInitialStateToIdle();
-
-	// [해결책] 타이머를 관리하기 위한 핸들입니다.
-	FTimerHandle InitialStateTimerHandle;
-
+	// [핵심] 애니메이션 노티파이가 호출할 함수입니다.
+	UFUNCTION()
+	void AnimNotify_KillAllPlayers();
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|State")
 	FGameplayTag StunnedByLightTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<UAnimMontage> AttackMontage;
 
+	// 이동 속도 관련 변수들
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float WalkSpeed = 50.0f;
 

@@ -13,27 +13,21 @@
 // 생성자
 ABNBaseAIController::ABNBaseAIController()
 {
-	// 비헤이비어 트리 컴포넌트 생성
 	BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviorTreeComponent"));
-	// AI 인지 컴포넌트 생성
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
 }
 
-// 폰(Pawn)에 빙의했을 때 호출
 void ABNBaseAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	// 빙의한 폰을 몬스터로 Cast
 	if (ABNBaseMonster* Monster = Cast<ABNBaseMonster>(InPawn))
 	{
-		// 몬스터의 비헤이비어 트리 실행
 		if (Monster->BehaviorTree)
 		{
 			RunBehaviorTree(Monster->BehaviorTree);
 		}
 
-		// 인지 업데이트 이벤트에 함수 바인딩
 		if (AIPerceptionComponent)
 		{
 			AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABNBaseAIController::OnTargetPerceptionUpdated);
@@ -41,13 +35,10 @@ void ABNBaseAIController::OnPossess(APawn* InPawn)
 	}
 }
 
-// 블랙보드 초기 상태 설정
 void ABNBaseAIController::SetInitialStateOnBlackboard(FName InitialState)
 {
-	// 블랙보드 컴포넌트 유효성 확인
 	if (UBlackboardComponent* MyBlackboard = GetBlackboardComponent())
 	{
-		// State 키에 초기 상태 값 설정
 		MyBlackboard->SetValueAsName(BBKeys::State, InitialState);
 	}
 	else
@@ -56,10 +47,8 @@ void ABNBaseAIController::SetInitialStateOnBlackboard(FName InitialState)
 	}
 }
 
-// 인지 시스템 업데이트 시 호출
 void ABNBaseAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	// 유효성 확인
 	UBlackboardComponent* MyBlackboard = GetBlackboardComponent();
 	if (!Actor || !MyBlackboard)
 	{
@@ -72,37 +61,33 @@ void ABNBaseAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus S
 		return;
 	}
 
-	// 블랙보드에서 현재 상태 값 가져오기
-    const FName CurrentStateName = MyBlackboard->GetValueAsName(BBKeys::State);
+	const FName CurrentStateName = MyBlackboard->GetValueAsName(BBKeys::State);
     const FName AttackStateName = Monster->StateDataAsset->AttackStateTag.GetTagName();
 
-	// 현재 공격 중이라면 인지 업데이트 무시 (공격 방해 방지)
+	// 현재 공격 중이라면 인지 업데이트 무시
     if (CurrentStateName == AttackStateName)
     {
 	    return;
     }
 
-	// 현재 휴면 상태라면 인지 업데이트 무시
-	const FName DormantStateName = Monster->StateDataAsset->DormantStateTag.GetTagName();
-	if (CurrentStateName == DormantStateName)
-	{
-		return;
-	}
-
-	// 대상을 성공적으로 감지했다면
+	// [핵심 수정] 대상을 성공적으로 감지했다면, 휴면 상태라도 즉시 깨어나서 추격합니다.
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		// 블랙보드에 타겟 설정
 		MyBlackboard->SetValueAsObject(BBKeys::TargetActor, Actor);
-		// 추격 상태로 전환
 		Monster->EnterChasingState();
 	}
 	// 대상을 잃었다면
 	else
 	{
-		// 블랙보드에서 타겟 제거
+		// [핵심 수정] 현재 휴면 상태라면, 타겟을 잃어도 아무것도 하지 않고 계속 잠들어 있습니다.
+		// 이렇게 하면 활성화 트리거를 기다리는 몬스터가 다시 잠드는 것을 방지합니다.
+		const FName DormantStateName = Monster->StateDataAsset->DormantStateTag.GetTagName();
+		if (CurrentStateName == DormantStateName)
+		{
+			return;
+		}
+
 		MyBlackboard->ClearValue(BBKeys::TargetActor);
-		// 대기 상태로 전환
 		Monster->EnterIdleState();
 	}
 }

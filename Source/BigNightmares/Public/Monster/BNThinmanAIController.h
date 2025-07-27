@@ -8,6 +8,7 @@
 #include "BNThinmanAIController.generated.h"
 
 class UAISenseConfig_Sight;
+class UBehaviorTree; // [추가]
 
 /**
  * 

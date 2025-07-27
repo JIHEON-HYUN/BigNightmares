@@ -20,8 +20,8 @@ ABNThinmanAIController::ABNThinmanAIController()
 		SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 		SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
 		SightConfig->DetectionByAffiliation.bDetectFriendlies = false;
-
-		// 부모 클래스(BNBaseAIController)의 AIPerceptionComponent에 이 설정을 추가합니다.
+        
+		// [핵심] 부모 클래스의 AIPerceptionComponent에 이 설정을 적용합니다.
 		if (AIPerceptionComponent)
 		{
 			AIPerceptionComponent->ConfigureSense(*SightConfig);

@@ -39,6 +39,22 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Tick(float DeltaTime) override;
 
+	// [수정] bIsOpen 변수가 복제될 때 OnRep_IsOpen 함수를 호출하도록 지정합니다.
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_IsOpen, BlueprintReadOnly, Category = "State")
+	bool bIsOpen;
+
+	// [추가] bIsOpen의 RepNotify 함수를 선언합니다.
+	UFUNCTION()
+	void OnRep_IsOpen();
+
+	// [추가] 모든 클라이언트에게 흔들림 효과를 재생하라고 명령하는 멀티캐스트 함수
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayShakeEffect();
+
+	// [추가] 모든 클라이언트에게 열림 효과를 재생하라고 명령하는 멀티캐스트 함수
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayOpenEffect();
+
 	// 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UWidgetComponent> PromptWidget;
@@ -51,12 +67,16 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UBoxComponent* InteractionVolume;
-	
-	// 내부 상태 변수
-	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, Category = "State")
-	bool bIsOpen;
 
+	// [추가] 뚜껑 열림 애니메이션 관련 변수들
 	bool bIsOpening;
 	float TargetLidPitch;
 	FRotator InitialLidRotation;
+
+	// [추가] 흔들림 애니메이션 관련 변수들
+	bool bIsShaking;
+	float ShakeDuration;
+	float ShakeIntensity;
+	float ShakeTimer;
+	FVector OriginalRelativeLocation; // 원래 위치를 저장할 변수
 };

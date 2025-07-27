@@ -110,6 +110,8 @@ void ABNMonsterActivationTrigger::OnOverlapBegin(UPrimitiveComponent* Overlapped
 	// 플레이어 컨트롤 확인
 	if (PlayerCharacter && PlayerCharacter->IsPlayerControlled())
 	{
+		// [로그 추가] 어떤 플레이어가 트리거에 진입했는지 확인합니다.
+		UE_LOG(LogTemp, Warning, TEXT("=== [ActivationTrigger] Player '%s' has entered the trigger volume. Trying to activate... ==="), *PlayerCharacter->GetName());
 		// 활성화 시도 함수 호출
 		TryActivate();
 	}
@@ -129,8 +131,11 @@ void ABNMonsterActivationTrigger::ActivateMonsters()
 	// 중복 발동 방지
 	if (bTriggerOnce && bHasBeenTriggered)
 	{
+		UE_LOG(LogTemp, Log, TEXT("[ActivationTrigger] Trigger has already been fired. Skipping."));
 		return;
 	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("--- [ActivationTrigger] Activating monsters NOW ---"));
 
 	// 모든 몬스터 순회
 	for (ABNBaseMonster* Monster : MonstersToActivate)
@@ -138,8 +143,14 @@ void ABNMonsterActivationTrigger::ActivateMonsters()
 		// 몬스터 유효성 확인
 		if (Monster)
 		{
+			// [로그 추가] 어떤 몬스터를 활성화하는지 확인합니다.
+			UE_LOG(LogTemp, Log, TEXT(" -> Activating: %s"), *Monster->GetName());
 			// 몬스터 활성화 함수 호출
 			Monster->ActivateMonster();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT(" -> An item in the MonstersToActivate array is NULL!"));
 		}
 	}
 
