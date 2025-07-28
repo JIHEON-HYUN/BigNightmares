@@ -44,17 +44,20 @@ ABNMonoCharacter::ABNMonoCharacter()
 	SetReplicates(true);
 	GetCapsuleComponent()->InitCapsuleSize(10.f, 25.f);
 
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationRoll = false;
-	bUseControllerRotationYaw = false;
+	//bUseControllerRotationPitch = false;
+	//bUseControllerRotationRoll = false;
+	//bUseControllerRotationYaw = false;
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->bDoCollisionTest = false;
 	CameraBoom->TargetArmLength = 300.f;
-	CameraBoom->bUsePawnControlRotation = false;
-	CameraBoom->SetUsingAbsoluteRotation(true);
-	CameraBoom->SetRelativeRotation(FRotator(-45.f,-180.f,0.f));
+	//CameraBoom->bUsePawnControlRotation = false;
+	CameraBoom->bUsePawnControlRotation = true;
+	//부모 컴포넌트의 회전으로부터 독립, 카메라의 고정된 시점 유지
+	//CameraBoom->SetUsingAbsoluteRotation(true);
+	//CameraBoom->SetRelativeRotation(FRotator(-45.f,-180.f,0.f));
+	CameraBoom->SetRelativeRotation(FRotator(-45.f,0.f,0.f));
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -351,6 +354,7 @@ void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	UBNBaseEnhancedInputComponent* BaseEnhancedInputComponent = CastChecked<UBNBaseEnhancedInputComponent>(PlayerInputComponent);
 	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Move,ETriggerEvent::Triggered, this,&ABNMonoCharacter::Input_Move);
+	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Look,ETriggerEvent::Triggered, this,&ABNMonoCharacter::Input_Look);
 	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_UseItem, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_UseItem);
 	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Jump, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Jump);
 	//TODO(NOTE): Look의 동작이 정해진다면 활성화
@@ -408,7 +412,8 @@ void ABNMonoCharacter::Input_Move(const FInputActionValue& InputActionValue)
 	}
 	
 	const FVector2D MovementVector = InputActionValue.Get<FVector2D>();
-	const FRotator MovementRotation(0.f,-180.f, 0.f);
+	//const FRotator MovementRotation(0.f,-180.f, 0.f);
+	const FRotator MovementRotation(0.f,Controller->GetControlRotation().Yaw, 0.f);
 
 	if (MovementVector.Y != 0.f)
 	{
@@ -426,7 +431,17 @@ void ABNMonoCharacter::Input_Move(const FInputActionValue& InputActionValue)
 //TODO: Look이 발생할 일이 생기면 그때 다시 정의
 void ABNMonoCharacter::Input_Look(const FInputActionValue& InputActionValue)
 {
-	
+	const FVector2D LookAxisVector = InputActionValue.Get<FVector2D>();
+
+	if (LookAxisVector.X != 0.f)
+	{
+		AddControllerYawInput(LookAxisVector.X);
+	}
+
+	if (LookAxisVector.Y != 0.f)
+	{
+		AddControllerPitchInput(-LookAxisVector.Y);
+	}
 }
 
 void ABNMonoCharacter::Input_Jump(const FInputActionValue& InputActionValue)
