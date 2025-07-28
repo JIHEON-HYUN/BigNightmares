@@ -8,18 +8,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="761905b1-3250-4b5a-8c5b-d5e4f837e1aa" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/.name" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BigNightmares.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/GameFramework/PlayerController/BP_PlayerController.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GameFramework/PlayerController/BP_PlayerController.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Maps/HyunTestLevel.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/HyunTestLevel.umap" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Maps/L_AssignableMission.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/L_AssignableMission.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MissionActor/AssignableMission/BP_AssignableMission.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MissionActor/AssignableMission/BP_AssignableMission.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MissionActor/AssignableMission/BP_AssignableMission_EscapeGate.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MissionActor/AssignableMission/BP_AssignableMission_EscapeGate.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MissionActor/AssignableMission/BP_AssignableMission_EscapeTest.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MissionActor/AssignableMission/BP_AssignableMission_EscapeTest.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MissionActor/AssignableMission/BP_AssignableMission_MoveActorCp.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MissionActor/AssignableMission/BP_AssignableMission_MoveActorCp.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/AssignableMissionActor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/AssignableMissionActor.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/AssignableMissionComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/AssignableMissionComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/AssignableMission_EscapeGate.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/AssignableMission_EscapeGate.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/AssignableMission_MoveActor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BigNightmares/Private/Interaction/Mission/AssignableMission_MoveActor.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -247,6 +239,7 @@
       <workItem from="1753615099376" duration="1078000" />
       <workItem from="1753659802810" duration="172000" />
       <workItem from="1753660003366" duration="2797000" />
+      <workItem from="1753662967670" duration="2115000" />
     </task>
     <servers />
   </component>
