@@ -4,14 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "BigNightmares/Public/GameFramework/GameMode/BNInGameGameMode.h" //이거 없어서 생긴 오류였음
 #include "BNGameState.generated.h"
 
 enum class EPlayerType : uint8;
 
-class ABNPlayerController;
-class ABNPlayerState;
 struct FLobbyPlayerData;
 struct FInGamePlayerData;
+class ABNPlayerController;
+class ABNPlayerState;
 
 USTRUCT()
 struct FGaugeChallengeInfo
@@ -109,6 +110,7 @@ public:
 	bool Server_TryStartSpecificGaugeChallenge(FGuid GaugeID, const ABNPlayerController* PlayerController);
 
 	//서버 : 특정 게이지 미션 도전 종료
+	UFUNCTION(Server, Reliable)
 	void Server_EndSpecificGaugeChallenge(FGuid GaugeID, ABNPlayerController* PlayerController);
 
 
@@ -122,12 +124,5 @@ protected:
 
 	//클라이언트에서 사용될 복제된 정보 기반의 맵 (맵은 Replicated가 안됨)
 	TMap<FGuid, FGaugeChallengeInfo> Client_ActiveGaugeChallengesMap;
-	
-	//클라에서 특정 게이지의 도전 상태를 조회
-	UFUNCTION(BlueprintCallable,Category="Timing Gauge | GameState")
-	bool IsGaugeChallengeActive(FGuid GaugeID) const;
-
-	UFUNCTION(BlueprintCallable,Category="Timing Gauge | GameState")
-	ABNPlayerState* GetChallengingPlayerStateForGauge(FGuid GaugeID) const;
 #pragma endregion
 };

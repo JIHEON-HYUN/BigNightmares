@@ -10,6 +10,12 @@
 #include "UI/InGame/BNInGameInterface.h"
 #include "BNPlayerController.generated.h"
 
+class UBNMission1Widget;
+class UVerticalTimingGaugeComponent;
+enum class EVerticalGaugeResult : uint8;
+class UImage;
+class UBorder;
+class UBNInGameWidget;
 struct FLobbyPlayerData;
 struct FInGamePlayerData;
 
@@ -27,6 +33,7 @@ class BIGNIGHTMARES_API ABNPlayerController : public APlayerController, public I
 public:
 	ABNPlayerController();
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void ReturnToMainMenu() override;
@@ -77,6 +84,7 @@ public:
 	
 #pragma endregion InGame
 
+#pragma region Inventory
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
@@ -100,6 +108,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Custom Values|Widgets")
 	TSubclassOf<UBNSystemWidget> InventoryWidgetClass;
 
+#pragma endregion
+
 #pragma region PlayerState_IsValid
 
 public:
@@ -115,4 +125,42 @@ protected:
 	FTimerHandle InitHandle; //타이머 핸들, player controller가 초기화가 제대로 안됬다면 일정 시간 후 다시 반복하기 위함
 	
 #pragma endregion PlayerState_IsValid
+
+#pragma region Missions1
+public:
+	UPROPERTY(EditDefaultsOnly, Category="Timing Gauge | UI")
+	TSubclassOf<UBNMission1Widget> Mission1WidgetClass;
+
+	//현재 게이지 위젯 인스턴스
+	UPROPERTY()
+	TObjectPtr<UBNMission1Widget> Mission1WidgetInstance;
+	
+	UPROPERTY(transient)
+	TWeakObjectPtr<UVerticalTimingGaugeComponent> ActiveGaugeComponent;
+	
+	// UI활성화 여부
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category="Timing Gauge | State")
+	bool bIsGaugeActive;
+	
+	float CachedGaugeHeight;	//게이지 바 전체 높이 캐시
+	float CachedPointerHeight;	//커서 높이 캐시
+
+	//클라이언트가 게이지 결과를 서버에 보고하는 RPC (원래는 서버가 결과도 검사하고 다시 클라에 보내야하지만 구현하다가 터짐..)
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_ReportGaugeInput(FGuid InGaugeID, float SmoothedGaugeValue);
+	
+	//클라이언트에서 게이지 실제로 시작
+	UFUNCTION(Client, Reliable)
+	void Client_ShowMission1GaugeUI(UVerticalTimingGaugeComponent* InGaugeComponent, int32 MaxLife, int32 RequiredSuccess);
+	
+	// 클라이언트에서 게이지 UI를 실제 종료 (서버로 부터 호출)
+	UFUNCTION(Client, Reliable)
+	void Client_EndGaugeUI(EVerticalGaugeResult Result);
+
+#pragma endregion
+
+#pragma region GameFocusSetting
+	UFUNCTION()
+	void OnApplicationStateChanged(bool bIsActive);
+#pragma endregion
 };
