@@ -440,7 +440,7 @@ void ABNMonoCharacter::Input_Look(const FInputActionValue& InputActionValue)
 
 	if (LookAxisVector.Y != 0.f)
 	{
-		AddControllerPitchInput(LookAxisVector.Y);
+		AddControllerPitchInput(-LookAxisVector.Y);
 	}
 }
 
