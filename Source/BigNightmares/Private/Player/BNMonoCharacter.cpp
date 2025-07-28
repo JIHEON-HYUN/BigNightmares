@@ -25,52 +25,38 @@
 #include "Player/InventoryComponent.h"
 #include "Net/UnrealNetwork.h"
 
-// [손전등 기능 추가] 시작: 필요한 헤더 파일들을 포함합니다.
 #include "Components/SpotLightComponent.h"
 #include "Interfaces/LightSensitive.h"
 #include "Kismet/KismetSystemLibrary.h"
-// [손전등 기능 추가] 끝
 
-#include "Animation/AnimInstance.h" // [추가] AnimInstance 헤더
+#include "Animation/AnimInstance.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Interaction/Mission/InteractionInterface.h" // [추가] 인터페이스 헤더를 포함합니다.
-#include "InputAction.h" // [추가] UInputAction을 사용하기 위해 필요합니다.
+#include "Interaction/Mission/InteractionInterface.h"
+#include "InputAction.h"
 
 ABNMonoCharacter::ABNMonoCharacter()
 {
-	// [손전등 기능 추가] Tick 함수를 사용하기 위해 true로 설정합니다.
 	PrimaryActorTick.bCanEverTick = true;
 	
 	SetReplicates(true);
 	GetCapsuleComponent()->InitCapsuleSize(10.f, 25.f);
-
-	//bUseControllerRotationPitch = false;
-	//bUseControllerRotationRoll = false;
-	//bUseControllerRotationYaw = false;
-
+	
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->bDoCollisionTest = false;
 	CameraBoom->TargetArmLength = 300.f;
-	//CameraBoom->bUsePawnControlRotation = false;
 	CameraBoom->bUsePawnControlRotation = true;
-	//부모 컴포넌트의 회전으로부터 독립, 카메라의 고정된 시점 유지
-	//CameraBoom->SetUsingAbsoluteRotation(true);
-	//CameraBoom->SetRelativeRotation(FRotator(-45.f,-180.f,0.f));
 	CameraBoom->SetRelativeRotation(FRotator(-45.f,0.f,0.f));
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 	
-	GetCharacterMovement()->bOrientRotationToMovement = true; //캐릭터가 이동하는 방향으로 자동으로 회전
-	GetCharacterMovement()->RotationRate = FRotator(0.f,360.f,0.f); //캐릭터의 회전 속도, 360 => 1초에 한 바퀴
-	//TODO(NOTE): 이동속도 변경을 원하면 해당 수치 조절
+	GetCharacterMovement()->bOrientRotationToMovement = true; 
+	GetCharacterMovement()->RotationRate = FRotator(0.f,360.f,0.f); 
 	GetCharacterMovement()->MaxWalkSpeed = 200.f;
-	//TODO(NOTE): 값이 낮을 수 록 천천히 멈춤 나중에 게임에 맞춰 조절
-	GetCharacterMovement()->BrakingDecelerationWalking  = 2048.f; //감속 속도 조절 , 기본값 2048
+	GetCharacterMovement()->BrakingDecelerationWalking  = 2048.f; 
 
-	//TODO(NOTE): Character의 SkeletalMesh의 경로가 바뀌면 이 경로도 반드시 수정 필요
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkeletalMeshAsset(TEXT("/Game/Characters/Player/Meshes/Player.Player"));
 
 	if (SkeletalMeshAsset.Succeeded())
@@ -79,8 +65,7 @@ ABNMonoCharacter::ABNMonoCharacter()
 	}
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0,0.0, -27.0), FRotator(0.0,0.0,0.0));
-
-	//TODO(NOTE): Editor의 ABP_BNMonoAnim의 경로가 바뀐다면 해당 경로 반드시 수정 필요
+	
 	static ConstructorHelpers::FClassFinder<UBNMonoAnimInstance> ABP_BNMonoAnimInstance(TEXT("/Game/Characters/Player/Animations/ABP_BNMonoAnimInstance"));
 
 	if (ABP_BNMonoAnimInstance.Succeeded())
@@ -88,19 +73,64 @@ ABNMonoCharacter::ABNMonoCharacter()
 		GetMesh()->SetAnimInstanceClass(ABP_BNMonoAnimInstance.Class);
 	}
 	
-	//InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
-
-	// 추가 ~
-	// [손전등 기능 수정] 캐릭터에 스포트라이트 컴포넌트를 생성하고, 카메라가 아닌 캐릭터의 '메시'에 부착합니다.
 	FlashlightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("FlashlightComponent"));
 	FlashlightComponent->SetupAttachment(GetMesh(), TEXT("skinned_l_innerHand_bnSocket")); 
 
-	// [핵심 수정] 게임 시작 시에는 기본적으로 손전등을 꺼둡니다.
 	FlashlightComponent->SetVisibility(false);
-	// ~ 추가
 }
 
-// [추가] 플레이어를 영구적으로 멈추게 하는 함수입니다.
+// [추가] 서버에서 호출되어 사망 처리를 시작하는 함수
+void ABNMonoCharacter::Die(AActor* DamageCauser)
+{
+	// 오직 서버(HasAuthority)만이 이 함수를 통해 모든 클라이언트에게 사망 명령을 내릴 수 있습니다.
+	if (HasAuthority())
+	{
+		Multicast_HandleDeath(DamageCauser);
+	}
+}
+
+// [수정] 이 함수가 이제 모든 클라이언트에서 실행될 Multicast RPC의 구현부입니다.
+void ABNMonoCharacter::Multicast_HandleDeath_Implementation(AActor* DamageCauser)
+{
+    if (bIsDead)
+	{
+		return;
+	}
+	bIsDead = true;
+
+	UE_LOG(LogTemp, Warning, TEXT("'%s' has been killed by ragdoll on all clients."), *GetName());
+
+	// 로컬 플레이어인 경우에만 입력을 비활성화 합니다.
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		if(PC->IsLocalController())
+		{
+			PC->DisableInput(PC);
+		}
+	}
+
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+    GetMesh()->SetAnimInstanceClass(nullptr); 
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetSimulatePhysics(true);
+
+    if (DamageCauser)
+    {
+        FVector ImpulseDirection = GetActorLocation() - DamageCauser->GetActorLocation();
+        ImpulseDirection.Z = 0.5f; 
+        ImpulseDirection.Normalize();
+
+        float ImpulseStrength = 1000.0f; 
+        GetMesh()->AddImpulse(ImpulseDirection * ImpulseStrength, NAME_None, true);
+    }
+}
+
+
 void ABNMonoCharacter::FreezePlayer(AActor* LookAtTarget)
 {
     if (bIsImmobilized || bIsDead)
@@ -114,94 +144,39 @@ void ABNMonoCharacter::FreezePlayer(AActor* LookAtTarget)
 
     if (LookAtTarget)
     {
-        // 헌터를 바라보도록 플레이어의 회전 값을 변경합니다.
         FVector StartLocation = GetActorLocation();
         FVector TargetLocation = LookAtTarget->GetActorLocation();
         
         FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(StartLocation, TargetLocation);
-        LookAtRotation.Pitch = 0.f; // 고개는 숙이지 않도록
-        LookAtRotation.Roll = 0.f;  // 몸은 기울이지 않도록
+        LookAtRotation.Pitch = 0.f;
+        LookAtRotation.Roll = 0.f; 
 
         SetActorRotation(LookAtRotation);
     }
 }
 
-// [추가] 즉시 래그돌로 전환하고 충격량을 적용하는 새로운 함수입니다.
+
 void ABNMonoCharacter::HandleImmediateDeath(AActor* DamageCauser)
 {
-    if (bIsDead)
-	{
-		return;
-	}
-	bIsDead = true;
-
-	UE_LOG(LogTemp, Warning, TEXT("'%s' has been killed instantly by ragdoll."), *GetName());
-
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		PC->DisableInput(PC);
-	}
-
-	// 캐릭터의 모든 움직임과 애니메이션 제어를 중단합니다.
-	GetCharacterMovement()->StopMovementImmediately();
-	GetCharacterMovement()->DisableMovement();
-    GetMesh()->SetAnimInstanceClass(nullptr); 
-
-	// 캡슐 콜리전을 완전히 끕니다.
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
-
-	// 래그돌을 위한 물리 설정을 적용합니다.
-	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
-	GetMesh()->SetSimulatePhysics(true);
-
-    // 공격자로부터의 방향으로 충격량을 계산하고 적용합니다.
-    if (DamageCauser)
-    {
-        FVector ImpulseDirection = GetActorLocation() - DamageCauser->GetActorLocation();
-        ImpulseDirection.Z = 0.5f; // 살짝 위로 뜨도록 Z값을 보정합니다.
-        ImpulseDirection.Normalize();
-
-        float ImpulseStrength = 1000.0f; // 충격량의 세기 (조절 가능)
-        GetMesh()->AddImpulse(ImpulseDirection * ImpulseStrength, NAME_None, true);
-    }
+    // 이제 이 함수의 주요 로직은 Multicast로 옮겨졌습니다.
+    // 다른 코드와의 호환성을 위해 새로운 Die() 함수를 호출하도록 합니다.
+    Die(DamageCauser);
 }
 
-
-// --- 아래 함수들은 이제 이 공격 시퀀스에서 직접 사용되지 않습니다. ---
-
+// 몽타주 재생 후 사망 처리 등이 필요할 때를 위해 남겨둡니다.
 void ABNMonoCharacter::TriggerGuaranteedDeath()
 {
-	// 이 함수는 이제 HandleImmediateDeath로 대체되었습니다.
-	// 만약의 경우를 대비해 남겨두거나, 다른 종류의 죽음에 사용할 수 있습니다.
 	if (bIsDead)
 	{
 		return;
 	}
 	
-	if (DeathMontage)
-	{
-		if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
-		{
-			AnimInstance->Montage_Play(DeathMontage);
-			FOnMontageEnded MontageEndedDelegate;
-			MontageEndedDelegate.BindUObject(this, &ABNMonoCharacter::OnDeathMontageEnded);
-			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, DeathMontage);
-		}
-		else
-		{
-			HandleLethalHit();
-		}
-	}
-	else
-	{
-		HandleLethalHit();
-	}
+	// 즉사 공격으로 변경. 공격자 정보가 필요하다면 다른 곳에서 받아와 Die()에 넘겨줘야 합니다.
+    Die(nullptr); 
 }
 
 void ABNMonoCharacter::HandleLethalHit()
 {
-	// 이 함수는 이제 HandleImmediateDeath로 대체되었습니다.
 	if (bIsDead)
 	{
 		return;
@@ -236,42 +211,28 @@ void ABNMonoCharacter::BeginPlay()
 		SetReplicateMovement(true);
 	}
 
-	if (AbilitySystemComponent)
-	{
-		for (UAttributeSet* Set : AbilitySystemComponent->GetSpawnedAttributes())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ASC has AttributeSet: %s (%p)"), *Set->GetName(), Set);
-		}
-	}
-
-	// 게임 시작 시, 원래의 최대 걷기 속도를 저장합니다.
 	if (GetCharacterMovement())
 	{
 		OriginalMaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	}
 }
 
-// [디버깅 추가 시작] 매 프레임마다 손전등 로직을 처리하는 Tick 함수 전체를 추가했습니다.
 void ABNMonoCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	// 손전등 컴포넌트가 없으면 아무것도 하지 않습니다.
 	if (!FlashlightComponent) 
 	{
 		return;
 	}
 
-	// 자신의 역할이 'FlashlightHolder'가 아닐 경우
 	if (PlayerRole != EPlayerRole::FlashlightHolder)
 	{
-		// [핵심 수정] 손전등이 켜져 있다면 확실하게 끕니다.
 		if (FlashlightComponent->IsVisible())
 		{
 			FlashlightComponent->SetVisibility(false);
 		}
 
-		// 이전에 비추던 대상이 있었다면 빛이 꺼졌다고 알려줍니다.
 		if (LastLitActor.IsValid() && LastLitActor->Implements<ULightSensitive>())
 		{
 			ILightSensitive::Execute_OnHitByLight(LastLitActor.Get(), false);
@@ -280,15 +241,11 @@ void ABNMonoCharacter::Tick(float DeltaTime)
 		return;
 	}
 
-	// --- 아래부터는 FlashlightHolder일 때만 실행되는 로직 ---
-
-	// [핵심 수정] 손전등이 꺼져 있다면 켭니다.
 	if (!FlashlightComponent->IsVisible())
 	{
 		FlashlightComponent->SetVisibility(true);
 	}
 	
-	// 캐릭터가 바라보는 방향으로 조준하는 로직
 	const FVector TraceStart = FlashlightComponent->GetComponentLocation();
 	const FVector FinalTraceDirection = GetActorForwardVector();
 	const float TraceDistance = 5000.0f;
@@ -307,17 +264,12 @@ void ABNMonoCharacter::Tick(float DeltaTime)
 		TraceChannel, 
 		false,
 		TArray<AActor*>(),
-		EDrawDebugTrace::None, // 디버깅용 선 그리기
+		EDrawDebugTrace::None,
 		HitResult,
 		true
 	);
 
 	AActor* CurrentHitActor = bHit ? HitResult.GetActor() : nullptr;
-
-	if(bHit)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Line Trace HIT! Actor: %s"), *CurrentHitActor->GetName());
-	}
 
 	if (LastLitActor.Get() != CurrentHitActor)
 	{
@@ -335,7 +287,6 @@ void ABNMonoCharacter::Tick(float DeltaTime)
 	LastLitActor = CurrentHitActor;
 }
 
-// [추가] SetInteractableActor 함수의 내용을 구현합니다.
 void ABNMonoCharacter::SetInteractableActor(AActor* Actor)
 {
 	OverlappedInteractableActor = Actor;
@@ -349,7 +300,7 @@ void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	ULocalPlayer* LocalPlayer = GetController<APlayerController>()->GetLocalPlayer();
 	UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
-	checkf(SubSystem , TEXT("EnhancedInputLocalPlayerSubsystem is null — check if LocalPlayer is valid and Subsystem is initialized properly."));
+	checkf(SubSystem , TEXT("EnhancedInputLocalPlayerSubsystem is null"));
 	SubSystem->AddMappingContext(InputConfigDataAsset->DefaultMappingContext, 0);
 
 	UBNBaseEnhancedInputComponent* BaseEnhancedInputComponent = CastChecked<UBNBaseEnhancedInputComponent>(PlayerInputComponent);
@@ -357,44 +308,34 @@ void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Look,ETriggerEvent::Triggered, this,&ABNMonoCharacter::Input_Look);
 	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_UseItem, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_UseItem);
 	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Jump, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Jump);
-	//TODO(NOTE): Look의 동작이 정해진다면 활성화
-	//BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Look, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Look);
-
-	// InteractAction 변수가 유효할 때, Input_Interact 함수를 연결합니다.
+	
 	if (InteractAction)
 	{
 		BaseEnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Interact);
 	}
 }
 
-// [수정] 상호작용 키를 눌렀을 때의 로직
 void ABNMonoCharacter::Input_Interact()
 {
-	// [수정] 바라보는 대상(FocusedActor)이 아닌, 겹쳐있는 대상(OverlappedInteractableActor)과 상호작용하도록 변경합니다.
 	if (OverlappedInteractableActor.IsValid())
 	{
 		Server_Interact(OverlappedInteractableActor.Get());
 	}
 }
 
-// [추가] 서버에서 실제 상호작용을 실행하는 함수
 void ABNMonoCharacter::Server_Interact_Implementation(AActor* TargetActor)
 {
-	// 서버에서도 다시 한번 유효성과 인터페이스를 확인하는 것이 안전합니다.
 	if (TargetActor && TargetActor->Implements<UInteractionInterface>())
 	{
-		// 인터페이스를 통해 대상 액터의 상호작용 함수를 안전하게 호출합니다.
 		IInteractionInterface::Execute_Interact(TargetActor, this);
 	}
 }
 
-// [추가] 상호작용 대상을 설정하는 함수
 void ABNMonoCharacter::SetOverlappedInteractable(AActor* Interactable)
 {
 	OverlappedInteractableActor = Interactable;
 }
 
-// [추가] 상호작용 대상을 비우는 함수
 void ABNMonoCharacter::ClearOverlappedInteractable(AActor* Interactable)
 {
 	if (OverlappedInteractableActor.Get() == Interactable)
@@ -405,14 +346,12 @@ void ABNMonoCharacter::ClearOverlappedInteractable(AActor* Interactable)
 
 void ABNMonoCharacter::Input_Move(const FInputActionValue& InputActionValue)
 {
-	// 이동 불가 상태일 때는 이동 입력을 무시합니다.
-	if (bIsImmobilized || bIsDead) // [수정] 사망 시에도 이동 불가
+	if (bIsImmobilized || bIsDead)
 	{
 		return;
 	}
 	
 	const FVector2D MovementVector = InputActionValue.Get<FVector2D>();
-	//const FRotator MovementRotation(0.f,-180.f, 0.f);
 	const FRotator MovementRotation(0.f,Controller->GetControlRotation().Yaw, 0.f);
 
 	if (MovementVector.Y != 0.f)
@@ -428,7 +367,6 @@ void ABNMonoCharacter::Input_Move(const FInputActionValue& InputActionValue)
 	}
 }
 
-//TODO: Look이 발생할 일이 생기면 그때 다시 정의
 void ABNMonoCharacter::Input_Look(const FInputActionValue& InputActionValue)
 {
 	const FVector2D LookAxisVector = InputActionValue.Get<FVector2D>();
@@ -458,18 +396,7 @@ void ABNMonoCharacter::Input_Jump(const FInputActionValue& InputActionValue)
 
 void ABNMonoCharacter::Input_UseItem(const FInputActionValue& InputActionValue)
 {	
-	
-	if (AbilitySystemComponent)
-	{
-		for (UAttributeSet* Set : AbilitySystemComponent->GetSpawnedAttributes())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ASC has AttributeSet: %s (%p)"), *Set->GetName(), Set);
-		}
-	}
-	
-	float Temp = GetCharacterMovement()->GetMaxSpeed();
-	UE_LOG(LogTemp,Warning, TEXT("MAX SPEED %.f"), Temp);
-
+	//
 }
 
 
@@ -485,31 +412,15 @@ void ABNMonoCharacter::InitAbilityActorInfo()
 		AbilitySystemComponent = BNPlayerState->GetBNBaseAbilitySystemComponent();
 		MonoCharacterAttributeSet = BNPlayerState->GetBNBaseAttributeSet();
 
-#pragma region Debugging : IsValid(MonoCharacterAttributeSet)
-		/*if (IsValid(MonoCharacterAttributeSet))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("MonoCharacterAttributeSet IsValid"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("MonoCharacterAttributeSet Not IsValid"));
-			UE_LOG(LogTemp, Error, TEXT("%s"), *MonoCharacterAttributeSet.GetName());			
-		}
-		*/
-#pragma endregion
-
 		if (!IsValid(MonoCharacterAttributeSet)) return;
 		
-		//UE_LOG(LogTemp, Warning, TEXT("PlayerState Successes"));
 		if (IsValid(AbilitySystemComponent))
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("AbilitySystemComponent IsValid"));
 			AbilitySystemComponent->InitAbilityActorInfo(BNPlayerState, this);
 			BindCallbacksToDependencies();
 
 			if (HasAuthority())
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("MonoCharacter HasAuthority"));
 				InitClassDefaults();
 			}
 		}
@@ -524,14 +435,10 @@ void ABNMonoCharacter::InitClassDefaults()
 	}
 	else if (UBNMonoCharacterDataAsset* ClassInfo = UBNAbilitySystemLibrary::GetMonoCharacterDataAsset(this))
 	{
-		//UE_LOG(LogTemp, Error, TEXT("ClassInfo->GetName() : %s"), *ClassInfo->GetName());
 		if (FMonoCharacterDefaultInfo* SelectedClassInfo = ClassInfo->ClassDefaultInfoMap.Find(CharacterTag))
 		{
-			//UE_LOG(LogTemp, Error, TEXT("%s"), *CharacterTag.ToString());
-			//UE_LOG(LogTemp, Error, TEXT("SelectedClassInfo->DefaultAttributes->GetName() : %s"), *SelectedClassInfo->DefaultAttributes->GetName());
 			if (IsValid(AbilitySystemComponent))
 			{ 
-				//UE_LOG(LogTemp, Warning, TEXT("AbilitySystemComponent Setting"));
 				AbilitySystemComponent->AddCharacterAbilities(SelectedClassInfo->StartingAbility);
 				AbilitySystemComponent->AddCharacterPassiveAbilities(SelectedClassInfo->PassiveAbility);
 				AbilitySystemComponent->InitializeDefaultAttributes(SelectedClassInfo->DefaultAttributes);
@@ -572,7 +479,6 @@ void ABNMonoCharacter::Server_SetMaxWalkSpeed_Implementation(float NewSpeed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
 	Client_ApplyMoveSpeed(NewSpeed);
-	//CurrentMoveSpeed = NewSpeed;
 }
 
 void ABNMonoCharacter::PossessedBy(AController* NewController)
@@ -581,41 +487,24 @@ void ABNMonoCharacter::PossessedBy(AController* NewController)
 
 	if (HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PossessedBy InitAbilityActorInfo"));
 		InitAbilityActorInfo();
 	}
-
-#pragma region Debugging Code: GetBNBaseAbilitySystemComponent() && GetAttributeSet<UBNTarotCardAttributeSet>()
-	/*if (GetBNBaseAbilitySystemComponent() && GetAttributeSet<UBNTarotCardAttributeSet>())
-	{
-		const FString AppendString = FString::Printf(TEXT("Owner Actor: %s, AvatarActor: %s"),
-			*GetBNBaseAbilitySystemComponent()->GetName(),
-			*GetAttributeSet<UBNTarotCardAttributeSet>()->GetName());
-		
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *AppendString);
-	}*/
-#pragma endregion
 }
 
 void ABNMonoCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
-
-	//UE_LOG(LogTemp, Warning, TEXT("OnRep_PlayerState InitAbilityActorInfo"));
 	InitAbilityActorInfo();
 }
 
 void ABNMonoCharacter::Client_ApplyMoveSpeed_Implementation(float NewSpeed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
-	//UE_LOG(LogTemp, Warning, TEXT("클라이언트에 속도 적용: %f"), NewSpeed);
 }
 
-// PlayerRole 변수를 네트워크를 통해 복제하도록 설정
 void ABNMonoCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// PlayerRole 변수가 복제 대상임을 엔진에 알림
 	DOREPLIFETIME(ABNMonoCharacter, PlayerRole);
 }

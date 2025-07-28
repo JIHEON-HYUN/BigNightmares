@@ -38,6 +38,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Character|Combat")
 	void FreezePlayer(AActor* LookAtTarget);
 
+	// [수정] 서버에서 호출하여 사망 처리를 시작하는 함수입니다.
+	void Die(AActor* DamageCauser);
+	
 	// [추가] 몽타주 없이 즉시 래그돌 상태로 전환하고, 피격 방향으로 힘을 받습니다.
 	UFUNCTION(BlueprintCallable, Category = "Character|Combat")
 	void HandleImmediateDeath(AActor* DamageCauser);
@@ -56,6 +59,10 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	// [추가] 모든 클라이언트에게 사망 상태를 전파할 Multicast 함수입니다.
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_HandleDeath(AActor* DamageCauser);
+	
 	// [추가] 플레이어가 피격 당했을 때 재생할 몽타주입니다.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<UAnimMontage> DeathMontage;
