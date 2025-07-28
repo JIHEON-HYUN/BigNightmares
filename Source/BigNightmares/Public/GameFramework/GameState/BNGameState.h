@@ -91,7 +91,7 @@ public:
 	void GameEnd(bool bIsPreyWin);
 
 protected:
-	UPROPERTY(ReplicatedUsing = OnRep_InGamePlayerDataList)
+	UPROPERTY(ReplicatedUsing = OnRep_InGamePlayerDataList, BlueprintReadOnly)
 	TArray<FInGamePlayerData> InGamePlayerDataList;
 
 	UFUNCTION()
