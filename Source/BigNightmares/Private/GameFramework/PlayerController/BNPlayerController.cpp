@@ -254,11 +254,6 @@ void ABNPlayerController::CreateInventoryWidget()
 	}
 }
 
-UAbilitySystemComponent* ABNPlayerController::GetAbilitySystemComponent() const
-{
-	return Cast<UBNBaseAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn()));
-}
-
 #pragma endregion Inventory
 
 #pragma region Missions1
