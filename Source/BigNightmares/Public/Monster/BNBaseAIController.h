@@ -6,7 +6,9 @@
 #include "AIController.h"
 #include "BNBaseAIController.generated.h"
 
+class UBehaviorTreeComponent;
 class UAIPerceptionComponent;
+struct FAIStimulus;
 
 /**
  * 
@@ -17,18 +19,26 @@ class BIGNIGHTMARES_API ABNBaseAIController : public AAIController
 	GENERATED_BODY()
 
 public:
+	// 생성자
 	ABNBaseAIController();
 
-protected:
-	virtual void BeginPlay() override;
-
-	// ===========================================
-	// AI 지각 시스템 (AI Perception System)
-	// ===========================================
+	// 블랙보드 초기 상태 설정 함수
+	void SetInitialStateOnBlackboard(FName InitialState);
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI Perception")
+protected:
+	// 폰(Pawn)에 빙의했을 때 호출되는 함수
+	virtual void OnPossess(APawn* InPawn) override;
+	
+protected:
+	// 비헤이비어 트리 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI Components")
+	TObjectPtr<UBehaviorTreeComponent> BehaviorTreeComponent;
+
+	// AI 인지(시야, 청각 등) 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI Components")
 	TObjectPtr<UAIPerceptionComponent> AIPerceptionComponent;
 
+	// 인지 시스템이 업데이트될 때(대상을 감지하거나 잃을 때) 호출될 함수
 	UFUNCTION()
 	virtual void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 };

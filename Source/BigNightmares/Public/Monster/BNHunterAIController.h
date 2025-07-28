@@ -19,19 +19,11 @@ class BIGNIGHTMARES_API ABNHunterAIController : public ABNBaseAIController
 	GENERATED_BODY()
 
 public:
+	// 생성자
 	ABNHunterAIController();
 
-	// [신규] 블랙보드에서 사용할 키의 이름을 반환하는 함수
-	static const FName TargetPlayerKey;
-
 protected:
-	virtual void BeginPlay() override;
-	
-	virtual void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus) override;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI Sight")
+	// 시야 감지 설정 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI Perception")
 	TObjectPtr<UAISenseConfig_Sight> SightConfig;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Behavior")
-	TObjectPtr<UBehaviorTree> BehaviorTreeAsset;
 };

@@ -6,9 +6,9 @@
 #include "Character/BNBaseMonster.h"
 #include "BNHunterCharacter.generated.h"
 
-class UAISenseConfig_Sight;
 class ABNMonsterWeapon;
 class AActor;
+class UAnimMontage;
 
 /**
  * 
@@ -19,55 +19,73 @@ class BIGNIGHTMARES_API ABNHunterCharacter : public ABNBaseMonster
 	GENERATED_BODY()
 
 public:
+	// 생성자
 	ABNHunterCharacter();
 
-	// 몬스터를 활성화시키는 함수입니다.
+	// 몬스터 활성화 함수 (오버라이드)
 	virtual void ActivateMonster() override;
+
+	// 공격 몽타주 Getter
+	UAnimMontage* GetAttackMontage() const { return AttackMontage; }
+	
+	// 대기 상태 진입 (오버라이드)
+	virtual void EnterIdleState() override;
+	// 추격 상태 진입 (오버라이드)
+	virtual void EnterChasingState() override;
+	// 공격 상태 진입 (오버라이드)
+	virtual void EnterAttackingState() override;
+
+	// [수정] 함수의 역할을 명확히 하기 위해 이름을 변경하고, 새로운 함수를 선언합니다.
+	UFUNCTION()
+	void AnimNotify_ExecuteGuaranteedHit();
+
+	UFUNCTION()
+	void AnimNotify_ActivateMeleeCollision();
+
+	UFUNCTION()
+	void AnimNotify_DeactivateMeleeCollision();
 	
 protected:
-	// 게임이 시작될 때 호출됩니다.
+	// 게임 시작 또는 스폰 시 호출
 	virtual void BeginPlay() override;
 
-	// 블루프린트에서 헌터의 기본 걷기 속도를 설정할 수 있습니다.
+	// 걷기 속도
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float WalkSpeed = 100.0f;
 
-	// 블루프린트에서 헌터의 추격 속도를 설정할 수 있습니다.
+	// 추격 속도
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float ChaseSpeed = 150.0f;
 
-	// --- 무기 관련 ---
-	// 이 헌터가 장착할 무기의 종류입니다. 블루프린트에서 설정합니다.
+	// 기본 무기 클래스
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TSubclassOf<ABNMonsterWeapon> DefaultWeaponClass;
 
-	// 현재 장착하고 있는 무기 액터의 인스턴스입니다.
+	// 장착된 무기 액터
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<ABNMonsterWeapon> EquippedWeapon;
 
-	// 무기를 장착할 손의 소켓 이름입니다.
+	// 무기 부착 소켓 이름
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	FName WeaponAttachSocketName = TEXT("r_hand_ikinema_0_bneSocket");
 
-	// --- 랜턴 관련 ---
+	// 공격 애니메이션 몽타주
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	TObjectPtr<UAnimMontage> AttackMontage;
+
+	// 기본 랜턴 클래스
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TSubclassOf<AActor> DefaultLanternClass;
 
+	// 장착된 랜턴 액터
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<AActor> EquippedLantern;
 
+	// 랜턴 부착 소켓 이름
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	FName LanternAttachSocketName = TEXT("l_hand_ikinema_0_bneSocket");
-	
-	virtual void EnterIdleState() override;
-	virtual void EnterChasingState() override;
-	virtual void EnterAttackingState() override;
-	
-private:
-	// 시각 감지 설정을 위한 변수
-	UPROPERTY()
-	TObjectPtr<UAISenseConfig_Sight> SightConfig;
 
-	// [추가됨] 몬스터 자동 활성화를 위한 타이머 핸들입니다.
-	FTimerHandle ActivateTimerHandle;
+	/** 플레이어를 멈추게 할 시간(초)입니다. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float ImmobilizeDuration = 0.7f;
 };
