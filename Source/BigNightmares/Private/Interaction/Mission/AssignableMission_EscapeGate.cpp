@@ -14,9 +14,12 @@ AAssignableMission_EscapeGate::AAssignableMission_EscapeGate()
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
 
+
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	RootComponent = StaticMeshComponent;
 
+	StaticMeshComponent->SetRelativeScale3D(FVector(4.f, 4.f, 4.f));
+	
 	EscapeTrigger = CreateDefaultSubobject<UBoxComponent>("EscapeTrigger");
 	EscapeTrigger->SetupAttachment(RootComponent);
 

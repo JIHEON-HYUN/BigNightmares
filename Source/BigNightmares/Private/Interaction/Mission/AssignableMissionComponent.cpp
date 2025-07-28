@@ -16,7 +16,6 @@ UAssignableMissionComponent::UAssignableMissionComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	SetComponentTickEnabled(false);
 
 	//기본값 설정
 	PlayerBaseSpeed = 25.f;
@@ -48,14 +47,13 @@ void UAssignableMissionComponent::GetLifetimeReplicatedProps(TArray<class FLifet
 void UAssignableMissionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	SetComponentTickEnabled(false);
 }
 
 void UAssignableMissionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	UE_LOG(LogTemp, Error, TEXT("Tick Function Call"));
 	 
 	if (GetOwnerRole() == ROLE_Authority) 
 	{
@@ -81,6 +79,53 @@ void UAssignableMissionComponent::OnRep_MovementDirection()
 {
 	//그냥 이동방향 변경되면 호출되는건데, 올라올떄는 줄이 끌어올려지는 사운드, 내려가면 내려가는 사운드 등등 재생가능
 }
+
+void UAssignableMissionComponent::InitializeMissionComponent(USplineComponent* InSpline,
+	AAssignableMission_MoveActor* InActorToMove)
+{
+	MovementSpline = InSpline;
+	ActorToMove = InActorToMove;
+
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		if (IsValid(MovementSpline))
+		{
+			CurrentSplineDistance = MovementSpline->GetDistanceAlongSplineAtSplinePoint(0);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("UAssignableMissionComponent::InitializeMissionComponent - MovementSpline Invalid."));
+		}
+
+		if (IsValid(ActorToMove))
+		{
+			AAssignableMission_MoveActor* MissionMoveActor = Cast<AAssignableMission_MoveActor>(ActorToMove);
+			if (IsValid(MissionMoveActor))
+			{
+				MissionMoveActor->OnMissionActorDestroyed.AddDynamic(this, &UAssignableMissionComponent::OnMissionMoveActorDestroyed);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error ,TEXT("UAssignableMissionComponent::InitializeMissionComponent - Cast to AAssignableMission_MoveActor FAILED!"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error ,TEXT("UAssignableMissionComponent::InitializeMissionComponent - ActorToMove Is Not Valid!"));
+		}
+
+		//모든 초기화가 완료되었으니 틱 활성화
+		if (GetOwner() && !GetOwner()->IsActorTickEnabled())
+		{
+			GetOwner()->SetActorTickEnabled(true);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("UAssignableMissionComponent::InitializeMissionComponent - Not Authority, skipping initialization."));
+	}
+}
+
 
 void UAssignableMissionComponent::UpdateMovement(float DeltaTime)
 {
@@ -234,11 +279,6 @@ void UAssignableMissionComponent::Server_RemovePlayerOverlap_Implementation(APla
 
 void UAssignableMissionComponent::SetMovementDirection(EAssignableMissionMovementDirection NewDirection)
 {
-	// if (GetOwnerRole() == ROLE_Authority)
-	// {
-	// 	CurrentMovementDirection = NewDirection;
-	// }
-
 	if (GetOwnerRole() == ROLE_Authority)
 	{
 		CurrentMovementDirection = NewDirection;
@@ -248,7 +288,7 @@ void UAssignableMissionComponent::SetMovementDirection(EAssignableMissionMovemen
 			if (IsComponentTickEnabled())
 			{
 				SetComponentTickEnabled(false);
-				UE_LOG(LogTemp, Warning, TEXT("UAssignableMissionComponent::SetMovementDirection - Stopped, Tick Disabled."));
+				//UE_LOG(LogTemp, Warning, TEXT("UAssignableMissionComponent::SetMovementDirection - Stopped, Tick Disabled."));
 			}
 		}
 		else // Stop이 아닌 다른 방향으로 바뀌면 틱을 활성화합니다.
@@ -260,7 +300,7 @@ void UAssignableMissionComponent::SetMovementDirection(EAssignableMissionMovemen
 				if (IsValid(MovementSpline) && IsValid(ActorToMove)) 
 				{
 					SetComponentTickEnabled(true);
-					UE_LOG(LogTemp, Warning, TEXT("UAssignableMissionComponent::SetMovementDirection - Moving, Tick Enabled."));
+					//UE_LOG(LogTemp, Warning, TEXT("UAssignableMissionComponent::SetMovementDirection - Moving, Tick Enabled."));
 				}
 				else
 				{
@@ -284,52 +324,5 @@ void UAssignableMissionComponent::OnMissionMoveActorDestroyed(AActor* DestroyedA
 	if (IsComponentTickEnabled())
 	{
 		SetComponentTickEnabled(false);
-	}
-}
-
-void UAssignableMissionComponent::InitializeMissionComponent(USplineComponent* InSpline,
-	AAssignableMission_MoveActor* InActorToMove)
-{
-	MovementSpline = InSpline;
-	ActorToMove = InActorToMove;
-
-	if (GetOwnerRole() == ROLE_Authority)
-	{
-		if (IsValid(MovementSpline))
-		{
-			CurrentSplineDistance = MovementSpline->GetDistanceAlongSplineAtSplinePoint(0);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("UAssignableMissionComponent::InitializeMissionComponent - MovementSpline Invalid."));
-		}
-
-		if (IsValid(ActorToMove))
-		{
-			AAssignableMission_MoveActor* MissionMoveActor = Cast<AAssignableMission_MoveActor>(ActorToMove);
-			if (IsValid(MissionMoveActor))
-			{
-				MissionMoveActor->OnMissionActorDestroyed.AddDynamic(this, &UAssignableMissionComponent::OnMissionMoveActorDestroyed);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Error ,TEXT("UAssignableMissionComponent::InitializeMissionComponent - Cast to AAssignableMission_MoveActor FAILED!"));
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error ,TEXT("UAssignableMissionComponent::InitializeMissionComponent - ActorToMove Is Not Valid!"));
-		}
-
-		//모든 초기화가 완료되었으니 틱 활성화
-		if (GetOwner() && !GetOwner()->IsActorTickEnabled())
-		{
-			GetOwner()->SetActorTickEnabled(true);
-			UE_LOG(LogTemp, Warning, TEXT("UAssignableMissionComponent::InitializeMissionComponent - Owning Actor Tick Enabled."));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UAssignableMissionComponent::InitializeMissionComponent - Not Authority, skipping initialization."));
 	}
 }

@@ -84,9 +84,7 @@ void AAssignableMissionActor::BeginPlay()
 		{
 			if (IsValid(AssignableMissionComponent))
 			{
-				// AssignableMissionComponent->MovementSpline = MovementSpline;
-				// AssignableMissionComponent->ActorToMove = MovementActorInstance;
-				// AssignableMissionComponent->BindMoveActorDelegates();
+				//MovementActorInstance 생성후 초기화
 				AssignableMissionComponent->InitializeMissionComponent(MovementSpline, MovementActorInstance);
 			}
 			else
@@ -189,10 +187,11 @@ void AAssignableMissionActor::SpawnEscapeGate()
 		return;
 	}
 
+	//EscapeGate Actor생성시 좌표 및 회전 값
 	FVector SpawnLocation = ChosenSpawnPoint->GetActorLocation();
 	FRotator SpawnRotation = ChosenSpawnPoint->GetActorRotation();
 	
-	SpawnLocation.Z = -25.f;
+	SpawnLocation.Z = 0.f;
 	
 	FActorSpawnParameters SpawnParams;
 	//새로운 액터를 생성할 때 기본적으로는 다른 오브젝트와 겹치지 않도록 적절한 위치를 찾아 스폰하려고 시도하지만, 만약 도저히 겹치지 않는 공간을 찾을 수 없더라도 어쨌든 액터는 생성되어야 할 때 사용

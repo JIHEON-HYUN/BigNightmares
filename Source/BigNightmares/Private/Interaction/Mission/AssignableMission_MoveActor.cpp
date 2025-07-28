@@ -23,6 +23,8 @@ AAssignableMission_MoveActor::AAssignableMission_MoveActor()
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	SphereComponent->SetupAttachment(GetRootComponent());
 
+	SphereComponent->SetRelativeScale3D(FVector(5.f, 5.f, 5.f));
+
 	MoveNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("MoveNiagara"));
 	MoveNiagara->SetupAttachment(GetRootComponent());
 	MoveNiagara->bAutoActivate = true;
@@ -77,7 +79,6 @@ void AAssignableMission_MoveActor::OnBeginOverlap(UPrimitiveComponent* Overlappe
 		ABNMonoCharacter* ActorType = Cast<ABNMonoCharacter>(OtherActor);
 		if (IsValid(ActorType))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("OnBeginOverlap"));
 			OnMissionActorDestroyed.Broadcast(this);
 			//이곳에 level의 문이 열리는 로직만 있으면 끝!
 			Destroy();	
