@@ -36,22 +36,22 @@ void ABNCoopMissionGameMode::AllPlayersKilledByThinman(AActor* Killer)
 
 	UE_LOG(LogTemp, Warning, TEXT("[GameMode] Found %d logged in players. Attempting to kill all."), LoggedInPlayers.Num());
 
-    for (APlayerController* PlayerController : LoggedInPlayers)
-    {
-        if (PlayerController)
-        {
-            ABNMonoCharacter* PlayerCharacter = Cast<ABNMonoCharacter>(PlayerController->GetPawn());
-            if (PlayerCharacter)
-            {
+	for (APlayerController* PlayerController : LoggedInPlayers)
+	{
+		if (PlayerController)
+		{
+			ABNMonoCharacter* PlayerCharacter = Cast<ABNMonoCharacter>(PlayerController->GetPawn());
+			if (PlayerCharacter)
+			{
 				UE_LOG(LogTemp, Warning, TEXT("[GameMode] -> Killing player: %s"), *PlayerCharacter->GetName());
-                PlayerCharacter->HandleImmediateDeath(Killer);
-            }
+				PlayerCharacter->HandleImmediateDeath(Killer);
+			}
 			else
 			{
 				UE_LOG(LogTemp, Error, TEXT("[GameMode] -> FAILED to get PlayerCharacter from Controller %s"), *PlayerController->GetName());
 			}
-        }
-    }
+		}
+	}
 }
 
 

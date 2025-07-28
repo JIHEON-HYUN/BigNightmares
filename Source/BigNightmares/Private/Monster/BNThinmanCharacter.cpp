@@ -85,17 +85,34 @@ void ABNThinmanCharacter::EnterAttackingState()
 	}
 }
 
-// [핵심] 애니메이션 노티파이가 이 함수를 호출하여 플레이어를 사망시킵니다.
 void ABNThinmanCharacter::AnimNotify_KillAllPlayers()
 {
+	// [디버깅 로그 추가]
+	UE_LOG(LogTemp, Warning, TEXT("--- AnimNotify_KillAllPlayers CALLED on %s ---"), *GetName());
+
 	// 서버에서만 사망 로직을 실행하도록 보장합니다.
 	if (HasAuthority())
 	{
+		// [디버깅 로그 추가]
+		UE_LOG(LogTemp, Warning, TEXT("--- Server confirmed. Getting GameMode... ---"));
+
 		// 현재 월드의 게임 모드를 가져옵니다.
 		if (ABNCoopMissionGameMode* GameMode = Cast<ABNCoopMissionGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
 		{
+			// [디버깅 로그 추가]
+			UE_LOG(LogTemp, Warning, TEXT("--- GameMode cast SUCCESS. Calling AllPlayersKilledByThinman. ---"));
 			// 게임 모드의 모든 플레이어 사망 함수를 호출합니다.
 			GameMode->AllPlayersKilledByThinman(this);
 		}
+		else
+		{
+			// [디버깅 로그 추가]
+			UE_LOG(LogTemp, Error, TEXT("--- GameMode cast FAILED! Check World Settings. ---"));
+		}
+	}
+	else
+	{
+		// [디버깅 로그 추가]
+		UE_LOG(LogTemp, Error, TEXT("--- NOT the Server. Logic will not run. ---"));
 	}
 }

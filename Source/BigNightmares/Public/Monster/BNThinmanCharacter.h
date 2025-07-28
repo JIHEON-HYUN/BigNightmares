@@ -28,11 +28,14 @@ public:
 	virtual void EnterChasingState() override;
 	virtual void EnterAttackingState() override;
 
+	// [추가] 외부에서 AttackMontage를 안전하게 가져갈 수 있도록 함수를 추가합니다.
+	UAnimMontage* GetAttackMontage() const { return AttackMontage; }
+
 protected:
 	virtual void BeginPlay() override;
 
 	// [핵심] 애니메이션 노티파이가 호출할 함수입니다.
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void AnimNotify_KillAllPlayers();
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|State")
