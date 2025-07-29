@@ -50,7 +50,7 @@ ABNMonoCharacter::ABNMonoCharacter()
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->bDoCollisionTest = false;
+	CameraBoom->bDoCollisionTest = true;
 	CameraBoom->TargetArmLength = 300.f;
 	//CameraBoom->bUsePawnControlRotation = false;
 	CameraBoom->bUsePawnControlRotation = true;
