@@ -8,6 +8,7 @@
 #include "NaniteSceneProxy.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ABaseMissionActor::ABaseMissionActor()
@@ -20,6 +21,7 @@ ABaseMissionActor::ABaseMissionActor()
 
 	ActorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ActorMesh"));
 	SetRootComponent(ActorMesh);
+	ActorMesh->SetIsReplicated(true);
 
 	OverlapBox = CreateDefaultSubobject<UBoxComponent>("OverlapBox");
 	OverlapBox->SetupAttachment(GetRootComponent());
@@ -58,6 +60,12 @@ void ABaseMissionActor::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	
+}
+
+void ABaseMissionActor::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ABaseMissionActor, ActorMesh);
 }
 
 UBoxComponent* ABaseMissionActor::GetBoxOverlapComponent() const
