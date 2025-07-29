@@ -1,24 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// BNInGameGameMode.h
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Math/RandomStream.h"
 #include "BNInGameGameMode.generated.h"
 
 class UBNMonoCharacterDataAsset;
-class UUserWidget;
 
-// [추가] 현재 게임 모드가 메인 게임인지, 협동 미션인지 구분하기 위한 Enum
-UENUM(BlueprintType)
-enum class EGameModeType : uint8
-{
-	MainGame,
-	CoopMission
-};
-
-// 플레이어 직업 enum
+// 메인 게임에서 사용되는 플레이어 직업 enum
 UENUM(BlueprintType)
 enum class EPlayerType : uint8
 {
@@ -27,7 +17,7 @@ enum class EPlayerType : uint8
 	Resident
 };
 
-// 플레이어 데이터 구조체 (이름, 직업)
+// 메인 게임에서 사용되는 플레이어 데이터 구조체
 USTRUCT(BlueprintType)
 struct FInGamePlayerData
 {
@@ -52,55 +42,27 @@ class BIGNIGHTMARES_API ABNInGameGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-    ABNInGameGameMode();
+	ABNInGameGameMode();
 
+	// 메인 게임의 플레이어 입장/퇴장 처리
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
     
+	// 메인 게임의 플레이어 사망 처리
 	void PlayerDead();
 	
+	// 모든 플레이어를 로비로 돌려보내는 함수
 	UFUNCTION(BlueprintCallable)
 	void ReturnToLobby();
 	
 	UBNMonoCharacterDataAsset* GetBNMonoCharacterDataAsset() const;
-    
-    // --- 협동 미션 기능 ---
-    void MissionComplete();
-    void AllPlayersKilledByThinman(AActor* Killer);
-    
-    UFUNCTION(BlueprintPure, Category = "Coop Mission")
-    bool IsGameOver() const { return bIsGameOver; }
-    
-protected:
-    UPROPERTY(EditDefaultsOnly, Category = "Coop Mission|UI")
-    TSubclassOf<UUserWidget> MissionClearWidgetClass;
-
-	// [추가] 에디터에서 현재 게임 모드의 유형을 설정할 수 있는 변수입니다.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Mode Settings")
-	EGameModeType CurrentGameModeType = EGameModeType::MainGame;
 
 private:
-	// 메인 게임용 타이머 및 변수
+	// 메인 게임의 역할 배정을 위한 타이머 및 변수
 	FTimerHandle PostLoginTimer;
 	float LastPostLoginTime;
-	void CheckPostLoginTimeOut();
+	void CheckPostLoginTimeOut(); 
 	
 	UPROPERTY(EditDefaultsOnly, Category="Custom Values|Class Defaults")
 	TObjectPtr<UBNMonoCharacterDataAsset> MonoCharacterDefaultDataAsset;
-    
-    // 협동 미션용 함수 및 변수
-    UFUNCTION(NetMulticast, Reliable)
-    void Multicast_ShowClearUI();
-
-    UPROPERTY()
-    TArray<APlayerController*> Coop_LoggedInPlayers;
-
-    bool bMissionIsComplete = false;
-    bool bIsGameOver = false;
-    bool bRolesAssigned = false;
-
-	FTimerHandle RoleAssignmentTimer;
-	void AttemptToAssignCoopRoles();
-	
-	FRandomStream RandomStream;
 };

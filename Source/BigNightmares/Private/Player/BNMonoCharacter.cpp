@@ -325,17 +325,13 @@ void ABNMonoCharacter::Input_Interact()
 
 void ABNMonoCharacter::Server_Interact_Implementation(AActor* TargetActor)
 {
-	if (PlayerRole == EPlayerRole::KeyHolder)
+	// [수정] 캐릭터의 역할 검사 로직을 완전히 제거합니다.
+	// 이제 캐릭터는 어떤 대상이든 일단 상호작용을 시도하고,
+	// 실제 조건 검사는 대상 액터(상자, 트리거 등)가 직접 하도록 책임을 넘깁니다.
+	if (TargetActor && TargetActor->Implements<UInteractionInterface>())
 	{
-		if (TargetActor && TargetActor->Implements<UInteractionInterface>())
-		{
-			UE_LOG(LogTemp, Log, TEXT("Server: Player '%s' is interacting with '%s'."), *GetName(), *TargetActor->GetName());
-			IInteractionInterface::Execute_Interact(TargetActor, this);
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Server: Interaction blocked for '%s'. Role is not KeyHolder."), *GetName());
+		UE_LOG(LogTemp, Log, TEXT("Server: Player '%s' is interacting with '%s'."), *GetName(), *TargetActor->GetName());
+		IInteractionInterface::Execute_Interact(TargetActor, this);
 	}
 }
 
