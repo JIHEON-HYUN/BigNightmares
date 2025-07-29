@@ -51,6 +51,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void ReturnToLobby();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void PrivateMissionEnd();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void AssignableMissionEnd();
 	
 	UBNMonoCharacterDataAsset* GetBNMonoCharacterDataAsset() const;
 	

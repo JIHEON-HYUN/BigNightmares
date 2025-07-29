@@ -87,7 +87,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FInGamePlayerUpdated OnInGamePlayerUpdated;
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "GameResult")
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "GameResult")
 	void GameEnd(bool bIsPreyWin);
 
 protected:

@@ -26,13 +26,13 @@ protected:
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
 private:
-	UPROPERTY(EditAnywhere,	meta=(AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere,	meta=(AllowPrivateAccess = true), BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
 	
-	UPROPERTY(EditAnywhere,	meta=(AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere,	meta=(AllowPrivateAccess = true), BlueprintReadOnly)
 	TObjectPtr<UBoxComponent> EscapeTrigger;
 
-	UPROPERTY(EditAnywhere,	meta=(AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere,	meta=(AllowPrivateAccess = true), BlueprintReadOnly)
 	TObjectPtr<UNiagaraComponent> NiagaraComponent;
 
 protected:

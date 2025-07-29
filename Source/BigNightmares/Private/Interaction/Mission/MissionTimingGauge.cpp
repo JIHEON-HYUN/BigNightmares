@@ -312,7 +312,22 @@ void AMissionTimingGauge::EndMission(EMissionResult Result)
 
 	if (Result == EMissionResult::Success)
 	{
-		Destroy();
+		const FString NewMeshPath = TEXT("/Game/MissionActor/Mission1/Box/OpenedBox/Mesh/Box_Open.Box_Open");
+		UStaticMesh* OpenBoxMesh = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), nullptr, *NewMeshPath));
+
+		if (OpenBoxMesh)
+		{
+			GetStaticMeshComponent()->SetStaticMesh(OpenBoxMesh);
+		}
+		else
+		{
+			// 에러 로그: 메쉬 로드 실패
+			UE_LOG(LogTemp, Warning, TEXT("Failed to load new mesh for TimingGaugeComponent."));
+		}
+
+		GetBoxOverlapComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		ClearMission();
 	}
 	else if (Result == EMissionResult::Failure)
 	{

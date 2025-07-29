@@ -77,6 +77,10 @@ public:
 	
 	//전체시간 만료시 호출
 	void HandleOverallMissionTimeOut();
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void ClearMission();
+	
 #pragma endregion
 
 #pragma region Server

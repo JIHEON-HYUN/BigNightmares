@@ -80,5 +80,5 @@ void ABNLobbyGameMode::StartGame()
 	if (World == nullptr) return;
 	
 	bUseSeamlessTravel = true;
-	World->ServerTravel("/Game/Levels/L_InGame?listen");
+	World->ServerTravel("/Game/Assets/AtmosphericHouse/Maps/L_InGame?listen");
 }
