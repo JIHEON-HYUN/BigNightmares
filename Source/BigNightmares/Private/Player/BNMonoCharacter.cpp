@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// BNMonoCharacter.cpp
 
 #include "Player/BNMonoCharacter.h"
 
@@ -79,17 +78,14 @@ ABNMonoCharacter::ABNMonoCharacter()
 	FlashlightComponent->SetVisibility(false);
 }
 
-// [추가] 서버에서 호출되어 사망 처리를 시작하는 함수
 void ABNMonoCharacter::Die(AActor* DamageCauser)
 {
-	// 오직 서버(HasAuthority)만이 이 함수를 통해 모든 클라이언트에게 사망 명령을 내릴 수 있습니다.
 	if (HasAuthority())
 	{
 		Multicast_HandleDeath(DamageCauser);
 	}
 }
 
-// [수정] 이 함수가 이제 모든 클라이언트에서 실행될 Multicast RPC의 구현부입니다.
 void ABNMonoCharacter::Multicast_HandleDeath_Implementation(AActor* DamageCauser)
 {
     if (bIsDead)
@@ -100,7 +96,6 @@ void ABNMonoCharacter::Multicast_HandleDeath_Implementation(AActor* DamageCauser
 
 	UE_LOG(LogTemp, Warning, TEXT("'%s' has been killed by ragdoll on all clients."), *GetName());
 
-	// 로컬 플레이어인 경우에만 입력을 비활성화 합니다.
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
 		if(PC->IsLocalController())
@@ -158,20 +153,15 @@ void ABNMonoCharacter::FreezePlayer(AActor* LookAtTarget)
 
 void ABNMonoCharacter::HandleImmediateDeath(AActor* DamageCauser)
 {
-    // 이제 이 함수의 주요 로직은 Multicast로 옮겨졌습니다.
-    // 다른 코드와의 호환성을 위해 새로운 Die() 함수를 호출하도록 합니다.
     Die(DamageCauser);
 }
 
-// 몽타주 재생 후 사망 처리 등이 필요할 때를 위해 남겨둡니다.
 void ABNMonoCharacter::TriggerGuaranteedDeath()
 {
 	if (bIsDead)
 	{
 		return;
 	}
-	
-	// 즉사 공격으로 변경. 공격자 정보가 필요하다면 다른 곳에서 받아와 Die()에 넘겨줘야 합니다.
     Die(nullptr); 
 }
 
@@ -298,25 +288,35 @@ void ABNMonoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	checkf(InputConfigDataAsset, TEXT("Forgot to assign a valid data asset as input config"));
 
-	ULocalPlayer* LocalPlayer = GetController<APlayerController>()->GetLocalPlayer();
-	UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
-	checkf(SubSystem , TEXT("EnhancedInputLocalPlayerSubsystem is null"));
-	SubSystem->AddMappingContext(InputConfigDataAsset->DefaultMappingContext, 0);
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+    {
+	    if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+	    {
+		    Subsystem->AddMappingContext(InputConfigDataAsset->DefaultMappingContext, 0);
+	    }
+    }
 
-	UBNBaseEnhancedInputComponent* BaseEnhancedInputComponent = CastChecked<UBNBaseEnhancedInputComponent>(PlayerInputComponent);
-	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Move,ETriggerEvent::Triggered, this,&ABNMonoCharacter::Input_Move);
-	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Look,ETriggerEvent::Triggered, this,&ABNMonoCharacter::Input_Look);
-	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_UseItem, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_UseItem);
-	BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Jump, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Jump);
+	if (UBNBaseEnhancedInputComponent* BaseEnhancedInputComponent = Cast<UBNBaseEnhancedInputComponent>(PlayerInputComponent))
+    {
+	    BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Move,ETriggerEvent::Triggered, this,&ABNMonoCharacter::Input_Move);
+	    BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Look,ETriggerEvent::Triggered, this,&ABNMonoCharacter::Input_Look);
+	    BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_UseItem, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_UseItem);
+	    BaseEnhancedInputComponent->BindNativeInputAction(InputConfigDataAsset, BaseGamePlayTags::InputTag_Jump, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Jump);
 	
-	if (InteractAction)
-	{
-		BaseEnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Interact);
-	}
+	    if (InteractAction)
+	    {
+		    BaseEnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ABNMonoCharacter::Input_Interact);
+	    }
+    }
 }
 
 void ABNMonoCharacter::Input_Interact()
 {
+	// [핵심 디버그 로그] F키를 누르는 바로 그 순간에 이 로그가 뜨는지 확인합니다.
+	FString TargetActorName = OverlappedInteractableActor.IsValid() ? OverlappedInteractableActor->GetName() : TEXT("None");
+	UE_LOG(LogTemp, Error, TEXT("!!! F KEY PRESSED by '%s'. Current Target: %s, Role: %s !!!"), 
+		*GetName(), *TargetActorName, *UEnum::GetValueAsString(PlayerRole));
+
 	if (OverlappedInteractableActor.IsValid())
 	{
 		Server_Interact(OverlappedInteractableActor.Get());
@@ -325,9 +325,17 @@ void ABNMonoCharacter::Input_Interact()
 
 void ABNMonoCharacter::Server_Interact_Implementation(AActor* TargetActor)
 {
-	if (TargetActor && TargetActor->Implements<UInteractionInterface>())
+	if (PlayerRole == EPlayerRole::KeyHolder)
 	{
-		IInteractionInterface::Execute_Interact(TargetActor, this);
+		if (TargetActor && TargetActor->Implements<UInteractionInterface>())
+		{
+			UE_LOG(LogTemp, Log, TEXT("Server: Player '%s' is interacting with '%s'."), *GetName(), *TargetActor->GetName());
+			IInteractionInterface::Execute_Interact(TargetActor, this);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Server: Interaction blocked for '%s'. Role is not KeyHolder."), *GetName());
 	}
 }
 

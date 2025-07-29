@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// ChestActor.h
 
 #pragma once
 
@@ -7,10 +7,14 @@
 #include "Interaction/Mission/InteractionInterface.h"
 #include "ChestActor.generated.h"
 
+class UStaticMeshComponent;
 class UBoxComponent;
 class UWidgetComponent;
-class UStaticMeshComponent; // [추가] UStaticMeshComponent의 존재를 알립니다.
 
+/**
+ * 상호작용의 핵심 기능에만 집중하여 완전히 재구성된 상자 액터입니다.
+ * 복잡한 로직을 모두 제거하고, 가장 안정적인 방식으로 작동하도록 설계되었습니다.
+ */
 UCLASS()
 class BIGNIGHTMARES_API AChestActor : public AActor, public IInteractionInterface
 {
@@ -19,64 +23,46 @@ class BIGNIGHTMARES_API AChestActor : public AActor, public IInteractionInterfac
 public:
 	AChestActor();
 
-	// 인터페이스 함수
-	virtual void Interact_Implementation(AActor* InteractingActor) override;
-
-	// 블루프린트에서 호출 가능한 Overlap 이벤트 핸들러 함수
-	UFUNCTION(BlueprintCallable, Category="Interaction")
-	void OnInteractionVolumeOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION(BlueprintCallable, Category="Interaction")
-	void OnInteractionVolumeOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	// 상태 변수
-	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, Category = "State")
+	// 이 상자가 '진짜 상자'인지 식별하는 변수입니다. ChestSpawner 등 외부에서 설정합니다.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Chest")
 	bool bIsTheCorrectChest = false;
 
 protected:
-	// Actor 생명주기 함수
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	// [추가] Tick 함수를 다시 사용하도록 오버라이드합니다.
 	virtual void Tick(float DeltaTime) override;
 
-	// [수정] bIsOpen 변수가 복제될 때 OnRep_IsOpen 함수를 호출하도록 지정합니다.
-	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_IsOpen, BlueprintReadOnly, Category = "State")
-	bool bIsOpen;
+	// 컴포넌트들
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> ChestMesh;
 
-	// [추가] bIsOpen의 RepNotify 함수를 선언합니다.
-	UFUNCTION()
-	void OnRep_IsOpen();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UBoxComponent> InteractionVolume;
 
-	// [추가] 모든 클라이언트에게 흔들림 효과를 재생하라고 명령하는 멀티캐스트 함수
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayShakeEffect();
-
-	// [추가] 모든 클라이언트에게 열림 효과를 재생하라고 명령하는 멀티캐스트 함수
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayOpenEffect();
-
-	// 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UWidgetComponent> PromptWidget;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UStaticMeshComponent* ChestBase;
+private:
+	// 플레이어가 상자 범위에 들어왔을 때 호출될 함수입니다.
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UStaticMeshComponent* ChestLid;
+	// 플레이어가 상자 범위에서 나갔을 때 호출될 함수입니다.
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	// InteractionInterface의 함수를 구현합니다.
+	virtual void Interact_Implementation(AActor* InteractingActor) override;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UBoxComponent* InteractionVolume;
-
-	// [추가] 뚜껑 열림 애니메이션 관련 변수들
-	bool bIsOpening;
-	float TargetLidPitch;
-	FRotator InitialLidRotation;
+	// [추가] 모든 클라이언트에게 흔들림 효과를 재생하라고 명령하는 멀티캐스트 함수
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayShakeEffect();
 
 	// [추가] 흔들림 애니메이션 관련 변수들
 	bool bIsShaking;
 	float ShakeDuration;
 	float ShakeIntensity;
 	float ShakeTimer;
-	FVector OriginalRelativeLocation; // 원래 위치를 저장할 변수
+	FVector OriginalMeshLocation;
 };
