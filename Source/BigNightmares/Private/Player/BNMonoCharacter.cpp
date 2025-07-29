@@ -458,7 +458,6 @@ void ABNMonoCharacter::Input_Jump(const FInputActionValue& InputActionValue)
 
 void ABNMonoCharacter::Input_UseItem(const FInputActionValue& InputActionValue)
 {	
-	
 	if (AbilitySystemComponent)
 	{
 		for (UAttributeSet* Set : AbilitySystemComponent->GetSpawnedAttributes())
@@ -469,7 +468,6 @@ void ABNMonoCharacter::Input_UseItem(const FInputActionValue& InputActionValue)
 	
 	float Temp = GetCharacterMovement()->GetMaxSpeed();
 	UE_LOG(LogTemp,Warning, TEXT("MAX SPEED %.f"), Temp);
-
 }
 
 
