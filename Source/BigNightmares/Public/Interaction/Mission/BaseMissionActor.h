@@ -29,8 +29,10 @@ protected:
 	UFUNCTION()
 	virtual void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta =(AllowPrivateAccess = true))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, meta =(AllowPrivateAccess = true))
 	TObjectPtr<UStaticMeshComponent> ActorMesh;
 
 	UPROPERTY(VisibleDefaultsOnly, meta =(AllowPrivateAccess = true))
