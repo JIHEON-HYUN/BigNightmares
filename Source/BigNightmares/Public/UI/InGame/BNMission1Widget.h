@@ -67,6 +67,44 @@ public:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> RequiredSuccessText; // 필요 성공 횟수를 표시할 텍스트 (예: "0 / 5")
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UImage> Image_Life1;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UImage> Image_Life2;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UImage> Image_Life3;
+
+	UPROPERTY(Transient) // 런타임에 채워지는 배열이므로 Transient
+	TArray<UImage*> LifeIcons;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UImage> Image_Success1;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UImage> Image_Success2;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UImage> Image_Success3;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UImage> Image_Success4;
+
+	UPROPERTY(Transient) // 런타임에 채워지는 배열이므로 Transient
+	TArray<UImage*> SuccessIcons;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI Textures")
+	TObjectPtr<UTexture2D> Life_Active_Tex; // 활성화된 라이프 이미지
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI Textures")
+	TObjectPtr<UTexture2D> Life_Inactive_Tex; // 비활성화된 라이프 이미지
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI Textures")
+	TObjectPtr<UTexture2D> Success_Active_Tex; // 활성화된 성공 이미지
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI Textures")
+	TObjectPtr<UTexture2D> Success_Inactive_Tex; // 비활성화된 성공 이미지
+	
 #pragma endregion
 
 #pragma region Cached UI Metrics
@@ -114,4 +152,6 @@ public:
 	// 미션 성공 카운트를 UI에 업데이트하는 함수
 	UFUNCTION(BlueprintCallable, Category = "Mission UI")
 	void UpdateSuccessUI(int32 NewSuccessCount);
+
+	void SetIconState(UImage* TargetImage, bool bIsActive, UTexture2D* ActiveTexture, UTexture2D* InactiveTexture);
 };
