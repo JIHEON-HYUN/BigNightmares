@@ -30,7 +30,7 @@ protected:
 	virtual void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
-	UPROPERTY(VisibleDefaultsOnly, meta =(AllowPrivateAccess = true))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta =(AllowPrivateAccess = true))
 	TObjectPtr<UStaticMeshComponent> ActorMesh;
 
 	UPROPERTY(VisibleDefaultsOnly, meta =(AllowPrivateAccess = true))
