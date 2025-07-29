@@ -243,14 +243,14 @@ void UBNMission1Widget::SetMissionGoals(int32 InMaxLife, int32 InRequiredSuccess
 	CachedMaxLife = InMaxLife;
 	CachedRequiredSuccess = InRequiredSuccess;
 
-	if (MaxLifeText)
-	{
-		MaxLifeText->SetText(FText::AsNumber(InMaxLife));
-	}
-	if (RequiredSuccessText)
-	{
-		RequiredSuccessText->SetText(FText::AsNumber(InRequiredSuccess));
-	}
+	// if (MaxLifeText)
+	// {
+	// 	MaxLifeText->SetText(FText::AsNumber(InMaxLife));
+	// }
+	// if (RequiredSuccessText)
+	// {
+	// 	RequiredSuccessText->SetText(FText::AsNumber(InRequiredSuccess));
+	// }
 
 	//초기 라이프와 성공횟수 업데이트
 	UpdateLifeUI(InMaxLife);
@@ -259,15 +259,15 @@ void UBNMission1Widget::SetMissionGoals(int32 InMaxLife, int32 InRequiredSuccess
 
 void UBNMission1Widget::UpdateLifeUI(int32 NewLifeCount)
 {
- 	if (LifeCountText)
-	{
-		FText FormattedText = FText::Format(
-			NSLOCTEXT("MissionUI", "LifeCountFormat", "라이프: {0} / {1}"),
-			FText::AsNumber(NewLifeCount),
-			FText::AsNumber(CachedMaxLife)
-		);
-		LifeCountText->SetText(FormattedText);
-	}
+ // 	if (LifeCountText)
+	// {
+	// 	FText FormattedText = FText::Format(
+	// 		NSLOCTEXT("MissionUI", "LifeCountFormat", "라이프: {0} / {1}"),
+	// 		FText::AsNumber(NewLifeCount),
+	// 		FText::AsNumber(CachedMaxLife)
+	// 	);
+	// 	LifeCountText->SetText(FormattedText);
+	// }
 
 	for (int32 i = 0; i < LifeIcons.Num(); ++i)
 	{
@@ -281,15 +281,15 @@ void UBNMission1Widget::UpdateLifeUI(int32 NewLifeCount)
 
 void UBNMission1Widget::UpdateSuccessUI(int32 NewSuccessCount)
 {
-  	if (SuccessCountText)
-	{
-		FText FormattedText = FText::Format(
-			NSLOCTEXT("MissionUI", "SuccessCountFormat", "성공: {0} / {1}"),
-			FText::AsNumber(NewSuccessCount),
-			FText::AsNumber(CachedRequiredSuccess) // SetMissionGoals에서 설정된 필요 성공 횟수 사용
-		);
-		SuccessCountText->SetText(FormattedText);
-	}
+ //  	if (SuccessCountText)
+	// {
+	// 	FText FormattedText = FText::Format(
+	// 		NSLOCTEXT("MissionUI", "SuccessCountFormat", "성공: {0} / {1}"),
+	// 		FText::AsNumber(NewSuccessCount),
+	// 		FText::AsNumber(CachedRequiredSuccess) // SetMissionGoals에서 설정된 필요 성공 횟수 사용
+	// 	);
+	// 	SuccessCountText->SetText(FormattedText);
+	// }
 
 	for (int32 i = 0; i < SuccessIcons.Num(); ++i)
 	{

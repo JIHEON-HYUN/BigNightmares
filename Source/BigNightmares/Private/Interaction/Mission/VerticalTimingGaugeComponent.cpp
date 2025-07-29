@@ -32,9 +32,9 @@ UVerticalTimingGaugeComponent::UVerticalTimingGaugeComponent()
 	GreenZoneLength = 0.25f; //블루프린트에서 설정될 값
 
 	InitialGreenZoneLength = 0.25f;
-	SpeedIncreasePerSuccess = 0.4f; //성공 시 속도 증가량
+	SpeedIncreasePerSuccess = 0.3f; //성공 시 속도 증가량
 	InitialGaugeSpeed = 0.5f;
-	GreenZoneShrinkPerSuccess = 0.05; //성공시 GreenZone 길이 감소량
+	GreenZoneShrinkPerSuccess = 0.05f; //성공시 GreenZone 길이 감소량
 	MinGreenZoneLength = 0.1f; //GreenZone 최소길이
 }
 

@@ -56,17 +56,17 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UImage> Image_Pointer;
 
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> LifeCountText; 
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> SuccessCountText;
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> MaxLifeText; // 최대 라이프를 표시할 텍스트 (예: "3 / 3")
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> RequiredSuccessText; // 필요 성공 횟수를 표시할 텍스트 (예: "0 / 5")
+	// UPROPERTY(meta=(BindWidget))
+	// TObjectPtr<UTextBlock> LifeCountText; 
+	//
+	// UPROPERTY(meta=(BindWidget))
+	// TObjectPtr<UTextBlock> SuccessCountText;
+	//
+	// UPROPERTY(meta=(BindWidget))
+	// TObjectPtr<UTextBlock> MaxLifeText; // 최대 라이프를 표시할 텍스트 (예: "3 / 3")
+	//
+	// UPROPERTY(meta=(BindWidget))
+	// TObjectPtr<UTextBlock> RequiredSuccessText; // 필요 성공 횟수를 표시할 텍스트 (예: "0 / 5")
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UImage> Image_Life1;
