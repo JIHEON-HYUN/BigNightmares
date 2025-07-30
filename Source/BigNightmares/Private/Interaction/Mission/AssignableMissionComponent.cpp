@@ -313,12 +313,10 @@ void UAssignableMissionComponent::SetMovementDirection(EAssignableMissionMovemen
 
 void UAssignableMissionComponent::OnMissionMoveActorDestroyed(AActor* DestroyedActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UAssignableMissionComponent::OnMissionMoveActorDestroyed : Test1"));
 	AAssignableMissionActor* OwningMissionActor = Cast<AAssignableMissionActor>(GetOwner());
 	if (IsValid(OwningMissionActor) && OwningMissionActor->HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UAssignableMissionComponent::OnMissionMoveActorDestroyed : Test2"));
-		OwningMissionActor->SpawnEscapeGate();
+		// OwningMissionActor->SpawnEscapeGate();
 	}
 
 	if (IsComponentTickEnabled())
