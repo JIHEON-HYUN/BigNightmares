@@ -102,6 +102,15 @@ void ABNMonsterActivationTrigger::TryActivate()
 	}
 }
 
+void ABNMonsterActivationTrigger::AddMonsterToActivate(ABNBaseMonster* Monster)
+{
+	if (Monster)
+	{
+		MonstersToActivate.Add(Monster);
+		UE_LOG(LogTemp, Log, TEXT("[Trigger] Monster %s registered to trigger."), *Monster->GetName());
+	}
+}
+
 // 오버랩(진입) 이벤트 발생 시 호출될 함수
 void ABNMonsterActivationTrigger::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
