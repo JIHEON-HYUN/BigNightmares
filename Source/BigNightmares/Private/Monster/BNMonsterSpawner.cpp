@@ -38,6 +38,9 @@ void ABNMonsterSpawner::BeginPlay()
 
 	Algo::RandomShuffle(SpawnPoints);
 	int32 SpawnCount = FMath::Min(NumberOfMonstersToSpawn, SpawnPoints.Num());
+	
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 	for (int32 i = 0; i < SpawnCount; ++i)
 	{
@@ -46,8 +49,8 @@ void ABNMonsterSpawner::BeginPlay()
 			continue;
 
 		FTransform SpawnTransform = CurrentPoint->GetActorTransform();
-		ABNBaseMonster* SpawnedMonster = GetWorld()->SpawnActor<ABNBaseMonster>(MonsterClass, SpawnTransform);
-
+		ABNBaseMonster* SpawnedMonster = GetWorld()->SpawnActor<ABNBaseMonster>(MonsterClass, SpawnTransform, SpawnParams);
+		
 		if (SpawnedMonster)
 		{
 			// 트리거에 등록

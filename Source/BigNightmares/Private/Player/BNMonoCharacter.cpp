@@ -111,7 +111,7 @@ void ABNMonoCharacter::FreezePlayer(AActor* LookAtTarget)
     GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->DisableMovement();
     UE_LOG(LogTemp, Warning, TEXT("Player '%s' has been frozen."), *GetName());
-
+ 
     if (LookAtTarget)
     {
         // 헌터를 바라보도록 플레이어의 회전 값을 변경합니다.
@@ -121,7 +121,7 @@ void ABNMonoCharacter::FreezePlayer(AActor* LookAtTarget)
         FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(StartLocation, TargetLocation);
         LookAtRotation.Pitch = 0.f; // 고개는 숙이지 않도록
         LookAtRotation.Roll = 0.f;  // 몸은 기울이지 않도록
-
+ 
         SetActorRotation(LookAtRotation);
     }
 }
@@ -129,31 +129,31 @@ void ABNMonoCharacter::FreezePlayer(AActor* LookAtTarget)
 // [추가] 즉시 래그돌로 전환하고 충격량을 적용하는 새로운 함수입니다.
 void ABNMonoCharacter::HandleImmediateDeath(AActor* DamageCauser)
 {
-    if (bIsDead)
-	{
-		return;
-	}
-	bIsDead = true;
+ //    if (bIsDead)
+	// {
+	// 	return;
+	// }
+	// bIsDead = true;
+ //
+	// UE_LOG(LogTemp, Warning, TEXT("'%s' has been killed instantly by ragdoll."), *GetName());
+ //
+	// if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	// {
+	// 	PC->DisableInput(PC);
+	// }
 
-	UE_LOG(LogTemp, Warning, TEXT("'%s' has been killed instantly by ragdoll."), *GetName());
-
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		PC->DisableInput(PC);
-	}
-
-	// 캐릭터의 모든 움직임과 애니메이션 제어를 중단합니다.
-	GetCharacterMovement()->StopMovementImmediately();
-	GetCharacterMovement()->DisableMovement();
-    GetMesh()->SetAnimInstanceClass(nullptr); 
-
-	// 캡슐 콜리전을 완전히 끕니다.
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
-
-	// 래그돌을 위한 물리 설정을 적용합니다.
-	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
-	GetMesh()->SetSimulatePhysics(true);
+	// // 캐릭터의 모든 움직임과 애니메이션 제어를 중단합니다.
+	// GetCharacterMovement()->StopMovementImmediately();
+	// GetCharacterMovement()->DisableMovement();
+ //    GetMesh()->SetAnimInstanceClass(nullptr); 
+ //
+	// // 캡슐 콜리전을 완전히 끕니다.
+	// GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
+ //
+	// // 래그돌을 위한 물리 설정을 적용합니다.
+	// GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	// GetMesh()->SetSimulatePhysics(true);
 
     // 공격자로부터의 방향으로 충격량을 계산하고 적용합니다.
     if (DamageCauser)
