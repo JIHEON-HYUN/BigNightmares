@@ -46,6 +46,9 @@ public:
 	void AnimNotify_DeactivateMeleeCollision();
 	
 protected:
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayAttackMontage();
+	
 	// 게임 시작 또는 스폰 시 호출
 	virtual void BeginPlay() override;
 

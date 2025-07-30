@@ -110,15 +110,9 @@ void ABNHunterCharacter::EnterAttackingState()
 	Super::EnterAttackingState();
 
 	// 공격 몽타주 유효성 확인
-	if (AttackMontage)
+	if (HasAuthority())
 	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		// 몽타주가 이미 재생 중인지 확인
-		if (AnimInstance && !AnimInstance->Montage_IsPlaying(AttackMontage))
-		{
-			// 몽타주 재생
-			AnimInstance->Montage_Play(AttackMontage);
-		}
+		Multicast_PlayAttackMontage();
 	}
 }
 
@@ -171,7 +165,7 @@ void ABNHunterCharacter::AnimNotify_ExecuteGuaranteedHit()
 
 void ABNHunterCharacter::AnimNotify_ActivateMeleeCollision()
 {
-	if (EquippedWeapon)
+	if (EquippedWeapon && HasAuthority())
 	{
 		EquippedWeapon->ActivateMeleeCollision();
 	}
@@ -179,8 +173,20 @@ void ABNHunterCharacter::AnimNotify_ActivateMeleeCollision()
 
 void ABNHunterCharacter::AnimNotify_DeactivateMeleeCollision()
 {
-	if (EquippedWeapon)
+	if (EquippedWeapon && HasAuthority())
 	{
 		EquippedWeapon->DeactivateMeleeCollision();
+	}
+}
+
+void ABNHunterCharacter::Multicast_PlayAttackMontage_Implementation()
+{
+	if (AttackMontage)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance&& !AnimInstance->Montage_IsPlaying(AttackMontage))
+		{
+			AnimInstance->Montage_Play(AttackMontage);
+		}
 	}
 }
