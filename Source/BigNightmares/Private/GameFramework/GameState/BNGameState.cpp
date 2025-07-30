@@ -153,10 +153,10 @@ void ABNGameState::SetPlayerStatusAlive(const FString& PlayerName)
 {
 	for (auto& PlayerData : InGamePlayerDataList)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("씨발 여기야 여기"));
 		if (PlayerData.PlayerName == PlayerName)
 		{
 			if (PlayerData.bStatusAlive == false) return;
-			UE_LOG(LogTemp, Error, TEXT("Tlqkffusdk"));
 			
 			// 생존 상태를 바꾸고, InGamePlayerDataList 변경 알림
 			PlayerData.bStatusAlive = false;

@@ -35,24 +35,13 @@ void ABNHunterCharacter::ActivateMonster()
 {
 	// 현재 컨트롤러 가져오기
 	AController* MyController = GetController();
-	// 컨트롤러 유효성 확인 및 로그 출력
-	if (MyController)
+	
+	// 컨트롤러 유효성 확인
+	if (!MyController)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Log: Character '%s' is possessed by Controller '%s'"), *GetName(), *MyController->GetName());
-		// AI 컨트롤러 타입 확인 로그
-		if (Cast<ABNBaseAIController>(MyController))
-		{
-			UE_LOG(LogTemp, Log, TEXT("Log: Controller is confirmed to be an ABNBaseAIController."));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Error: Controller is NOT an ABNBaseAIController!"));
-		}
+		return;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Error: Character '%s' has NO controller at the moment of activation!"), *GetName());
-	}
+	
 	// 부모 클래스 함수 호출
 	Super::ActivateMonster();
 }
@@ -142,21 +131,18 @@ void ABNHunterCharacter::AnimNotify_ExecuteGuaranteedHit()
 	AController* MyController = GetController();
 	if (!MyController)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[DEBUG] FAILED: Character has no valid Controller."));
 		return;
 	}
 	
 	ABNHunterAIController* AIController = Cast<ABNHunterAIController>(MyController);
 	if (!AIController)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[DEBUG] FAILED: Controller is not an ABNHunterAIController. Controller is of type: %s"), *MyController->GetName());
 		return;
 	}
 
 	UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
 	if (!BlackboardComp)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[DEBUG] FAILED: AIController does not have a BlackboardComponent."));
 		return;
 	}
 
@@ -166,18 +152,15 @@ void ABNHunterCharacter::AnimNotify_ExecuteGuaranteedHit()
 	UObject* TargetObject = BlackboardComp->GetValueAsObject(TargetKeyName);
 	if (!TargetObject)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[DEBUG] FAILED: Blackboard key '%s' is NULL. Check the Behavior Tree."), *TargetKeyName.ToString());
 		return;
 	}
 
 	ABNMonoCharacter* TargetPlayer = Cast<ABNMonoCharacter>(TargetObject);
 	if (!TargetPlayer)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[DEBUG] FAILED: The object in Blackboard key '%s' is NOT a BNMonoCharacter. It is a '%s'."), *TargetKeyName.ToString(), *TargetObject->GetName());
 		return;
 	}
-
-	UE_LOG(LogTemp, Log, TEXT("[DEBUG] SUCCESS! Triggering guaranteed death for player '%s'."), *TargetPlayer->GetName());
+	
 	TargetPlayer->TriggerGuaranteedDeath();
 }
 
