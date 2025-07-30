@@ -56,6 +56,22 @@ void UBNMission1Widget::NativeConstruct()
 		RemoveFromParent();
 		return;
 	}
+
+	//위젯 추가
+	if (Image_Life1) LifeIcons.Add(Image_Life1);
+	if (Image_Life2) LifeIcons.Add(Image_Life2);
+	if (Image_Life3) LifeIcons.Add(Image_Life3);
+
+	if (Image_Success1) SuccessIcons.Add(Image_Success1);
+	if (Image_Success2) SuccessIcons.Add(Image_Success2);
+	if (Image_Success3) SuccessIcons.Add(Image_Success3);
+	if (Image_Success4) SuccessIcons.Add(Image_Success4);
+
+	if (LifeIcons.Num() == 0 || SuccessIcons.Num() == 0)
+	{
+		RemoveFromParent();
+		return;
+	}
 }
 
 void UBNMission1Widget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -227,14 +243,14 @@ void UBNMission1Widget::SetMissionGoals(int32 InMaxLife, int32 InRequiredSuccess
 	CachedMaxLife = InMaxLife;
 	CachedRequiredSuccess = InRequiredSuccess;
 
-	if (MaxLifeText)
-	{
-		MaxLifeText->SetText(FText::AsNumber(InMaxLife));
-	}
-	if (RequiredSuccessText)
-	{
-		RequiredSuccessText->SetText(FText::AsNumber(InRequiredSuccess));
-	}
+	// if (MaxLifeText)
+	// {
+	// 	MaxLifeText->SetText(FText::AsNumber(InMaxLife));
+	// }
+	// if (RequiredSuccessText)
+	// {
+	// 	RequiredSuccessText->SetText(FText::AsNumber(InRequiredSuccess));
+	// }
 
 	//초기 라이프와 성공횟수 업데이트
 	UpdateLifeUI(InMaxLife);
@@ -243,26 +259,63 @@ void UBNMission1Widget::SetMissionGoals(int32 InMaxLife, int32 InRequiredSuccess
 
 void UBNMission1Widget::UpdateLifeUI(int32 NewLifeCount)
 {
- 	if (LifeCountText)
+ // 	if (LifeCountText)
+	// {
+	// 	FText FormattedText = FText::Format(
+	// 		NSLOCTEXT("MissionUI", "LifeCountFormat", "라이프: {0} / {1}"),
+	// 		FText::AsNumber(NewLifeCount),
+	// 		FText::AsNumber(CachedMaxLife)
+	// 	);
+	// 	LifeCountText->SetText(FormattedText);
+	// }
+
+	for (int32 i = 0; i < LifeIcons.Num(); ++i)
 	{
-		FText FormattedText = FText::Format(
-			NSLOCTEXT("MissionUI", "LifeCountFormat", "라이프: {0} / {1}"),
-			FText::AsNumber(NewLifeCount),
-			FText::AsNumber(CachedMaxLife)
-		);
-		LifeCountText->SetText(FormattedText);
+		if (IsValid(LifeIcons[i]))
+		{
+			// 현재 라이프 수보다 인덱스가 작거나 같으면 활성화 (0부터 시작하므로 +1)
+			SetIconState(LifeIcons[i], (i + 1) <= NewLifeCount, Life_Active_Tex, Life_Inactive_Tex);
+		}
 	}
 }
 
 void UBNMission1Widget::UpdateSuccessUI(int32 NewSuccessCount)
 {
-  	if (SuccessCountText)
+ //  	if (SuccessCountText)
+	// {
+	// 	FText FormattedText = FText::Format(
+	// 		NSLOCTEXT("MissionUI", "SuccessCountFormat", "성공: {0} / {1}"),
+	// 		FText::AsNumber(NewSuccessCount),
+	// 		FText::AsNumber(CachedRequiredSuccess) // SetMissionGoals에서 설정된 필요 성공 횟수 사용
+	// 	);
+	// 	SuccessCountText->SetText(FormattedText);
+	// }
+
+	for (int32 i = 0; i < SuccessIcons.Num(); ++i)
 	{
-		FText FormattedText = FText::Format(
-			NSLOCTEXT("MissionUI", "SuccessCountFormat", "성공: {0} / {1}"),
-			FText::AsNumber(NewSuccessCount),
-			FText::AsNumber(CachedRequiredSuccess) // SetMissionGoals에서 설정된 필요 성공 횟수 사용
-		);
-		SuccessCountText->SetText(FormattedText);
+		if (IsValid(SuccessIcons[i]))
+		{
+			// 현재 성공 수보다 인덱스가 작거나 같으면 활성화 (0부터 시작하므로 +1)
+			SetIconState(SuccessIcons[i], (i + 1) <= NewSuccessCount, Success_Active_Tex, Success_Inactive_Tex);
+		}
 	}
+}
+
+void UBNMission1Widget::SetIconState(UImage* TargetImage, bool bIsActive, UTexture2D* ActiveTexture,
+	UTexture2D* InactiveTexture)
+{
+	if (!IsValid(TargetImage))
+	{
+		return;
+	}
+
+	FSlateBrush NewBrush = TargetImage->GetBrush(); // 현재 브러시 복사
+
+	// 활성화 여부에 따라 적절한 텍스처 할당
+	NewBrush.SetResourceObject(bIsActive ? ActiveTexture : InactiveTexture);
+	
+	//NewBrush.ImageSize = FVector2D(TargetImage->GetDesiredSize()); // 혹은 고정 크기 FVector2D(500.f, 500.f);
+	NewBrush.ImageSize = FVector2D(150.f, 150.f); // 혹은 고정 크기 FVector2D(500.f, 500.f);
+
+	TargetImage->SetBrush(NewBrush);
 }
