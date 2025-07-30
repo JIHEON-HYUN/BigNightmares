@@ -36,23 +36,11 @@ void ABNHunterCharacter::ActivateMonster()
 	// 현재 컨트롤러 가져오기
 	AController* MyController = GetController();
 	// 컨트롤러 유효성 확인 및 로그 출력
-	if (MyController)
+	if (!MyController)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Log: Character '%s' is possessed by Controller '%s'"), *GetName(), *MyController->GetName());
-		// AI 컨트롤러 타입 확인 로그
-		if (Cast<ABNBaseAIController>(MyController))
-		{
-			UE_LOG(LogTemp, Log, TEXT("Log: Controller is confirmed to be an ABNBaseAIController."));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Error: Controller is NOT an ABNBaseAIController!"));
-		}
+		return;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Error: Character '%s' has NO controller at the moment of activation!"), *GetName());
-	}
+	
 	// 부모 클래스 함수 호출
 	Super::ActivateMonster();
 }
