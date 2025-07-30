@@ -35,7 +35,6 @@ public:
 	// 공격 상태 진입 (오버라이드)
 	virtual void EnterAttackingState() override;
 
-	// [수정] 함수의 역할을 명확히 하기 위해 이름을 변경하고, 새로운 함수를 선언합니다.
 	UFUNCTION()
 	void AnimNotify_ExecuteGuaranteedHit();
 
@@ -46,6 +45,10 @@ public:
 	void AnimNotify_DeactivateMeleeCollision();
 	
 protected:
+	// [추가] 공격 몽타주를 모든 클라이언트에 재생시키는 Multicast 함수입니다.
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayAttackMontage();
+
 	// 게임 시작 또는 스폰 시 호출
 	virtual void BeginPlay() override;
 

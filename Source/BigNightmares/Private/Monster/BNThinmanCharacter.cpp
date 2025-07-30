@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// BNThinmanCharacter.cpp
 
 #include "Monster/BNThinmanCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -9,10 +8,9 @@
 #include "Abilities/BNBaseAbilitySystemComponent.h"
 #include "Animation/AnimInstance.h"
 #include "TimerManager.h"
-
-// 게임 모드와 플레이어 캐릭터에 접근하기 위해 헤더를 포함합니다.
-#include "GameFramework/GameMode/BNCoopMissionGameMode.h"
 #include "Kismet/GameplayStatics.h"
+// [수정] GameMode 대신 CoopMissionManager 헤더를 포함합니다.
+#include "Interaction/Mission/BNCoopMissionManager.h"
 
 ABNThinmanCharacter::ABNThinmanCharacter()
 {
@@ -33,7 +31,6 @@ void ABNThinmanCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 }
-
 
 void ABNThinmanCharacter::OnHitByLight_Implementation(bool bIsLit)
 {
@@ -72,7 +69,6 @@ void ABNThinmanCharacter::EnterAttackingState()
 {
 	Super::EnterAttackingState();
 
-	// 이 함수는 이제 공격 몽타주를 재생하는 역할만 합니다.
 	if (AttackMontage)
 	{
 		if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
@@ -87,32 +83,21 @@ void ABNThinmanCharacter::EnterAttackingState()
 
 void ABNThinmanCharacter::AnimNotify_KillAllPlayers()
 {
-	// [디버깅 로그 추가]
-	UE_LOG(LogTemp, Warning, TEXT("--- AnimNotify_KillAllPlayers CALLED on %s ---"), *GetName());
-
-	// 서버에서만 사망 로직을 실행하도록 보장합니다.
 	if (HasAuthority())
 	{
-		// [디버깅 로그 추가]
-		UE_LOG(LogTemp, Warning, TEXT("--- Server confirmed. Getting GameMode... ---"));
+		// [수정] GameMode 대신 월드의 CoopMissionManager를 찾아 함수를 호출합니다.
+		ABNCoopMissionManager* MissionManager = Cast<ABNCoopMissionManager>(
+			UGameplayStatics::GetActorOfClass(GetWorld(), ABNCoopMissionManager::StaticClass())
+		);
 
-		// 현재 월드의 게임 모드를 가져옵니다.
-		if (ABNCoopMissionGameMode* GameMode = Cast<ABNCoopMissionGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+		if (MissionManager)
 		{
-			// [디버깅 로그 추가]
-			UE_LOG(LogTemp, Warning, TEXT("--- GameMode cast SUCCESS. Calling AllPlayersKilledByThinman. ---"));
-			// 게임 모드의 모든 플레이어 사망 함수를 호출합니다.
-			GameMode->AllPlayersKilledByThinman(this);
+			// 미션 실패 함수를 호출합니다.
+			MissionManager->AllPlayersKilledByThinman(this);
 		}
 		else
 		{
-			// [디버깅 로그 추가]
-			UE_LOG(LogTemp, Error, TEXT("--- GameMode cast FAILED! Check World Settings. ---"));
+			UE_LOG(LogTemp, Error, TEXT("Thinman: CoopMissionManager not found in the world!"));
 		}
-	}
-	else
-	{
-		// [디버깅 로그 추가]
-		UE_LOG(LogTemp, Error, TEXT("--- NOT the Server. Logic will not run. ---"));
 	}
 }

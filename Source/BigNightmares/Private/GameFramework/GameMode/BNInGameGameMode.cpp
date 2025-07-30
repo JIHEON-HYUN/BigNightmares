@@ -1,24 +1,28 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// BNInGameGameMode.cpp
 
 #include "GameFramework/GameMode/BNInGameGameMode.h"
-
 #include "GameFramework/GameInstance/BNGameInstance.h"
 #include "GameFramework/GameState/BNGameState.h"
 #include "GameFramework/PlayerState/BNPlayerState.h"
+#include "Kismet/GameplayStatics.h"
+#include "TimerManager.h"
+
+ABNInGameGameMode::ABNInGameGameMode()
+{
+	PrimaryActorTick.bCanEverTick = false;
+}
 
 void ABNInGameGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 	if (NewPlayer == nullptr) return;
 
+	// 메인 게임 플레이어 입장 로직만 처리
 	auto PS = NewPlayer->GetPlayerState<ABNPlayerState>();
 	if (PS == nullptr) return;
-	
 	auto GS = GetGameState<ABNGameState>();
 	if (GS == nullptr) return;
 
-	// PostLogin이 되면 GameState의 InGamePlayerDataList에 추가
 	FInGamePlayerData NewInGamePlayer;
 	NewInGamePlayer.PlayerName = PS->GetPlayerName();
 	NewInGamePlayer.PlayerType = EPlayerType::Prey;
@@ -32,36 +36,32 @@ void ABNInGameGameMode::PostLogin(APlayerController* NewPlayer)
 	}
 }
 
-void ABNInGameGameMode::CheckPostLoginTimeOut()
-{
-	float CurrentTime = GetWorld()->GetTimeSeconds();
-
-	// 3초 동안 PostLogin 없으면
-	if (CurrentTime - LastPostLoginTime > 3.f) 
-	{
-		GetWorldTimerManager().ClearTimer(PostLoginTimer);
-
-		auto GS = GetGameState<ABNGameState>();
-		if (GS == nullptr) return;
-		
-		GS->SetPlayerType(FMath::RandRange(0, GS->GetInGamePlayerCount() - 1), EPlayerType::Resident);
-		UE_LOG(LogTemp, Error, TEXT("Resident Player is set"));
-	}
-}
-
 void ABNInGameGameMode::Logout(AController* Exiting)
 {
 	Super::Logout(Exiting);
 	if (Exiting == nullptr) return;
 
+	// 메인 게임 플레이어 퇴장 로직만 처리
 	auto PS = Exiting->GetPlayerState<ABNPlayerState>();
 	if (PS == nullptr) return;
-	
 	auto GS = GetGameState<ABNGameState>();
 	if (GS == nullptr) return;
-	
-	// Logout이 되면 GameState의 InGamePlayerDataList에서 해당 플레이어 삭제
 	GS->RemoveLobbyPlayer(PS);
+}
+
+void ABNInGameGameMode::CheckPostLoginTimeOut()
+{
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+
+	if (CurrentTime - LastPostLoginTime > 3.f) 
+	{
+		GetWorldTimerManager().ClearTimer(PostLoginTimer);
+		auto GS = GetGameState<ABNGameState>();
+		if (GS == nullptr) return;
+
+		// 플레이어 중 한 명에게 'Resident' 역할을 무작위로 배정
+		GS->SetPlayerType(FMath::RandRange(0, GS->GetInGamePlayerCount() - 1), EPlayerType::Resident);
+	}
 }
 
 void ABNInGameGameMode::PlayerDead()
