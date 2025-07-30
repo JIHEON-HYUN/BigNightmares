@@ -23,9 +23,9 @@ void ABNBaseAIController::OnPossess(APawn* InPawn)
 
 	if (ABNBaseMonster* Monster = Cast<ABNBaseMonster>(InPawn))
 	{
-		if (Monster->BehaviorTree)
+		if (BehaviorTree)
 		{
-			RunBehaviorTree(Monster->BehaviorTree);
+			RunBehaviorTree(BehaviorTree);
 		}
 
 		if (AIPerceptionComponent)

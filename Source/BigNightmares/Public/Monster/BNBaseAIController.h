@@ -34,6 +34,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI Components")
 	TObjectPtr<UBehaviorTreeComponent> BehaviorTreeComponent;
 
+	// AI가 사용할 비헤이비어 트리
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	TObjectPtr<UBehaviorTree> BehaviorTree;
+
 	// AI 인지(시야, 청각 등) 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI Components")
 	TObjectPtr<UAIPerceptionComponent> AIPerceptionComponent;
