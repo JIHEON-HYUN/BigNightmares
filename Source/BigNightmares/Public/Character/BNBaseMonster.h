@@ -27,10 +27,6 @@ public:
 	// 어빌리티 시스템 컴포넌트 Getter
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	// AI가 사용할 비헤이비어 트리
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
-	TObjectPtr<UBehaviorTree> BehaviorTree;
-
 	// 몬스터 상태 데이터 에셋
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|State")
 	TObjectPtr<UDataAsset_State_Monster> StateDataAsset;
