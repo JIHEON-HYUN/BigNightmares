@@ -11,7 +11,7 @@ void ABNInGameGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 	if (NewPlayer == nullptr) return;
-
+	
 	auto PS = NewPlayer->GetPlayerState<ABNPlayerState>();
 	if (PS == nullptr) return;
 	
@@ -37,7 +37,7 @@ void ABNInGameGameMode::CheckPostLoginTimeOut()
 	float CurrentTime = GetWorld()->GetTimeSeconds();
 
 	// 3초 동안 PostLogin 없으면
-	if (CurrentTime - LastPostLoginTime > 3.f) 
+	if (CurrentTime - LastPostLoginTime > 10.f) 
 	{
 		GetWorldTimerManager().ClearTimer(PostLoginTimer);
 
@@ -66,13 +66,16 @@ void ABNInGameGameMode::Logout(AController* Exiting)
 
 void ABNInGameGameMode::PlayerDead()
 {
+	UE_LOG(LogTemp, Warning, TEXT("끝끝끝 1"));
 	auto GS = GetGameState<ABNGameState>();
 	if (GS == nullptr) return;
 	
 	if (GS->GetPreyPlayerCount() == 0)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("끝끝끝 2"));
 		ReturnToLobby();
 		GS->GameEnd(false);
+		UE_LOG(LogTemp, Warning, TEXT("끝끝끝 3"));
 	}
 }
 
@@ -81,7 +84,7 @@ void ABNInGameGameMode::ReturnToLobby()
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
 	
-	bUseSeamlessTravel = true;
+	// bUseSeamlessTravel = true;
 	World->ServerTravel("/Game/Levels/L_Lobby?listen");
 }
 

@@ -15,6 +15,8 @@ void ABNLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	Super::PostLogin(NewPlayer);
 	if (NewPlayer == nullptr) return;
 
+	UE_LOG(LogTemp, Warning, TEXT("로비 포스트 로그인"));
+	
 	auto PS = NewPlayer->GetPlayerState<ABNPlayerState>();
 	if (PS == nullptr) return;
 	
@@ -79,6 +81,6 @@ void ABNLobbyGameMode::StartGame()
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
 	
-	bUseSeamlessTravel = true;
+	// bUseSeamlessTravel = true;
 	World->ServerTravel("/Game/Assets/AtmosphericHouse/Maps/L_InGame?listen");
 }
