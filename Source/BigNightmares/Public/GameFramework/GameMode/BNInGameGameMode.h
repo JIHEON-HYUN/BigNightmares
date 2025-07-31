@@ -61,10 +61,7 @@ public:
 	UBNMonoCharacterDataAsset* GetBNMonoCharacterDataAsset() const;
 	
 private:
-	FTimerHandle PostLoginTimer;
-	float LastPostLoginTime;
-
-	void CheckPostLoginTimeOut();
+	uint8 PlayerCount = 0;
 	
 	// 캐릭터 기본 베이스 데이터에셋
 	UPROPERTY(EditDefaultsOnly, Category="Custom Values|Class Defaults")

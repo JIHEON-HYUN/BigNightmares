@@ -18,6 +18,11 @@ void ABNInGameGameMode::PostLogin(APlayerController* NewPlayer)
 	auto GS = GetGameState<ABNGameState>();
 	if (GS == nullptr) return;
 
+	auto GI = GetGameInstance<UBNGameInstance>();
+	if (GI == nullptr) return;
+
+	++PlayerCount;
+
 	// PostLogin이 되면 GameState의 InGamePlayerDataList에 추가
 	FInGamePlayerData NewInGamePlayer;
 	NewInGamePlayer.PlayerName = PS->GetPlayerName();
@@ -25,25 +30,8 @@ void ABNInGameGameMode::PostLogin(APlayerController* NewPlayer)
 	NewInGamePlayer.bStatusAlive = true;
 	GS->AddInGamePlayer(NewInGamePlayer);
 
-	LastPostLoginTime = GetWorld()->GetTimeSeconds();
-	if (!GetWorldTimerManager().IsTimerActive(PostLoginTimer))
+	if (PlayerCount == GI->MaxPlayerCount)
 	{
-		GetWorldTimerManager().SetTimer(PostLoginTimer, this, &ABNInGameGameMode::CheckPostLoginTimeOut, 1.0f, true);
-	}
-}
-
-void ABNInGameGameMode::CheckPostLoginTimeOut()
-{
-	float CurrentTime = GetWorld()->GetTimeSeconds();
-
-	// 3초 동안 PostLogin 없으면
-	if (CurrentTime - LastPostLoginTime > 10.f) 
-	{
-		GetWorldTimerManager().ClearTimer(PostLoginTimer);
-
-		auto GS = GetGameState<ABNGameState>();
-		if (GS == nullptr) return;
-		
 		GS->SetPlayerType(FMath::RandRange(0, GS->GetInGamePlayerCount() - 1), EPlayerType::Resident);
 		UE_LOG(LogTemp, Error, TEXT("Resident Player is set"));
 	}
@@ -61,21 +49,18 @@ void ABNInGameGameMode::Logout(AController* Exiting)
 	if (GS == nullptr) return;
 	
 	// Logout이 되면 GameState의 InGamePlayerDataList에서 해당 플레이어 삭제
-	GS->RemoveLobbyPlayer(PS);
+	GS->RemoveInGamePlayer(PS);
 }
 
 void ABNInGameGameMode::PlayerDead()
 {
-	UE_LOG(LogTemp, Warning, TEXT("끝끝끝 1"));
 	auto GS = GetGameState<ABNGameState>();
 	if (GS == nullptr) return;
 	
 	if (GS->GetPreyPlayerCount() == 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("끝끝끝 2"));
 		ReturnToLobby();
 		GS->GameEnd(false);
-		UE_LOG(LogTemp, Warning, TEXT("끝끝끝 3"));
 	}
 }
 
