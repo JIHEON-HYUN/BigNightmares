@@ -123,6 +123,7 @@ uint8 ABNGameState::GetPreyPlayerCount() const
 
 void ABNGameState::SetPlayerType(uint8 Index, EPlayerType NewType)
 {
+	ResidentPlayerIndex = Index;
 	InGamePlayerDataList[Index].PlayerType = NewType;
 	if (NewType == EPlayerType::Resident)
 	{
@@ -147,6 +148,8 @@ void ABNGameState::SetPlayerType(uint8 Index, EPlayerType NewType)
 			UE_LOG(LogTemp, Error, TEXT("Player Type : None"));
 		}
 	}
+
+	ShowResidentPlayer();
 }
 
 void ABNGameState::SetPlayerStatusAlive(const FString& PlayerName)

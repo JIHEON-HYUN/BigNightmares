@@ -90,6 +90,12 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "GameResult")
 	void GameEnd(bool bIsPreyWin);
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void ShowResidentPlayer();
+
+	UPROPERTY(BlueprintReadOnly)
+	uint8 ResidentPlayerIndex = 0;
+
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_InGamePlayerDataList, BlueprintReadOnly)
 	TArray<FInGamePlayerData> InGamePlayerDataList;
