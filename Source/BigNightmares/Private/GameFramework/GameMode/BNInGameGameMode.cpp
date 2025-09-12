@@ -33,7 +33,6 @@ void ABNInGameGameMode::PostLogin(APlayerController* NewPlayer)
 	if (PlayerCount == GI->MaxPlayerCount)
 	{
 		GS->SetPlayerType(FMath::RandRange(0, GS->GetInGamePlayerCount() - 1), EPlayerType::Resident);
-		UE_LOG(LogTemp, Error, TEXT("Resident Player is set"));
 	}
 }
 
@@ -59,7 +58,6 @@ void ABNInGameGameMode::PlayerDead()
 	
 	if (GS->GetPreyPlayerCount() == 0)
 	{
-		ReturnToLobby();
 		GS->GameEnd(false);
 	}
 }

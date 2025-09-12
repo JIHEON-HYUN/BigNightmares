@@ -6,7 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "BNLobbyGameMode.generated.h"
 
-// 플레이어 데이터 구조체 (이름, 준비상태)
+// 플레이어 데이터 구조체 (이름, 준비 상태)
 USTRUCT(BlueprintType)
 struct FLobbyPlayerData
 {

@@ -10,7 +10,6 @@
 #include "Online/OnlineSessionNames.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-#include "GameFramework/GameState/BNGameState.h"
 #include "UI/MainMenu/BNMainMenuWidget.h"
 
 const static FName SESSION_NAME = TEXT("GameSession");
@@ -37,13 +36,13 @@ void UBNGameInstance::Init()
 		SessionInterface = Subsystem->GetSessionInterface();
 		if (SessionInterface.IsValid())
 		{
-			// CreateSession이 완료되면 델리게이트 호출
+			// CreateSession이 완료되면 실행될 콜백 등록
 			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UBNGameInstance::OnCreateSessionComplete);
-			// DestroySession이 완료되면 델리게이트 호출
+			// DestroySession이 완료되면 실행될 콜백 등록
 			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UBNGameInstance::OnDestroySessionComplete);
-			// FindSessions가 완료되면 델리게이트 호출
+			// FindSessions가 완료되면 실행될 콜백 등록
 			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UBNGameInstance::OnFindSessionsComplete);
-			// JoinSession이 완료되면 델리게이트 호출
+			// JoinSession이 완료되면 실행될 콜백 등록
 			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UBNGameInstance::OnJoinSessionComplete);
 		}
 	}

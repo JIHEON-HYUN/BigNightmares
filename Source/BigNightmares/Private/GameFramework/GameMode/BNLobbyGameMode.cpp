@@ -4,7 +4,6 @@
 #include "GameFramework/GameMode/BNLobbyGameMode.h"
 
 #include "TimerManager.h"
-#include "UObject/ConstructorHelpers.h"
 
 #include "GameFramework/GameInstance/BNGameInstance.h"
 #include "GameFramework/GameState/BNGameState.h"
@@ -53,7 +52,7 @@ void ABNLobbyGameMode::Ready()
 
 	if (ReadyCount == GI->MaxPlayerCount)
 	{
-		// ReadyCount가 정원이 되면, 1초 후에 게임 시작
+		// ReadyCount가 정원이 되면, 게임 시작
 		GetWorldTimerManager().SetTimer(GameStartTimer, this, &ABNLobbyGameMode::StartGame, 1.0f);
 	}
 }

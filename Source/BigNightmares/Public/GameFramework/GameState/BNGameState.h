@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
-#include "BigNightmares/Public/GameFramework/GameMode/BNInGameGameMode.h" //이거 없어서 생긴 오류였음
+#include "GameFramework/GameMode/BNInGameGameMode.h"
 #include "BNGameState.generated.h"
 
 enum class EPlayerType : uint8;
@@ -49,31 +49,41 @@ protected:
 #pragma region Lobby
 	
 public:
-	void AddLobbyPlayer(const FLobbyPlayerData& NewPlayer);
-	void RemoveLobbyPlayer(ABNPlayerState* ExitPlayerState);
-	
-	const TArray<FLobbyPlayerData>& GetLobbyPlayers() const;
-	
-	void SetPlayerReadyState(const FString& PlayerName);
-
 	UPROPERTY(BlueprintAssignable)
 	FLobbyPlayerUpdated OnLobbyPlayerUpdated;
-	
+
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_LobbyPlayerDataList)
 	TArray<FLobbyPlayerData> LobbyPlayerDataList;
 
 	UFUNCTION()
 	void OnRep_LobbyPlayerDataList();
+
+public:
+	void AddLobbyPlayer(const FLobbyPlayerData& NewPlayer);
+	void RemoveLobbyPlayer(ABNPlayerState* ExitPlayerState);
+	const TArray<FLobbyPlayerData>& GetLobbyPlayers() const;
 	
+	void SetPlayerReadyState(const FString& PlayerName);
+
 #pragma endregion Lobby
 
 #pragma region InGame
 
+private:
+	UPROPERTY(Replicated)
+	uint8 PreyPlayerCount = 0;
+	
+protected:
+	UPROPERTY(ReplicatedUsing = OnRep_InGamePlayerDataList, BlueprintReadOnly)
+	TArray<FInGamePlayerData> InGamePlayerDataList;
+
+	UFUNCTION()
+	void OnRep_InGamePlayerDataList();
+
 public:
 	void AddInGamePlayer(const FInGamePlayerData& NewPlayer);
 	void RemoveInGamePlayer(ABNPlayerState* ExitPlayerState);
-	
 	const TArray<FInGamePlayerData>& GetInGamePlayers() const;
 	const EPlayerType GetPlayerType(ABNPlayerState* PlayerState) const;
 	uint8 GetInGamePlayerCount() const;
@@ -95,17 +105,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	uint8 ResidentPlayerIndex = 0;
-
-protected:
-	UPROPERTY(ReplicatedUsing = OnRep_InGamePlayerDataList, BlueprintReadOnly)
-	TArray<FInGamePlayerData> InGamePlayerDataList;
-
-	UFUNCTION()
-	void OnRep_InGamePlayerDataList();
-
-private:
-	UPROPERTY(Replicated)
-	uint8 PreyPlayerCount = 0;
 
 #pragma endregion InGame
 	
